@@ -1,0 +1,68 @@
+# ─── Python ─────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+
+# ─── PHP ────────────────────────────────────────
+vendor/
+composer.lock
+composer.phar
+
+# ─── Node (Tailwind build) ──────────────────────
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ─── Env & secrets ──────────────────────────────
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.p12
+
+# ─── Database ───────────────────────────────────
+db/backup/*.sql
+db/backup/*.gz
+!db/techpulse_snapshot.sql
+
+# ─── Logs ───────────────────────────────────────
+*.log
+logs/
+scraper/logs/
+api/logs/
+
+# ─── OS ─────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# ─── IDE ────────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-*
+
+# ─── Docker ─────────────────────────────────────
+.docker/
+
+# ─── spaCy models ───────────────────────────────
+*.tar.gz
+
+# ─── Divers ─────────────────────────────────────
+*.bak
+*.tmp
+.cache/

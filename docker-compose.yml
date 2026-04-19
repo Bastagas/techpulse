@@ -1,0 +1,64 @@
+# TechPulse — stack docker-compose pour dev local + déploiement
+# Setup : make setup (ou : docker compose up -d)
+#
+# Services exposés :
+#   - MySQL 8          : localhost:3306
+#   - phpMyAdmin       : http://localhost:8080   (root / rootpass par défaut)
+#   - Frontend PHP     : http://localhost:8000   (ajouté en Sprint 2)
+#   - API Flask        : http://localhost:5000   (ajoutée en Sprint 3)
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: techpulse-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-techpulse}
+      MYSQL_USER: ${MYSQL_USER:-techpulse}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-techpass}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # MySQL entrypoint n'explore pas les sous-dossiers → on monte les fichiers un par un.
+      # Ajouter de nouveaux scripts ici en conservant l'ordre alphabétique (01_, 02_, 03_).
+      - ./db/migrations/001_init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+      - ./db/seeds/02_technologies.sql:/docker-entrypoint-initdb.d/02_technologies.sql:ro
+    healthcheck:
+      test:
+        - CMD
+        - mysqladmin
+        - ping
+        - -h
+        - localhost
+        - -u
+        - root
+        - -p${MYSQL_ROOT_PASSWORD:-rootpass}
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    container_name: techpulse-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+      UPLOAD_LIMIT: 128M
+    ports:
+      - "${PHPMYADMIN_PORT:-8080}:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql-data:
+    name: techpulse-mysql-data

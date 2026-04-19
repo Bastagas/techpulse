@@ -1,0 +1,53 @@
+[project]
+name = "techpulse-api"
+version = "0.1.0"
+description = "API REST Flask pour TechPulse"
+readme = "../README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Bastien Ruedas" }]
+license = { text = "MIT" }
+
+dependencies = [
+    "flask>=3.0",
+    "flask-smorest>=0.44",
+    "flask-cors>=4.0",
+    "marshmallow>=3.21",
+    "sqlalchemy>=2.0.30",
+    "pymysql>=1.1",
+    "cryptography>=42.0",
+    "pydantic-settings>=2.3",
+    "apscheduler>=3.10",
+    "loguru>=0.7",
+    "python-dotenv>=1.0",
+    "gunicorn>=22.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2",
+    "pytest-flask>=1.3",
+    "ruff>=0.5",
+]
+
+[project.scripts]
+techpulse-api = "techpulse_api.app:run"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/techpulse_api"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
