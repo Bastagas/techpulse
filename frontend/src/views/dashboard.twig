@@ -81,7 +81,7 @@
 </section>
 
 {# ─── Row 3 : Villes + Timeline ──────── #}
-<section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
     <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
         <h2 class="text-lg font-semibold mb-4">Top 15 villes</h2>
         <div class="h-80"><canvas id="chart-cities"></canvas></div>
@@ -91,6 +91,57 @@
         <div class="h-80"><canvas id="chart-timeline"></canvas></div>
     </div>
 </section>
+
+{# ─── Row 4 : Matrice de corrélation des technos ─────── #}
+{% if correlations.techs|length >= 3 %}
+<section class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+    <h2 class="text-lg font-semibold mb-1">Corrélation entre technologies</h2>
+    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        Probabilité conditionnelle <code class="font-mono text-xs">P(ligne | colonne)</code> :
+        dans les offres qui mentionnent la <b>colonne</b>, quel pourcentage mentionne aussi la <b>ligne</b> ?
+    </p>
+    <div class="overflow-x-auto">
+        <table class="min-w-full text-xs tabular-nums">
+            <thead>
+                <tr>
+                    <th class="sticky left-0 bg-white dark:bg-gray-900 z-10 p-2 text-left font-semibold"></th>
+                    {% for tech in correlations.techs %}
+                    <th class="p-2 text-center font-semibold whitespace-nowrap" style="writing-mode: vertical-rl; transform: rotate(180deg); height: 110px;">
+                        {{ tech.name }}
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row_tech in correlations.techs %}
+                <tr>
+                    <td class="sticky left-0 bg-white dark:bg-gray-900 z-10 p-2 text-left font-semibold whitespace-nowrap">
+                        {{ row_tech.name }}
+                    </td>
+                    {% for col_tech in correlations.techs %}
+                        {% if row_tech.name == col_tech.name %}
+                            <td class="p-2 text-center text-gray-400 dark:text-gray-600">—</td>
+                        {% else %}
+                            {% set match = correlations.pairs|filter(p => p.a == col_tech.name and p.b == row_tech.name)|first %}
+                            {% set conf = match ? match.conf : 0 %}
+                            {% set pct = (conf * 100)|round %}
+                            {% set opacity = (conf > 0 ? (0.15 + conf * 0.85)|round(2) : 0) %}
+                            <td class="p-2 text-center" style="background-color: rgba(59, 130, 246, {{ opacity }}); color: {{ conf > 0.5 ? 'white' : 'inherit' }};"
+                                title="{{ match ? match.count ~ ' offres communes · ' ~ pct ~ '%' : 'Aucune offre commune' }}">
+                                {{ pct > 0 ? pct ~ '%' : '·' }}
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+        Plus la cellule est bleue, plus la techno de la ligne est fréquente chez celles qui mentionnent la techno de la colonne.
+    </p>
+</section>
+{% endif %}
 
 {# ─── Data bundled as JSON for JS ─────── #}
 <script id="dashboard-data" type="application/json">

@@ -119,3 +119,46 @@ class OfferDetail(MethodView):
             if offer is None or not offer.is_active:
                 abort(404, message=f"Offre {offer_id} introuvable")
             return _serialize_offer(offer)
+
+
+@blp.route("/<int:offer_id>/salary-prediction")
+class OfferSalaryPrediction(MethodView):
+    @blp.doc(tags=["offers"])
+    def get(self, offer_id: int):
+        """Prédit une fourchette de salaire pour l'offre via scikit-learn.
+
+        Le modèle RandomForest est entraîné sur les offres ayant un salaire
+        renseigné (~127 offres). Renvoie un point estimé + fourchette P25-P75
+        basée sur la dispersion des prédictions des arbres individuels.
+        """
+        from techpulse_api.ml.salary import predict_for_offer
+
+        with get_session() as session:
+            offer = session.get(Offer, offer_id)
+            if offer is None:
+                abort(404, message=f"Offre {offer_id} introuvable")
+
+            prediction = predict_for_offer(session, offer_id)
+            if prediction is None:
+                return {
+                    "available": False,
+                    "reason": "Modèle non entraîné. Lance `python -m techpulse_api.ml.salary train`.",
+                }
+
+            return {
+                "available": True,
+                "prediction": {
+                    "point": prediction.point,
+                    "low": prediction.low,
+                    "high": prediction.high,
+                    "confidence": prediction.confidence,
+                },
+                "model": {
+                    "training_size": prediction.training_size,
+                    "feature_count": prediction.feature_count,
+                },
+                "actual": {
+                    "salary_min": offer.salary_min,
+                    "salary_max": offer.salary_max,
+                },
+            }

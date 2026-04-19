@@ -22,4 +22,5 @@ echo $twig->render('dashboard.twig', [
     'salary_stats' => $repo->salaryStats(),
     'timeline' => $repo->timeline(30),
     'geo' => $repo->geoPoints(),
+    'correlations' => $repo->techCorrelations(12),
 ]);

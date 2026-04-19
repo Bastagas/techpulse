@@ -166,6 +166,77 @@ class SourcesStats(MethodView):
         ]
 
 
+@blp.route("/tech-correlations")
+class TechCorrelations(MethodView):
+    @blp.doc(tags=["stats"])
+    def get(self):
+        """Matrice de corrélation P(B|A) entre les top N technologies.
+
+        Retourne la liste des technos (top_n=12) et toutes les paires (a, b) avec :
+          - count : nombre d'offres actives mentionnant les deux
+          - conf  : P(b | a) = count / offres_avec_a
+        """
+        top_n = 12
+        with get_session() as session:
+            top_rows = session.execute(
+                select(
+                    Technology.id,
+                    Technology.display_name,
+                    func.count(func.distinct(OfferTechnology.offer_id)).label("count"),
+                )
+                .join(OfferTechnology, OfferTechnology.technology_id == Technology.id)
+                .join(Offer, Offer.id == OfferTechnology.offer_id)
+                .where(Offer.is_active.is_(True))
+                .group_by(Technology.id)
+                .order_by(func.count(func.distinct(OfferTechnology.offer_id)).desc())
+                .limit(top_n)
+            ).all()
+
+            techs = [
+                {"id": r.id, "name": r.display_name, "count": int(r.count)} for r in top_rows
+            ]
+            if len(techs) < 2:
+                return {"techs": techs, "pairs": []}
+
+            top_ids = [t["id"] for t in techs]
+            count_by_id = {t["id"]: t["count"] for t in techs}
+
+            ot_a = OfferTechnology.__table__.alias("ota")
+            ot_b = OfferTechnology.__table__.alias("otb")
+            pair_rows = session.execute(
+                select(
+                    ot_a.c.technology_id.label("a_id"),
+                    ot_b.c.technology_id.label("b_id"),
+                    func.count(func.distinct(ot_a.c.offer_id)).label("count"),
+                )
+                .join(ot_b, (ot_a.c.offer_id == ot_b.c.offer_id) & (ot_a.c.technology_id != ot_b.c.technology_id))
+                .join(Offer, Offer.id == ot_a.c.offer_id)
+                .where(
+                    Offer.is_active.is_(True),
+                    ot_a.c.technology_id.in_(top_ids),
+                    ot_b.c.technology_id.in_(top_ids),
+                )
+                .group_by(ot_a.c.technology_id, ot_b.c.technology_id)
+            ).all()
+
+            name_by_id = {t["id"]: t["name"] for t in techs}
+            pairs = [
+                {
+                    "a": name_by_id[r.a_id],
+                    "b": name_by_id[r.b_id],
+                    "count": int(r.count),
+                    "conf": round(r.count / count_by_id[r.a_id], 3) if count_by_id[r.a_id] else 0.0,
+                }
+                for r in pair_rows
+                if r.a_id in name_by_id and r.b_id in name_by_id
+            ]
+
+        return {
+            "techs": [{"name": t["name"], "count": t["count"]} for t in techs],
+            "pairs": pairs,
+        }
+
+
 @blp.route("/runs")
 class Runs(MethodView):
     @blp.doc(tags=["stats"])

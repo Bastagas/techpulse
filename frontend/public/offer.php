@@ -25,4 +25,16 @@ if ($offer === null) {
     exit;
 }
 
-echo $twig->render('offer.twig', ['offer' => $offer]);
+// Récupère la prédiction salaire via l'API Flask (s'il tourne)
+$salaryPrediction = null;
+$apiPort = $_ENV['API_PORT'] ?? '5001';
+$ctx = stream_context_create(['http' => ['timeout' => 1.5]]);
+$apiResponse = @file_get_contents("http://127.0.0.1:{$apiPort}/offers/{$id}/salary-prediction", false, $ctx);
+if ($apiResponse !== false) {
+    $salaryPrediction = json_decode($apiResponse, true) ?: null;
+}
+
+echo $twig->render('offer.twig', [
+    'offer' => $offer,
+    'salary_prediction' => $salaryPrediction,
+]);

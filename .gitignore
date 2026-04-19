@@ -67,3 +67,4 @@ Thumbs.db
 *.tmp
 .cache/
 instance.config.yaml
+api/src/techpulse_api/ml/salary_model.pkl

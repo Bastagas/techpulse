@@ -322,6 +322,74 @@ final class OfferRepository
     }
 
     /**
+     * Matrice de corrélation des technologies.
+     *
+     * Pour chaque paire (A, B) où A != B, retourne :
+     *  - count    : nombre d'offres actives contenant les deux
+     *  - confAB   : P(B|A) = count / offres_avec_A
+     *
+     * Utilisé pour la heatmap "Si tu vois Python, tu vois aussi Django dans X % des offres".
+     *
+     * @return array{techs: list<array{name:string, count:int}>, pairs: list<array{a:string,b:string,count:int,conf:float}>}
+     */
+    public function techCorrelations(int $topN = 12): array
+    {
+        // Top N technos
+        $topStmt = $this->pdo->prepare(
+            'SELECT t.display_name, COUNT(DISTINCT ot.offer_id) count '
+            . 'FROM technologies t '
+            . 'INNER JOIN offer_technologies ot ON ot.technology_id = t.id '
+            . 'INNER JOIN offers o ON o.id = ot.offer_id AND o.is_active = 1 '
+            . 'GROUP BY t.id '
+            . 'ORDER BY count DESC '
+            . 'LIMIT :n'
+        );
+        $topStmt->bindValue(':n', $topN, PDO::PARAM_INT);
+        $topStmt->execute();
+        $techs = array_map(
+            static fn (array $r) => ['name' => (string) $r['display_name'], 'count' => (int) $r['count']],
+            $topStmt->fetchAll(),
+        );
+
+        if (count($techs) < 2) {
+            return ['techs' => $techs, 'pairs' => []];
+        }
+
+        $names = array_column($techs, 'name');
+        $placeholders = implode(',', array_fill(0, count($names), '?'));
+
+        // Toutes les paires A,B parmi le top (ordre alphabétique garanti pour éviter doublons a-b / b-a)
+        $pairsStmt = $this->pdo->prepare(
+            'SELECT ta.display_name a, tb.display_name b, COUNT(DISTINCT ota.offer_id) count '
+            . 'FROM offer_technologies ota '
+            . 'INNER JOIN offer_technologies otb ON ota.offer_id = otb.offer_id AND ota.technology_id != otb.technology_id '
+            . 'INNER JOIN technologies ta ON ta.id = ota.technology_id '
+            . 'INNER JOIN technologies tb ON tb.id = otb.technology_id '
+            . 'INNER JOIN offers o ON o.id = ota.offer_id AND o.is_active = 1 '
+            . "WHERE ta.display_name IN ($placeholders) AND tb.display_name IN ($placeholders) "
+            . 'GROUP BY ta.id, tb.id'
+        );
+        $pairsStmt->execute(array_merge($names, $names));
+
+        $countByA = array_column($techs, 'count', 'name');
+        $pairs = [];
+        foreach ($pairsStmt->fetchAll() as $row) {
+            $a = (string) $row['a'];
+            $b = (string) $row['b'];
+            $count = (int) $row['count'];
+            $aTotal = $countByA[$a] ?? 0;
+            $pairs[] = [
+                'a' => $a,
+                'b' => $b,
+                'count' => $count,
+                'conf' => $aTotal > 0 ? round($count / $aTotal, 3) : 0.0,
+            ];
+        }
+
+        return ['techs' => $techs, 'pairs' => $pairs];
+    }
+
+    /**
      * Top N technologies les plus fréquentes parmi les offres actives.
      *
      * @return list<array{name:string, count:int, category:string}>
