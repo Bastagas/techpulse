@@ -88,6 +88,86 @@
     {% block content %}{% endblock %}
 </main>
 
+{# ─── Barre flottante comparateur ─── #}
+<div id="compare-bar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 hidden"
+     style="min-width: 280px;">
+    <div class="bg-brand-600 text-white rounded-full shadow-xl px-5 py-3 flex items-center gap-4">
+        <span class="text-sm font-medium"><span id="compare-count">0</span> offre(s) sélectionnée(s)</span>
+        <button id="compare-go" class="bg-white text-brand-600 px-3 py-1 rounded-full text-sm font-semibold hover:bg-gray-100">
+            Comparer →
+        </button>
+        <button id="compare-clear" class="text-white/80 hover:text-white text-sm">✕</button>
+    </div>
+</div>
+
+<script>
+(() => {
+    const STORE = 'techpulse_compare';
+    const getIds = () => JSON.parse(localStorage.getItem(STORE) || '[]');
+    const setIds = (ids) => localStorage.setItem(STORE, JSON.stringify(ids));
+    const bar = document.getElementById('compare-bar');
+    const count = document.getElementById('compare-count');
+
+    function refresh() {
+        const ids = getIds();
+        if (ids.length > 0) {
+            bar.classList.remove('hidden');
+            count.textContent = ids.length;
+        } else {
+            bar.classList.add('hidden');
+        }
+        // Cocher automatiquement les checkboxes déjà dans la liste
+        document.querySelectorAll('.compare-checkbox').forEach(cb => {
+            cb.checked = ids.includes(parseInt(cb.dataset.offerId));
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('compare-checkbox')) {
+            e.stopPropagation();
+            const id = parseInt(e.target.dataset.offerId);
+            let ids = getIds();
+            if (e.target.checked) {
+                if (ids.length >= 4) {
+                    alert('Maximum 4 offres pour la comparaison.');
+                    e.target.checked = false;
+                    return;
+                }
+                if (!ids.includes(id)) ids.push(id);
+            } else {
+                ids = ids.filter(x => x !== id);
+            }
+            setIds(ids);
+            refresh();
+        }
+    });
+
+    // Empêche le clic sur la checkbox de déclencher le lien parent
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('label') && e.target.closest('.compare-checkbox, label')) {
+            e.stopPropagation();
+        }
+    }, true);
+
+    document.getElementById('compare-go')?.addEventListener('click', () => {
+        const ids = getIds();
+        if (ids.length < 2) {
+            alert('Sélectionne au moins 2 offres.');
+            return;
+        }
+        window.location = '/compare.php?ids=' + ids.join(',');
+    });
+
+    document.getElementById('compare-clear')?.addEventListener('click', () => {
+        setIds([]);
+        refresh();
+    });
+
+    document.addEventListener('DOMContentLoaded', refresh);
+    refresh();
+})();
+</script>
+
 <footer class="mt-16 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 text-sm text-gray-600 dark:text-gray-400">
         <div class="flex flex-col sm:flex-row gap-4 justify-between items-start">
