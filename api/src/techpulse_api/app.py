@@ -60,6 +60,11 @@ def create_app() -> Flask:
     CORS(app, resources={r"/*": {"origins": "*"}})
     api = Api(app)
 
+    # ─── Scheduler (APScheduler, OFF par défaut) ───
+    from techpulse_api.scheduler import init_scheduler
+
+    init_scheduler()
+
     # ─── Blueprints ────────────────────────────────
     from techpulse_api.routes import meta, offers, stats
 

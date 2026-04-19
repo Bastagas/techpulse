@@ -110,6 +110,14 @@ class TestStats:
         data = r.get_json()
         assert isinstance(data, list)
 
+    def test_runs(self, client):
+        r = client.get("/stats/runs")
+        assert r.status_code == 200
+        data = r.get_json()
+        assert "scheduler" in data
+        assert "recent_runs" in data
+        assert isinstance(data["recent_runs"], list)
+
 
 class TestOpenAPI:
     def test_spec_is_accessible(self, client):

@@ -164,3 +164,42 @@ class SourcesStats(MethodView):
             }
             for r in rows
         ]
+
+
+@blp.route("/runs")
+class Runs(MethodView):
+    @blp.doc(tags=["stats"])
+    def get(self):
+        """Historique des derniers runs de scraping (monitoring)."""
+        from techpulse_scraper.models import ScrapeRun
+
+        from techpulse_api.scheduler import get_next_run
+
+        with get_session() as session:
+            rows = (
+                session.execute(select(ScrapeRun).order_by(ScrapeRun.started_at.desc()).limit(20))
+                .scalars()
+                .all()
+            )
+
+        next_run = get_next_run()
+        return {
+            "scheduler": {
+                "enabled": next_run is not None,
+                "next_run_at": next_run.isoformat() if next_run else None,
+            },
+            "recent_runs": [
+                {
+                    "id": r.id,
+                    "spider": r.spider,
+                    "started_at": r.started_at.isoformat() if r.started_at else None,
+                    "finished_at": r.finished_at.isoformat() if r.finished_at else None,
+                    "status": r.status.value if hasattr(r.status, "value") else str(r.status),
+                    "offers_found": r.offers_found,
+                    "offers_new": r.offers_new,
+                    "offers_updated": r.offers_updated,
+                    "errors_count": r.errors_count,
+                }
+                for r in rows
+            ],
+        }

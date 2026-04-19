@@ -104,6 +104,19 @@ async def _run_spider(name: str, spider, limit: int | None) -> None:  # noqa: AN
 
 
 @cli.command()
+@click.option("--limit", type=int, default=None, help="Max villes à géocoder (défaut : toutes).")
+def geocode(limit: int | None) -> None:
+    """Géocode les villes des offres via l'API Adresse Data Gouv."""
+    from techpulse_scraper.utils.geocoder import geocode_cities_sync
+
+    with get_session() as session:
+        resolved, skipped = geocode_cities_sync(session, limit=limit)
+    click.echo(
+        f"\n✓ Géocodage terminé : {resolved} offres mises à jour, {skipped} villes non trouvées"
+    )
+
+
+@cli.command()
 def stats() -> None:
     """Affiche quelques stats rapides sur le contenu de la BDD."""
     with get_session() as session:

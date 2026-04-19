@@ -204,6 +204,124 @@ final class OfferRepository
     }
 
     /**
+     * Top N villes par nombre d'offres.
+     *
+     * @return list<array{city:string, department_code:?string, count:int}>
+     */
+    public function topCities(int $n = 15): array
+    {
+        $sql = 'SELECT city, department_code, COUNT(*) count '
+            . 'FROM offers WHERE city IS NOT NULL AND is_active = 1 '
+            . 'GROUP BY city, department_code ORDER BY count DESC LIMIT :n';
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':n', $n, PDO::PARAM_INT);
+        $stmt->execute();
+        return array_map(
+            static fn (array $r) => [
+                'city' => (string) $r['city'],
+                'department_code' => $r['department_code'] ? (string) $r['department_code'] : null,
+                'count' => (int) $r['count'],
+            ],
+            $stmt->fetchAll(),
+        );
+    }
+
+    /**
+     * Distribution des types de contrats.
+     *
+     * @return list<array{contract_type:string, count:int}>
+     */
+    public function contractDistribution(): array
+    {
+        $sql = 'SELECT contract_type, COUNT(*) count FROM offers '
+            . 'WHERE contract_type IS NOT NULL AND is_active = 1 '
+            . 'GROUP BY contract_type ORDER BY count DESC';
+        $rows = $this->pdo->query($sql)->fetchAll();
+        return array_map(
+            static fn (array $r) => [
+                'contract_type' => (string) $r['contract_type'],
+                'count' => (int) $r['count'],
+            ],
+            $rows,
+        );
+    }
+
+    /**
+     * Statistiques de salaires (count / mean / p25 / median / p75 / min / max).
+     *
+     * @return array<string, int|float|null>
+     */
+    public function salaryStats(): array
+    {
+        $values = array_column(
+            $this->pdo->query(
+                'SELECT salary_min FROM offers WHERE salary_min IS NOT NULL AND is_active = 1 '
+                    . 'ORDER BY salary_min ASC'
+            )->fetchAll(),
+            'salary_min',
+        );
+        $values = array_map('intval', $values);
+        $n = count($values);
+        if ($n === 0) {
+            return ['count' => 0, 'mean' => null, 'median' => null, 'p25' => null, 'p75' => null, 'min' => null, 'max' => null];
+        }
+        $pct = static fn (float $p) => $values[min($n - 1, (int) floor($p * ($n - 1)))];
+        return [
+            'count' => $n,
+            'mean' => round(array_sum($values) / $n, 2),
+            'median' => $pct(0.5),
+            'p25' => $pct(0.25),
+            'p75' => $pct(0.75),
+            'min' => $values[0],
+            'max' => $values[$n - 1],
+        ];
+    }
+
+    /**
+     * Points géographiques agrégés par ville pour la heatmap.
+     *
+     * @return list<array{city:string, lat:float, lng:float, count:int}>
+     */
+    public function geoPoints(): array
+    {
+        $sql = 'SELECT city, lat, lng, COUNT(*) count FROM offers '
+            . 'WHERE lat IS NOT NULL AND is_active = 1 '
+            . 'GROUP BY city, lat, lng ORDER BY count DESC';
+        return array_map(
+            static fn (array $r) => [
+                'city' => (string) $r['city'],
+                'lat' => (float) $r['lat'],
+                'lng' => (float) $r['lng'],
+                'count' => (int) $r['count'],
+            ],
+            $this->pdo->query($sql)->fetchAll(),
+        );
+    }
+
+    /**
+     * Timeline des offres publiées sur les N derniers jours.
+     *
+     * @return list<array{date:string, count:int}>
+     */
+    public function timeline(int $days = 30): array
+    {
+        $sql = 'SELECT DATE(posted_at) d, COUNT(*) c FROM offers '
+            . 'WHERE posted_at IS NOT NULL AND is_active = 1 '
+            . 'AND posted_at >= DATE_SUB(CURDATE(), INTERVAL :d DAY) '
+            . 'GROUP BY DATE(posted_at) ORDER BY DATE(posted_at) ASC';
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':d', $days, PDO::PARAM_INT);
+        $stmt->execute();
+        return array_map(
+            static fn (array $r) => [
+                'date' => (string) $r['d'],
+                'count' => (int) $r['c'],
+            ],
+            $stmt->fetchAll(),
+        );
+    }
+
+    /**
      * Top N technologies les plus fréquentes parmi les offres actives.
      *
      * @return list<array{name:string, count:int, category:string}>

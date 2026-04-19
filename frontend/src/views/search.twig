@@ -75,9 +75,25 @@
 </form>
 
 <section>
-    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        <span class="font-semibold text-gray-900 dark:text-white">{{ offers.total }}</span> offre(s) trouvée(s)
-    </p>
+    <div class="flex items-center justify-between mb-4 gap-4 flex-wrap">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+            <span class="font-semibold text-gray-900 dark:text-white">{{ offers.total }}</span> offre(s) trouvée(s)
+        </p>
+        {% if offers.total > 0 %}
+        <div class="flex gap-2 text-sm">
+            <a href="/export.php?format=csv&{{ filters|url_encode }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+                Export CSV
+            </a>
+            <a href="/export.php?format=json&{{ filters|url_encode }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+                Export JSON
+            </a>
+        </div>
+        {% endif %}
+    </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {% for offer in offers.items %}
             {% include 'partials/offer_card.twig' with { offer: offer } %}
