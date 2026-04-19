@@ -66,3 +66,4 @@ Thumbs.db
 *.bak
 *.tmp
 .cache/
+instance.config.yaml

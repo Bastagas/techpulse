@@ -1,0 +1,49 @@
+# Configuration pour auto_retry.py
+#
+# Copie ce fichier vers instance.config.yaml puis remplis les ocid1... avec
+# les valeurs que tu trouves dans ton Oracle Cloud Console.
+# (Voir RETRY.md étape 3 pour savoir où trouver chaque OCID.)
+
+# Nom de l'instance à créer
+display_name: techpulse
+
+# Compartment OCID (racine par défaut — visible dans le profil utilisateur ou Identity → Compartments)
+compartment_id: ocid1.compartment.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Availability Domain à cibler. Le auto_retry ne teste qu'une AD à la fois.
+# Si AD-1 est saturée, relance avec AD-2 puis AD-3.
+# Format : "<tenancy-prefix>:<region>-AD-<N>"
+# Ex Frankfurt : "xxxx:EU-FRANKFURT-1-AD-1"
+availability_domain: xxxx:EU-FRANKFURT-1-AD-1
+
+# Subnet OCID (créé automatiquement avec le VCN par défaut)
+# À trouver dans : Networking → Virtual Cloud Networks → ton VCN → Subnets
+subnet_id: ocid1.subnet.oc1.eu-frankfurt-1.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Image OCID — Canonical Ubuntu 22.04 Minimal aarch64
+# À trouver dans : Compute → Custom Images (ou dans le selector d'image du Create instance)
+# La valeur change par région, extrait la tienne :
+#   https://docs.oracle.com/en-us/iaas/images/image/<release>/
+image_id: ocid1.image.oc1.eu-frankfurt-1.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Clé SSH publique (contenu de ton ssh-key-XXXX.key.pub — UNE seule ligne commençant par ssh-rsa ou ssh-ed25519)
+ssh_public_key: |
+  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD... remplace-par-ta-cle-publique user@machine
+
+# Shape ARM Ampere Always Free
+shape: VM.Standard.A1.Flex
+
+# Config CPU/RAM (max gratuit : 4 OCPU + 24 GB)
+# Commence à 4/24, si tout est saturé pendant 2 h, baisse à 2/12
+ocpus: 4
+memory_gb: 24
+
+# Boot volume size (max gratuit : 200 GB partagés entre toutes les instances)
+boot_volume_gb: 50
+
+# Assigner une IP publique (recommandé : true)
+assign_public_ip: true
+
+# Intervalle entre 2 tentatives (secondes).
+# Ne descends pas sous 30s pour éviter le rate-limit Oracle.
+retry_interval_seconds: 45
