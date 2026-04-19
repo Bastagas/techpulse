@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lead Developer Python · Holenek · TechPulse</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+</head>
+<body class="noise body-font min-h-screen antialiased">
+<div class="mesh"><div></div></div>
+
+<!-- Ticker -->
+<div class="relative z-20 ticker-wrap">
+  <div class="ticker">
+    <span class="t-item"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span class="t-lbl">TECHPULSE.MARKET</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">LIVE</span> <span class="t-val">19.04.2026 · 17:32 UTC</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">OFFERS</span> <span class="t-val">678</span> <span class="t-up">▲ +12</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">▲ python +12% · rust +7% · typescript +5%</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span class="t-lbl">TECHPULSE.MARKET</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">LIVE</span> <span class="t-val">19.04.2026 · 17:32 UTC</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">OFFERS</span> <span class="t-val">678</span> <span class="t-up">▲ +12</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">▲ python +12% · rust +7% · typescript +5%</span></span>
+    <span class="t-sep">│</span>
+  </div>
+</div>
+
+<!-- Nav -->
+<header class="relative z-20 pt-5 px-6">
+  <div class="max-w-[1100px] mx-auto glass px-5 h-14 flex items-center justify-between" style="border-radius: 9999px;">
+    <div class="flex items-center gap-8">
+      <a href="#" class="flex items-center gap-2.5">
+        <div class="relative">
+          <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 via-pink-500 to-indigo-500 flex items-center justify-center">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+        </div>
+        <span class="font-bold tracking-tight text-lg">techpulse</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-1 text-sm">
+        <a href="#" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">Découvrir</a>
+        <a href="#" class="px-3 py-1.5 rounded-full bg-white/5 text-white">Offres</a>
+        <a href="#" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">Dashboard</a>
+        <a href="#" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">API</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-2 text-sm">
+      <button class="px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/5">Se connecter</button>
+      <button class="cta-red px-4 py-1.5 rounded-full text-white font-medium text-sm">Démarrer</button>
+    </div>
+  </div>
+</header>
+
+<main class="relative z-10 max-w-[1100px] mx-auto px-6 py-10">
+
+  <!-- Breadcrumb -->
+  <a href="#" class="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white mb-6 reveal" style="animation-delay:100ms">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Retour aux offres
+  </a>
+
+  <!-- ━━━ HEADER OFFRE ━━━ -->
+  <section class="reveal glass-strong p-8 mb-6 relative overflow-hidden iridescent" style="animation-delay:180ms">
+    <div class="orb w-64 h-64 bg-red-500/20 -top-10 -right-10"></div>
+
+    <div class="flex items-center gap-2 mb-4">
+      <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono uppercase tracking-wider">Featured</span>
+      <span class="px-2 py-0.5 rounded-full bg-white/5 text-slate-300 text-[10px] mono">CDI</span>
+      <span class="px-2 py-0.5 rounded-full bg-white/5 text-slate-300 text-[10px] mono">Senior</span>
+      <span class="ml-auto mono text-[11px] text-slate-500">Offre #677 · publiée il y a 3h · source France Travail</span>
+    </div>
+
+    <h1 class="text-5xl font-bold tracking-[-0.03em] leading-[1.1] mb-3">Lead Developer Python</h1>
+    <p class="text-xl text-slate-300 mb-2 body-font">Holenek Ingénierie</p>
+    <p class="text-sm text-slate-400 mb-6">Nantes (44) · Pays de la Loire · France</p>
+
+    <div class="grid grid-cols-12 gap-4">
+      <!-- Quick facts -->
+      <div class="col-span-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+        <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1">Rémunération annoncée</p>
+        <p class="text-2xl font-bold text-emerald-400">55 – 70 k€</p>
+        <p class="text-xs text-slate-500 mono mt-0.5">annuel brut</p>
+      </div>
+      <div class="col-span-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+        <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1">Télétravail</p>
+        <p class="text-2xl font-bold">Hybride</p>
+        <p class="text-xs text-slate-500 mono mt-0.5">2 jours / semaine</p>
+      </div>
+      <div class="col-span-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+        <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1">Expérience</p>
+        <p class="text-2xl font-bold">5+ ans</p>
+        <p class="text-xs text-slate-500 mono mt-0.5">Senior requis</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3 mt-6">
+      <a href="#" class="cta-red px-5 py-2.5 rounded-full text-white font-semibold flex items-center gap-2">
+        Postuler sur France Travail
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+      </a>
+      <button class="glass px-4 py-2.5 text-white hover:bg-white/10 flex items-center gap-2" style="border-radius:9999px;">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+        Sauvegarder
+      </button>
+      <button class="glass px-4 py-2.5 text-white hover:bg-white/10 flex items-center gap-2" style="border-radius:9999px;">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+        Partager
+      </button>
+    </div>
+  </section>
+
+  <!-- ━━━ ML SALARY PREDICTION ━━━ -->
+  <section class="reveal grid grid-cols-12 gap-4 mb-6" style="animation-delay:260ms">
+    <div class="col-span-7 glass-strong p-6 relative overflow-hidden iridescent">
+      <div class="orb w-40 h-40 bg-pink-500/20 -top-5 -right-5"></div>
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-indigo-500 flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        </div>
+        <div>
+          <p class="mono text-[10px] text-pink-400 uppercase tracking-widest">Prédiction ML · scikit-learn</p>
+          <h2 class="text-xl font-bold">Fourchette estimée par notre modèle</h2>
+        </div>
+      </div>
+
+      <div class="mb-5">
+        <p class="text-5xl font-bold gradient-accent inline-flex items-baseline gap-2">
+          52 – 68 <span class="text-2xl">k€</span>
+        </p>
+        <p class="text-sm text-slate-400 mt-2">point estimé : <strong class="text-white">60 000 €</strong> · confiance : <strong class="text-pink-400">73%</strong></p>
+      </div>
+
+      <!-- Distribution bar with ranges -->
+      <div class="relative h-20 mb-6">
+        <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1 bg-white/5 rounded-full"></div>
+        <!-- Predicted range -->
+        <div class="absolute top-1/2 -translate-y-1/2 left-[35%] w-[30%] h-10 bg-gradient-to-r from-pink-500/40 via-indigo-500/40 to-red-500/40 rounded-lg border border-white/10"></div>
+        <!-- Point estimate -->
+        <div class="absolute top-1/2 -translate-y-1/2 left-[48%] w-0.5 h-12 bg-white shadow-lg"></div>
+        <!-- Actual salary marker (green) -->
+        <div class="absolute top-1/2 -translate-y-1/2 left-[56%] w-1 h-8 bg-emerald-400 rounded"></div>
+        <!-- Labels -->
+        <div class="absolute -bottom-6 left-0 mono text-[10px] text-slate-500">20k</div>
+        <div class="absolute -bottom-6 left-[35%] mono text-[10px] text-pink-400">P25 52k</div>
+        <div class="absolute -bottom-6 left-[48%] mono text-[10px] text-white font-semibold">point 60k</div>
+        <div class="absolute -bottom-6 left-[56%] mono text-[10px] text-emerald-400">réel 62k</div>
+        <div class="absolute -bottom-6 right-0 mono text-[10px] text-slate-500">100k</div>
+      </div>
+
+      <div class="pt-6 border-t border-white/5 grid grid-cols-3 gap-3 text-sm">
+        <div>
+          <p class="mono text-[10px] text-slate-500 uppercase">Échantillon</p>
+          <p class="text-base font-semibold">127 offres</p>
+        </div>
+        <div>
+          <p class="mono text-[10px] text-slate-500 uppercase">Features</p>
+          <p class="text-base font-semibold">239</p>
+        </div>
+        <div>
+          <p class="mono text-[10px] text-slate-500 uppercase">R² train</p>
+          <p class="text-base font-semibold">0.738</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-span-5 glass-strong p-6 relative overflow-hidden">
+      <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-3">Facteurs les plus influents</p>
+      <h3 class="text-lg font-bold mb-4">Pourquoi ce score ?</h3>
+
+      <div class="space-y-3">
+        <div class="flex items-center gap-3">
+          <span class="mono text-[10px] text-slate-500 w-8">01</span>
+          <span class="flex-1 text-sm">contract = CDI</span>
+          <div class="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-1.5 spark-bar rounded-full" style="width:100%"></div></div>
+          <span class="mono text-xs text-emerald-400 w-10 text-right">+12%</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="mono text-[10px] text-slate-500 w-8">02</span>
+          <span class="flex-1 text-sm">seniority = senior</span>
+          <div class="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-1.5 spark-bar rounded-full" style="width:82%; animation-delay:40ms"></div></div>
+          <span class="mono text-xs text-emerald-400 w-10 text-right">+8%</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="mono text-[10px] text-slate-500 w-8">03</span>
+          <span class="flex-1 text-sm">tech = Python</span>
+          <div class="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-1.5 spark-bar rounded-full" style="width:65%; animation-delay:80ms"></div></div>
+          <span class="mono text-xs text-emerald-400 w-10 text-right">+6%</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="mono text-[10px] text-slate-500 w-8">04</span>
+          <span class="flex-1 text-sm">tech = Docker</span>
+          <div class="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-1.5 spark-bar rounded-full" style="width:50%; animation-delay:120ms"></div></div>
+          <span class="mono text-xs text-emerald-400 w-10 text-right">+5%</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="mono text-[10px] text-slate-500 w-8">05</span>
+          <span class="flex-1 text-sm">dept = 44 (Nantes)</span>
+          <div class="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-1.5 spark-bar rounded-full" style="width:40%; animation-delay:160ms"></div></div>
+          <span class="mono text-xs text-slate-400 w-10 text-right">+2%</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="mono text-[10px] text-slate-500 w-8">06</span>
+          <span class="flex-1 text-sm">tech = FastAPI</span>
+          <div class="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-1.5 spark-bar rounded-full" style="width:30%; animation-delay:200ms"></div></div>
+          <span class="mono text-xs text-slate-400 w-10 text-right">+1%</span>
+        </div>
+      </div>
+      <p class="text-[11px] text-slate-500 mt-4 pt-3 border-t border-white/5 mono">
+        SHAP values via RandomForestRegressor · extraction locale
+      </p>
+    </div>
+  </section>
+
+  <!-- ━━━ TECHS ━━━ -->
+  <section class="reveal glass-strong p-6 mb-6" style="animation-delay:340ms">
+    <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-3">Stack technique détectée · NLP</p>
+    <h3 class="text-lg font-bold mb-4">12 technologies identifiées dans la description</h3>
+    <div class="flex flex-wrap gap-2">
+      <span class="px-3 py-1.5 rounded-full bg-red-500/15 border border-red-500/30 text-red-300 text-sm font-medium">Python</span>
+      <span class="px-3 py-1.5 rounded-full bg-red-500/15 border border-red-500/30 text-red-300 text-sm font-medium">FastAPI</span>
+      <span class="px-3 py-1.5 rounded-full bg-red-500/15 border border-red-500/30 text-red-300 text-sm font-medium">Django</span>
+      <span class="px-3 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-sm font-medium">Docker</span>
+      <span class="px-3 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-sm font-medium">Kubernetes</span>
+      <span class="px-3 py-1.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-sm font-medium">PostgreSQL</span>
+      <span class="px-3 py-1.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-sm font-medium">Redis</span>
+      <span class="px-3 py-1.5 rounded-full bg-pink-500/15 border border-pink-500/30 text-pink-300 text-sm font-medium">AWS</span>
+      <span class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-300 text-sm font-medium">CI/CD</span>
+      <span class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-300 text-sm font-medium">Git</span>
+      <span class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-300 text-sm font-medium">Agile</span>
+      <span class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-300 text-sm font-medium">REST</span>
+    </div>
+    <div class="flex items-center gap-4 mt-4 pt-4 border-t border-white/5 text-xs text-slate-500 mono">
+      <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-500"></span>Langages / Frameworks</span>
+      <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-500"></span>Infrastructure</span>
+      <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-cyan-500"></span>Data</span>
+      <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-pink-500"></span>Cloud</span>
+    </div>
+  </section>
+
+  <!-- ━━━ DESCRIPTION ━━━ -->
+  <section class="reveal glass-strong p-8 mb-6" style="animation-delay:420ms">
+    <h3 class="text-2xl font-bold mb-5">Description du poste</h3>
+    <div class="prose prose-invert max-w-none text-slate-300 body-font leading-relaxed">
+      <p class="mb-4">
+        Chez Holenek Ingénierie, nous concevons des plateformes data et IA pour des grands comptes
+        industriels et publics. Après une levée de Série B en 2025, nous élargissons notre équipe
+        produit autour de Python/FastAPI pour bâtir la prochaine génération de nos solutions.
+      </p>
+      <h4 class="text-lg font-semibold text-white mb-2 mt-6">Vos missions</h4>
+      <ul class="list-disc pl-5 space-y-1.5">
+        <li>Architecturer les services backend Python/FastAPI de nos produits phares (ServiceNow, Azure OpenAI, SAP)</li>
+        <li>Encadrer une équipe de 4 développeurs juniors et intermédiaires (code review, pair programming, mentorat technique)</li>
+        <li>Contribuer à la roadmap produit avec le CTO et les product managers</li>
+        <li>Participer aux choix d'architecture cloud (AWS, Kubernetes, Terraform)</li>
+        <li>Garantir la qualité (tests, CI/CD GitHub Actions, monitoring Sentry + Datadog)</li>
+      </ul>
+      <h4 class="text-lg font-semibold text-white mb-2 mt-6">Profil recherché</h4>
+      <ul class="list-disc pl-5 space-y-1.5">
+        <li>5+ ans d'expérience Python en production (FastAPI, Django, Flask ou équivalent)</li>
+        <li>Solide expérience Docker + Kubernetes + un cloud majeur (idéalement AWS)</li>
+        <li>Appétence pour la donnée (PostgreSQL, Redis, streaming Kafka optionnel)</li>
+        <li>Leadership technique : savoir choisir les bons combats, communiquer clairement, arbitrer</li>
+        <li>Anglais professionnel (certains clients internationaux)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ━━━ OFFRES SIMILAIRES ━━━ -->
+  <section class="reveal mb-10" style="animation-delay:500ms">
+    <div class="flex items-end justify-between mb-5">
+      <div>
+        <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">Similarité sémantique · TF-IDF</p>
+        <h2 class="text-2xl font-bold">5 offres similaires</h2>
+      </div>
+      <span class="mono text-xs text-slate-500">cosine sur titre + description</span>
+    </div>
+    <div class="grid grid-cols-12 gap-4">
+      <!-- Similar 1 -->
+      <a href="#" class="col-span-12 glass-strong p-5 hover:bg-white/[0.06] transition-colors group relative overflow-hidden">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono">CDI</span>
+              <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Senior</span>
+              <span class="mono text-[10px] text-slate-500 ml-auto">il y a 8h</span>
+            </div>
+            <h3 class="font-semibold mb-1 group-hover:text-red-400 transition-colors text-lg">Senior Python Engineer · Plateforme data</h3>
+            <p class="text-sm text-slate-400 mb-3">Datadog France · Paris (75) · CDI · 4-7 ans</p>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">Python</span>
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">FastAPI</span>
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">Docker</span>
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">Kubernetes</span>
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">AWS</span>
+            </div>
+          </div>
+          <div class="flex flex-col items-end gap-2 shrink-0">
+            <div class="relative w-16 h-16">
+              <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
+                <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3"/>
+                <circle cx="20" cy="20" r="16" fill="none" stroke="#EC4899" stroke-width="3" stroke-dasharray="87 100"/>
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="text-sm font-bold rotate-0">87%</span>
+              </div>
+            </div>
+            <span class="mono text-[9px] text-pink-400 uppercase">similar</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="col-span-12 glass-strong p-5 hover:bg-white/[0.06] transition-colors group relative overflow-hidden">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono">CDI</span>
+              <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Senior</span>
+              <span class="mono text-[10px] text-slate-500 ml-auto">il y a 1j</span>
+            </div>
+            <h3 class="font-semibold mb-1 group-hover:text-red-400 transition-colors text-lg">Tech Lead Backend Python</h3>
+            <p class="text-sm text-slate-400 mb-3">OVHcloud · Roubaix · CDI · 5+ ans</p>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">Python</span>
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">Django</span>
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">PostgreSQL</span>
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">Docker</span>
+            </div>
+          </div>
+          <div class="flex flex-col items-end gap-2 shrink-0">
+            <div class="relative w-16 h-16">
+              <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
+                <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3"/>
+                <circle cx="20" cy="20" r="16" fill="none" stroke="#EC4899" stroke-width="3" stroke-dasharray="81 100"/>
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="text-sm font-bold rotate-0">81%</span>
+              </div>
+            </div>
+            <span class="mono text-[9px] text-pink-400 uppercase">similar</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="col-span-12 glass-strong p-5 hover:bg-white/[0.06] transition-colors group relative overflow-hidden">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono">CDI</span>
+              <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Senior</span>
+              <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] mono">Remote</span>
+              <span class="mono text-[10px] text-slate-500 ml-auto">il y a 2j</span>
+            </div>
+            <h3 class="font-semibold mb-1 group-hover:text-red-400 transition-colors text-lg">Lead Backend Engineer · Python/Go</h3>
+            <p class="text-sm text-slate-400 mb-3">Qonto · Paris (remote-friendly) · CDI · 5-8 ans</p>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">Python</span>
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">Go</span>
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">FastAPI</span>
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">Kafka</span>
+            </div>
+          </div>
+          <div class="flex flex-col items-end gap-2 shrink-0">
+            <div class="relative w-16 h-16">
+              <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
+                <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3"/>
+                <circle cx="20" cy="20" r="16" fill="none" stroke="#EC4899" stroke-width="3" stroke-dasharray="76 100"/>
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="text-sm font-bold rotate-0">76%</span>
+              </div>
+            </div>
+            <span class="mono text-[9px] text-pink-400 uppercase">similar</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="col-span-12 glass-strong p-5 hover:bg-white/[0.06] transition-colors group relative overflow-hidden">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono">CDI</span>
+              <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Senior</span>
+              <span class="mono text-[10px] text-slate-500 ml-auto">il y a 3j</span>
+            </div>
+            <h3 class="font-semibold mb-1 group-hover:text-red-400 transition-colors text-lg">Staff Engineer Python · Platform</h3>
+            <p class="text-sm text-slate-400 mb-3">Alan · Paris · CDI · 7+ ans</p>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">Python</span>
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">Django</span>
+              <span class="pill px-2 py-0.5 text-[10px] rounded-full">GraphQL</span>
+            </div>
+          </div>
+          <div class="flex flex-col items-end gap-2 shrink-0">
+            <div class="relative w-16 h-16">
+              <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
+                <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3"/>
+                <circle cx="20" cy="20" r="16" fill="none" stroke="#EC4899" stroke-width="3" stroke-dasharray="71 100"/>
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="text-sm font-bold rotate-0">71%</span>
+              </div>
+            </div>
+            <span class="mono text-[9px] text-pink-400 uppercase">similar</span>
+          </div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ━━━ COMPANY ━━━ -->
+  <section class="reveal glass-strong p-6 mb-6 relative overflow-hidden" style="animation-delay:580ms">
+    <div class="orb w-40 h-40 bg-indigo-500/15 -top-6 -right-6"></div>
+    <div class="flex items-start gap-5">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center shrink-0 text-2xl font-bold">H</div>
+      <div class="flex-1">
+        <h3 class="text-xl font-bold mb-1">Holenek Ingénierie</h3>
+        <p class="text-sm text-slate-400 mb-4">Data · IA · ServiceNow · 120 collaborateurs · Nantes / Paris · holenek.fr</p>
+        <div class="grid grid-cols-4 gap-4 pt-4 border-t border-white/5">
+          <div>
+            <p class="mono text-[10px] text-slate-500 uppercase">Offres actives</p>
+            <p class="text-lg font-semibold">7</p>
+          </div>
+          <div>
+            <p class="mono text-[10px] text-slate-500 uppercase">Secteur</p>
+            <p class="text-lg font-semibold">Services IT</p>
+          </div>
+          <div>
+            <p class="mono text-[10px] text-slate-500 uppercase">Taille</p>
+            <p class="text-lg font-semibold">100-250</p>
+          </div>
+          <div>
+            <p class="mono text-[10px] text-slate-500 uppercase">Fondée</p>
+            <p class="text-lg font-semibold">2016</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="relative z-10 border-t border-white/5 mt-8 py-10 px-6">
+  <div class="max-w-[1100px] mx-auto flex items-center justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-6">
+      <a href="#" class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 via-pink-500 to-indigo-500"></div>
+        <span class="font-bold tracking-tight">techpulse</span>
+      </a>
+      <span class="text-slate-600 text-sm">© 2026 · Bastien Ruedas</span>
+    </div>
+    <div class="flex items-center gap-6 text-sm text-slate-400">
+      <a href="#" class="hover:text-white">GitHub</a>
+      <a href="#" class="hover:text-white">API</a>
+      <a href="#" class="hover:text-white">Mentions</a>
+    </div>
+    <div class="mono text-[10px] text-slate-600 tracking-widest uppercase">M2 · Montpellier</div>
+  </div>
+</footer>
+</body>
+</html>

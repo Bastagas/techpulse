@@ -1,127 +1,174 @@
 {% extends 'layout.twig' %}
+{% set active_page = 'search' %}
 
 {% block title %}{{ offer.title }}{% endblock %}
 
 {% block content %}
-<a href="javascript:history.back()" class="inline-flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-6">
-    ← Retour
+
+<a href="/search.php" class="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white mb-6 reveal">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Retour aux offres
 </a>
 
-<article class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 sm:p-8">
-    <header class="mb-6">
-        <div class="flex flex-wrap items-center gap-2 mb-3">
-            {% if offer.contract_type %}
-            <span class="text-xs font-medium px-2 py-1 rounded bg-gray-100 dark:bg-gray-800">{{ offer.contract_type }}</span>
-            {% endif %}
-            {% if offer.experience_level %}
-            <span class="text-xs font-medium px-2 py-1 rounded bg-gray-100 dark:bg-gray-800">{{ offer.experience_level }}</span>
-            {% endif %}
-            <span class="text-xs text-gray-500 dark:text-gray-400">
-                Source : {{ offer.source }}{% if offer.posted_at %} · publiée {{ offer.posted_at|ago }}{% endif %}
-            </span>
-        </div>
-        <h1 class="text-3xl font-bold tracking-tight">{{ offer.title }}</h1>
-        <p class="mt-2 text-lg text-gray-700 dark:text-gray-300">
-            <span class="font-semibold">{{ offer.company_name }}</span>
-            {% if offer.city %}
-            <span class="mx-2 text-gray-400">·</span>
-            <span>{{ offer.city }}{% if offer.department_code %} ({{ offer.department_code }}){% endif %}</span>
-            {% endif %}
-        </p>
-    </header>
+<div class="max-w-[1100px] mx-auto">
 
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+<!-- ─── HEADER OFFRE ─── -->
+<article class="reveal glass-strong p-6 sm:p-8 mb-6 relative overflow-hidden iridescent" style="animation-delay:180ms">
+    <div class="orb w-64 h-64 bg-red-500/20 -top-10 -right-10"></div>
+
+    <div class="flex items-center gap-2 mb-4 flex-wrap">
+        {% if offer.contract_type %}
+        <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono uppercase tracking-wider">{{ offer.contract_type }}</span>
+        {% endif %}
+        {% if offer.seniority %}
+        <span class="px-2 py-0.5 rounded-full bg-white/5 text-slate-300 text-[10px] mono">
+            {% if offer.seniority == 'junior' %}Junior
+            {% elseif offer.seniority == 'mid' %}Confirmé
+            {% elseif offer.seniority == 'senior' %}Senior
+            {% elseif offer.seniority == 'lead' %}Lead{% endif %}
+        </span>
+        {% endif %}
+        {% if offer.remote_policy == 'full_remote' %}
+        <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] mono">Full remote</span>
+        {% elseif offer.remote_policy == 'hybrid' %}
+        <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] mono">Hybride</span>
+        {% endif %}
+        <span class="ml-auto mono text-[11px] text-slate-500">
+            #{{ offer.id }} · source {{ offer.source }}{% if offer.posted_at %} · {{ offer.posted_at|ago }}{% endif %}
+        </span>
+    </div>
+
+    <h1 class="text-3xl sm:text-5xl font-bold tracking-[-0.03em] leading-[1.1] mb-3">{{ offer.title }}</h1>
+    <p class="text-xl text-slate-300 mb-2">{{ offer.company_name }}</p>
+    <p class="text-sm text-slate-400 mb-6">
+        {% if offer.city %}{{ offer.city }}{% if offer.department_code %} ({{ offer.department_code }}){% endif %}{% endif %}
+    </p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {% if offer.salary_min %}
-        <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-lg p-4">
-            <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold">Rémunération</p>
-            <p class="mt-1 text-xl font-bold text-emerald-700 dark:text-emerald-300">
-                {{ offer.salary_min|salary }}{% if offer.salary_max and offer.salary_max > offer.salary_min %}<br><span class="text-sm font-normal">à {{ offer.salary_max|salary }}</span>{% endif %}
+        <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+            <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1">Rémunération</p>
+            <p class="text-2xl font-bold text-emerald-400">
+                {{ offer.salary_min|salary }}{% if offer.salary_max and offer.salary_max > offer.salary_min %} – {{ offer.salary_max|salary }}{% endif %}
+            </p>
+            <p class="text-xs text-slate-500 mono mt-0.5">annuel brut</p>
+        </div>
+        {% endif %}
+        {% if offer.remote_policy %}
+        <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+            <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1">Télétravail</p>
+            <p class="text-2xl font-bold">
+                {% if offer.remote_policy == 'full_remote' %}Full remote
+                {% elseif offer.remote_policy == 'hybrid' %}Hybride
+                {% elseif offer.remote_policy == 'on_site' %}Sur site
+                {% else %}—{% endif %}
             </p>
         </div>
         {% endif %}
-
-        {% if offer.technologies|length > 0 %}
-        <div class="bg-brand-50 dark:bg-brand-950/30 border border-brand-200 dark:border-brand-900 rounded-lg p-4 sm:col-span-2">
-            <p class="text-xs uppercase tracking-wide text-brand-700 dark:text-brand-300 font-semibold mb-2">Technologies détectées · {{ offer.technologies|length }}</p>
-            <div class="flex flex-wrap gap-1.5">
-                {% for tech in offer.technologies %}
-                    {% include 'partials/tech_badge.twig' with { tech: tech } %}
-                {% endfor %}
-            </div>
+        {% if offer.experience_level %}
+        <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+            <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1">Expérience</p>
+            <p class="text-2xl font-bold">{{ offer.experience_level }}</p>
         </div>
         {% endif %}
     </div>
 
-    {% if offer.description %}
-    <div class="prose prose-gray dark:prose-invert max-w-none mb-6">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Description du poste</h2>
-        <div class="whitespace-pre-wrap text-gray-700 dark:text-gray-300 leading-relaxed">{{ offer.description }}</div>
-    </div>
-    {% endif %}
-
-    {# ─── Estimation salaire ML ─── #}
-    {% if salary_prediction and salary_prediction.available %}
-    <div class="bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-900 rounded-lg p-4 mb-6">
-        <div class="flex items-start gap-3">
-            <svg class="h-6 w-6 text-violet-600 dark:text-violet-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-            </svg>
-            <div class="flex-1">
-                <p class="text-xs uppercase tracking-wide text-violet-700 dark:text-violet-300 font-semibold">Estimation salariale (scikit-learn)</p>
-                <p class="mt-1 text-xl font-bold text-violet-900 dark:text-violet-200">
-                    {{ salary_prediction.prediction.low|salary }} – {{ salary_prediction.prediction.high|salary }}
-                </p>
-                <p class="text-sm text-violet-700 dark:text-violet-300 mt-0.5">
-                    point estimé : <strong>{{ salary_prediction.prediction.point|salary }}</strong>
-                    · confiance : {{ (salary_prediction.prediction.confidence * 100)|round }}%
-                </p>
-                <p class="text-xs text-violet-600 dark:text-violet-400 mt-2">
-                    Prédiction RandomForest entraîné sur {{ salary_prediction.model.training_size }} offres avec salaire renseigné,
-                    {{ salary_prediction.model.feature_count }} features (technos + ville + contrat + expérience).
-                    {% if salary_prediction.actual.salary_min %}
-                    Salaire réel annoncé : <strong>{{ salary_prediction.actual.salary_min|salary }}</strong>.
-                    {% endif %}
-                </p>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
     {% if offer.source_url %}
-    <div class="pt-6 border-t border-gray-200 dark:border-gray-800">
-        <a href="{{ offer.source_url }}" target="_blank" rel="noopener"
-           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-medium">
+    <div class="flex items-center gap-3 mt-6">
+        <a href="{{ offer.source_url }}" target="_blank" rel="noopener" class="cta-red px-5 py-2.5 rounded-full font-semibold flex items-center gap-2">
             Postuler sur {{ offer.source|replace({'_': ' '})|title }}
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-            </svg>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
         </a>
     </div>
     {% endif %}
 </article>
 
-{# ─── Offres similaires (TF-IDF cosine) ─── #}
-{% if similar_offers|length > 0 %}
-<section class="mt-8">
-    <h2 class="text-xl font-semibold mb-4">Offres similaires</h2>
-    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        Calculé par similarité TF-IDF sur le titre + la description (score cosine, plus proche de 1 = plus similaire).
+<!-- ─── ML Salary Prediction ─── -->
+{% if salary_prediction and salary_prediction.available %}
+<section class="reveal glass-strong p-6 mb-6 relative overflow-hidden iridescent" style="animation-delay:260ms">
+    <div class="orb w-40 h-40 bg-pink-500/20 -top-5 -right-5"></div>
+    <div class="flex items-start gap-4 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-indigo-500 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        </div>
+        <div class="flex-1">
+            <p class="mono text-[10px] text-pink-400 uppercase tracking-widest">Prédiction ML · scikit-learn</p>
+            <h2 class="text-xl font-bold">Fourchette estimée</h2>
+        </div>
+    </div>
+    <p class="text-4xl font-bold gradient-accent mb-2">
+        {{ salary_prediction.prediction.low|salary }} – {{ salary_prediction.prediction.high|salary }}
     </p>
+    <p class="text-sm text-slate-400 mb-4">
+        point estimé : <strong class="text-white">{{ salary_prediction.prediction.point|salary }}</strong>
+        · confiance : <strong class="text-pink-400">{{ (salary_prediction.prediction.confidence * 100)|round }}%</strong>
+    </p>
+    <p class="text-xs text-slate-500 mt-4 pt-4 border-t border-white/5">
+        RandomForest entraîné sur <strong class="text-white">{{ salary_prediction.model.training_size }}</strong> offres ·
+        <strong class="text-white">{{ salary_prediction.model.feature_count }}</strong> features
+        {% if salary_prediction.actual.salary_min %} · salaire annoncé : <strong class="text-emerald-400">{{ salary_prediction.actual.salary_min|salary }}</strong>{% endif %}
+    </p>
+</section>
+{% endif %}
+
+<!-- ─── TECHS ─── -->
+{% if offer.technologies|length > 0 %}
+<section class="reveal glass-strong p-6 mb-6" style="animation-delay:340ms">
+    <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-3">Stack technique · NLP</p>
+    <h3 class="text-lg font-bold mb-4">{{ offer.technologies|length }} technologies identifiées</h3>
+    <div class="flex flex-wrap gap-2">
+        {% for tech in offer.technologies %}
+            {% include 'partials/tech_badge.twig' with { tech: tech } %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- ─── DESCRIPTION ─── -->
+{% if offer.description %}
+<section class="reveal glass-strong p-6 sm:p-8 mb-6" style="animation-delay:420ms">
+    <h3 class="text-2xl font-bold mb-5">Description du poste</h3>
+    <div class="prose-invert-tp body-font leading-relaxed whitespace-pre-wrap">{{ offer.description }}</div>
+</section>
+{% endif %}
+
+<!-- ─── Offres similaires (TF-IDF) ─── -->
+{% if similar_offers|length > 0 %}
+<section class="reveal mb-10" style="animation-delay:500ms">
+    <div class="flex items-end justify-between mb-5">
+        <div>
+            <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">Similarité sémantique · TF-IDF</p>
+            <h2 class="text-2xl font-bold">Offres similaires</h2>
+        </div>
+        <span class="mono text-xs text-slate-500">cosine sur titre + description</span>
+    </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         {% for s in similar_offers %}
-        <a href="/offer.php?id={{ s.id }}" class="block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-brand-500 rounded-lg p-4">
-            <div class="flex items-start justify-between gap-3 mb-2">
-                <h3 class="font-semibold text-gray-900 dark:text-white line-clamp-2 flex-1">{{ s.title }}</h3>
-                <span class="shrink-0 text-xs font-mono tabular-nums px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300">
-                    {{ (s.score * 100)|round }}%
-                </span>
+        <a href="/offer.php?id={{ s.id }}" class="block glass-strong p-5 hover:bg-white/[0.06] transition-colors group relative overflow-hidden">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex-1">
+                    <h3 class="font-semibold mb-1 group-hover:text-red-400 transition-colors line-clamp-2 leading-snug">{{ s.title }}</h3>
+                    <p class="text-sm text-slate-400">{{ s.company ?: 'Entreprise anonyme' }}{% if s.city %} · {{ s.city }}{% endif %}</p>
+                </div>
+                <div class="shrink-0 text-center">
+                    <div class="relative w-14 h-14">
+                        <svg viewBox="0 0 40 40" class="w-full h-full -rotate-90">
+                            <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3"/>
+                            <circle cx="20" cy="20" r="16" fill="none" stroke="#EC4899" stroke-width="3" stroke-dasharray="{{ (s.score * 100)|round }} 100"/>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-xs font-bold rotate-0">{{ (s.score * 100)|round }}%</span>
+                        </div>
+                    </div>
+                    <span class="mono text-[9px] text-pink-400 uppercase">similar</span>
+                </div>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
-                {{ s.company ?: 'Entreprise anonyme' }}{% if s.city %} · {{ s.city }}{% endif %}
-            </p>
         </a>
         {% endfor %}
     </div>
 </section>
 {% endif %}
+
+</div>
+
 {% endblock %}

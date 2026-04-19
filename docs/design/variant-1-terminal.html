@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TechPulse · Market Terminal</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary:   #1E40AF;
+  --secondary: #3B82F6;
+  --accent:    #D97706;
+  --grid:      rgba(148, 163, 184, 0.06);
+  --grid-lit:  rgba(217, 119, 6, 0.12);
+  --bg:        #050914;
+  --bg-panel:  #0B1424;
+  --border:    #1e293b;
+  --text-dim:  #64748b;
+  --text-up:   #10b981;
+  --text-dn:   #ef4444;
+}
+* { font-family: 'Fira Sans', system-ui, sans-serif; }
+.mono, code, .num { font-family: 'Fira Code', 'SF Mono', monospace; font-feature-settings: "tnum" 1, "zero" 1; }
+body {
+  background: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: #e2e8f0;
+}
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  position: relative;
+}
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at top left, rgba(59,130,246,0.06), transparent 50%);
+}
+.pulse-dot { animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.3 } }
+.ticker-strip { animation: ticker 90s linear infinite; }
+@keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+.bar-fill {
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+  transition: width 1.8s cubic-bezier(0.4,0,0.2,1);
+  transform-origin: left center;
+  animation: growBar 2s cubic-bezier(0.4,0,0.2,1) backwards;
+}
+@keyframes growBar { from { transform: scaleX(0); } }
+.row:hover { background: linear-gradient(90deg, rgba(217,119,6,0.04) 0%, transparent 100%); }
+.glow-amber { box-shadow: 0 0 24px rgba(217, 119, 6, 0.2), inset 0 0 0 1px rgba(217, 119, 6, 0.3); }
+.scan-line {
+  background: linear-gradient(180deg, transparent 50%, rgba(217,119,6,0.03) 50.1%, transparent 51%);
+  background-size: 100% 4px;
+  pointer-events: none;
+  animation: scan 12s linear infinite;
+}
+@keyframes scan { 0%{background-position:0 0} 100%{background-position:0 100vh} }
+.tape-item:nth-child(odd) { color: var(--text-up); }
+.corner-tick::before, .corner-tick::after,
+.corner-tick > span::before, .corner-tick > span::after {
+  content: ''; position: absolute; width: 8px; height: 8px;
+  border-color: var(--accent);
+}
+.corner-tick::before { top:-1px; left:-1px; border-top: 1px solid; border-left: 1px solid; }
+.corner-tick::after { top:-1px; right:-1px; border-top: 1px solid; border-right: 1px solid; }
+.corner-tick > span::before { bottom:-1px; left:-1px; border-bottom: 1px solid; border-left: 1px solid; position:absolute; width:8px; height:8px; content:''; }
+.corner-tick > span::after { bottom:-1px; right:-1px; border-bottom: 1px solid; border-right: 1px solid; position:absolute; width:8px; height:8px; content:''; }
+.status-ok { background: var(--text-up); }
+.spark {
+  stroke-dasharray: 120;
+  stroke-dashoffset: 120;
+  animation: sparkDraw 2.4s ease-out forwards;
+}
+@keyframes sparkDraw { to { stroke-dashoffset: 0; } }
+</style>
+</head>
+<body class="min-h-screen antialiased">
+<div class="scan-line fixed inset-0 z-0"></div>
+
+<!-- ━━━ Top ticker ━━━ -->
+<div class="relative z-10 border-b border-slate-800 bg-slate-950/90 backdrop-blur-sm overflow-hidden">
+  <div class="flex ticker-strip gap-8 py-1.5 text-[11px] mono whitespace-nowrap tracking-wider">
+    <span class="tape-item pl-6 text-slate-500">► TECHPULSE.MARKET</span>
+    <span class="tape-item">LAST_SYNC 2026.04.19 · 17:32:08 UTC</span>
+    <span class="tape-item">OFFERS <span class="text-amber-500">678</span></span>
+    <span class="tape-item">COMPANIES <span class="text-amber-500">316</span></span>
+    <span class="tape-item">▲ python +12%</span>
+    <span class="tape-item">▲ rust +7%</span>
+    <span class="tape-item">▼ jquery -4%</span>
+    <span class="tape-item">▲ typescript +5%</span>
+    <span class="tape-item text-emerald-400">SCRAPER STATUS: OK</span>
+    <span class="tape-item">NEXT_RUN 03:00:00 UTC</span>
+    <span class="tape-item">SOURCES FT · HELLOWORK · APEC</span>
+    <!-- Duplicate for seamless loop -->
+    <span class="tape-item pl-6 text-slate-500">► TECHPULSE.MARKET</span>
+    <span class="tape-item">LAST_SYNC 2026.04.19 · 17:32:08 UTC</span>
+    <span class="tape-item">OFFERS <span class="text-amber-500">678</span></span>
+    <span class="tape-item">COMPANIES <span class="text-amber-500">316</span></span>
+    <span class="tape-item">▲ python +12%</span>
+    <span class="tape-item">▲ rust +7%</span>
+    <span class="tape-item">▼ jquery -4%</span>
+    <span class="tape-item">▲ typescript +5%</span>
+    <span class="tape-item text-emerald-400">SCRAPER STATUS: OK</span>
+    <span class="tape-item">NEXT_RUN 03:00:00 UTC</span>
+  </div>
+</div>
+
+<!-- ━━━ Header ━━━ -->
+<header class="relative z-10 border-b border-slate-800 bg-slate-950/70 backdrop-blur-sm sticky top-0">
+  <div class="max-w-[1400px] mx-auto px-6 h-14 flex items-center justify-between">
+    <div class="flex items-center gap-8">
+      <a href="#" class="flex items-center gap-2.5">
+        <div class="w-6 h-6 border border-amber-500 flex items-center justify-center glow-amber">
+          <div class="w-1.5 h-1.5 bg-amber-500 pulse-dot"></div>
+        </div>
+        <span class="mono text-sm tracking-[0.18em] font-semibold">TECHPULSE</span>
+        <span class="mono text-[10px] text-slate-500 border-l border-slate-700 pl-2">v0.1.0</span>
+      </a>
+      <nav class="flex items-center gap-1 text-xs">
+        <a href="#" class="px-3 py-1.5 mono tracking-wider text-amber-500 border-b border-amber-500 -mb-[1px]">MARKET</a>
+        <a href="#" class="px-3 py-1.5 mono tracking-wider text-slate-400 hover:text-slate-200">SEARCH</a>
+        <a href="#" class="px-3 py-1.5 mono tracking-wider text-slate-400 hover:text-slate-200">TRENDS</a>
+        <a href="#" class="px-3 py-1.5 mono tracking-wider text-slate-400 hover:text-slate-200">API</a>
+        <a href="#" class="px-3 py-1.5 mono tracking-wider text-slate-400 hover:text-slate-200">DOCS</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-4 mono text-xs">
+      <div class="flex items-center gap-2">
+        <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></div>
+        <span class="text-slate-400">LIVE</span>
+      </div>
+      <span class="text-slate-500 border-l border-slate-700 pl-4">17:32:08 UTC</span>
+      <button class="px-3 py-1.5 bg-amber-500/10 border border-amber-500/40 text-amber-400 hover:bg-amber-500/20">
+        [+] NEW ALERT
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ━━━ Market overview ━━━ -->
+<main class="relative z-10 max-w-[1400px] mx-auto px-6 py-6 space-y-3">
+  <section class="grid grid-cols-12 gap-3">
+    <div class="col-span-7">
+      <p class="mono text-[11px] text-amber-500 mb-2 tracking-widest">// MARKET_OVERVIEW · FR_TECH_JOBS</p>
+      <h1 class="text-[44px] leading-[1.05] font-extrabold tracking-tight">
+        Le marché de l'emploi <span class="text-amber-500">tech français</span>,
+        en temps réel.
+      </h1>
+      <p class="mt-3 text-slate-400 max-w-2xl text-[15px] leading-relaxed">
+        Agrégation continue de France Travail, HelloWork et APEC.
+        Extraction NLP des technologies, géolocalisation, prédiction de salaires.
+        Observe les tendances sans biais marketing.
+      </p>
+      <div class="mt-6 flex items-center gap-3">
+        <button class="mono text-sm px-4 py-2 bg-amber-500 text-slate-950 font-semibold hover:bg-amber-400 tracking-wide">
+          [→] EXPLORE_MARKET
+        </button>
+        <button class="mono text-sm px-4 py-2 border border-slate-700 text-slate-300 hover:border-slate-500 tracking-wide">
+          API_DOCS
+        </button>
+      </div>
+    </div>
+
+    <div class="col-span-5 panel corner-tick p-5 relative"><span></span>
+      <div class="flex items-center justify-between mb-4">
+        <p class="mono text-[11px] text-slate-500 tracking-wider">SIGNAL // SALARY_INDEX</p>
+        <span class="mono text-[10px] text-emerald-400 border border-emerald-400/30 bg-emerald-400/5 px-1.5 py-0.5">LIVE</span>
+      </div>
+      <p class="num text-4xl font-bold tracking-tight">43 000 <span class="text-base text-slate-400">EUR</span></p>
+      <p class="num text-xs text-emerald-400 mt-1">+3.2% vs Q4 2025</p>
+      <svg class="mt-4 w-full h-16" viewBox="0 0 300 60" fill="none">
+        <path class="spark" d="M0,45 L20,42 L40,38 L60,41 L80,35 L100,30 L120,32 L140,25 L160,28 L180,20 L200,22 L220,15 L240,18 L260,12 L280,8 L300,5"
+          stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M0,45 L20,42 L40,38 L60,41 L80,35 L100,30 L120,32 L140,25 L160,28 L180,20 L200,22 L220,15 L240,18 L260,12 L280,8 L300,5 L300,60 L0,60 Z"
+          fill="url(#g1)" opacity="0.4"/>
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#D97706"/>
+            <stop offset="100%" stop-color="#D97706" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="grid grid-cols-3 gap-2 pt-3 border-t border-slate-800 mono text-[11px]">
+        <div><p class="text-slate-500">p25</p><p class="num text-slate-300">33k</p></div>
+        <div><p class="text-slate-500">median</p><p class="num text-amber-500">43k</p></div>
+        <div><p class="text-slate-500">p75</p><p class="num text-slate-300">55k</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ━━━ 6 KPI ribbon ━━━ -->
+  <section class="grid grid-cols-6 gap-2">
+    <div class="panel corner-tick p-3 relative"><span></span>
+      <p class="mono text-[10px] text-slate-500 tracking-wider">offers.total</p>
+      <p class="num text-2xl font-bold mt-0.5">678</p>
+      <p class="num text-[10px] text-emerald-400">+12 (24h)</p>
+    </div>
+    <div class="panel corner-tick p-3 relative"><span></span>
+      <p class="mono text-[10px] text-slate-500 tracking-wider">companies</p>
+      <p class="num text-2xl font-bold mt-0.5">316</p>
+      <p class="num text-[10px] text-emerald-400">+4 (24h)</p>
+    </div>
+    <div class="panel corner-tick p-3 relative"><span></span>
+      <p class="mono text-[10px] text-slate-500 tracking-wider">cities</p>
+      <p class="num text-2xl font-bold mt-0.5">257</p>
+      <p class="num text-[10px] text-slate-500">geocoded</p>
+    </div>
+    <div class="panel corner-tick p-3 relative"><span></span>
+      <p class="mono text-[10px] text-slate-500 tracking-wider">techs.unique</p>
+      <p class="num text-2xl font-bold mt-0.5 text-amber-500">137</p>
+      <p class="num text-[10px] text-slate-500">of 202</p>
+    </div>
+    <div class="panel corner-tick p-3 relative"><span></span>
+      <p class="mono text-[10px] text-slate-500 tracking-wider">remote.full</p>
+      <p class="num text-2xl font-bold mt-0.5">79</p>
+      <p class="num text-[10px] text-slate-500">= 12%</p>
+    </div>
+    <div class="panel corner-tick p-3 relative"><span></span>
+      <p class="mono text-[10px] text-slate-500 tracking-wider">with_salary</p>
+      <p class="num text-2xl font-bold mt-0.5">173</p>
+      <p class="num text-[10px] text-slate-500">= 26%</p>
+    </div>
+  </section>
+
+  <!-- ━━━ Main grid ━━━ -->
+  <section class="grid grid-cols-12 gap-3">
+
+    <!-- Top technos -->
+    <div class="col-span-5 panel corner-tick p-4 relative"><span></span>
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+        <div class="flex items-baseline gap-3">
+          <h2 class="mono font-semibold tracking-wider text-sm">TOP_TECHNOLOGIES</h2>
+          <span class="mono text-[10px] text-slate-500">{{ n = 10 of 137 }}</span>
+        </div>
+        <button class="mono text-[11px] text-amber-500 hover:underline">VIEW_ALL →</button>
+      </div>
+      <div class="space-y-1">
+        <!-- rows -->
+        <div class="row grid grid-cols-12 items-center gap-3 px-2 py-1.5 rounded-sm">
+          <span class="col-span-1 mono text-[10px] text-slate-500 tabular-nums">01</span>
+          <span class="col-span-3 text-sm">C</span>
+          <div class="col-span-6 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full bar-fill rounded-full" style="width:100%; animation-delay:0ms"></div>
+          </div>
+          <span class="col-span-2 text-right num text-xs text-amber-500">216</span>
+        </div>
+        <div class="row grid grid-cols-12 items-center gap-3 px-2 py-1.5 rounded-sm">
+          <span class="col-span-1 mono text-[10px] text-slate-500 tabular-nums">02</span>
+          <span class="col-span-3 text-sm">Java</span>
+          <div class="col-span-6 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full bar-fill rounded-full" style="width:72%; animation-delay:60ms"></div>
+          </div>
+          <span class="col-span-2 text-right num text-xs text-slate-300">156</span>
+        </div>
+        <div class="row grid grid-cols-12 items-center gap-3 px-2 py-1.5 rounded-sm">
+          <span class="col-span-1 mono text-[10px] text-slate-500 tabular-nums">03</span>
+          <span class="col-span-3 text-sm">SQL</span>
+          <div class="col-span-6 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full bar-fill rounded-full" style="width:63%; animation-delay:120ms"></div>
+          </div>
+          <span class="col-span-2 text-right num text-xs text-slate-300">136</span>
+        </div>
+        <div class="row grid grid-cols-12 items-center gap-3 px-2 py-1.5 rounded-sm">
+          <span class="col-span-1 mono text-[10px] text-slate-500 tabular-nums">04</span>
+          <span class="col-span-3 text-sm">Agile</span>
+          <div class="col-span-6 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full bar-fill rounded-full" style="width:57%; animation-delay:180ms"></div>
+          </div>
+          <span class="col-span-2 text-right num text-xs text-slate-300">124</span>
+        </div>
+        <div class="row grid grid-cols-12 items-center gap-3 px-2 py-1.5 rounded-sm">
+          <span class="col-span-1 mono text-[10px] text-slate-500 tabular-nums">05</span>
+          <span class="col-span-3 text-sm">Angular</span>
+          <div class="col-span-6 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full bar-fill rounded-full" style="width:47%; animation-delay:240ms"></div>
+          </div>
+          <span class="col-span-2 text-right num text-xs text-slate-300">102</span>
+        </div>
+        <div class="row grid grid-cols-12 items-center gap-3 px-2 py-1.5 rounded-sm">
+          <span class="col-span-1 mono text-[10px] text-slate-500 tabular-nums">06</span>
+          <span class="col-span-3 text-sm">JavaScript</span>
+          <div class="col-span-6 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full bar-fill rounded-full" style="width:46%; animation-delay:300ms"></div>
+          </div>
+          <span class="col-span-2 text-right num text-xs text-slate-300">99</span>
+        </div>
+        <div class="row grid grid-cols-12 items-center gap-3 px-2 py-1.5 rounded-sm">
+          <span class="col-span-1 mono text-[10px] text-slate-500 tabular-nums">07</span>
+          <span class="col-span-3 text-sm">CI/CD</span>
+          <div class="col-span-6 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full bar-fill rounded-full" style="width:45%; animation-delay:360ms"></div>
+          </div>
+          <span class="col-span-2 text-right num text-xs text-slate-300">98</span>
+        </div>
+        <div class="row grid grid-cols-12 items-center gap-3 px-2 py-1.5 rounded-sm">
+          <span class="col-span-1 mono text-[10px] text-slate-500 tabular-nums">08</span>
+          <span class="col-span-3 text-sm">DevOps</span>
+          <div class="col-span-6 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full bar-fill rounded-full" style="width:45%; animation-delay:420ms"></div>
+          </div>
+          <span class="col-span-2 text-right num text-xs text-slate-300">97</span>
+        </div>
+        <div class="row grid grid-cols-12 items-center gap-3 px-2 py-1.5 rounded-sm">
+          <span class="col-span-1 mono text-[10px] text-slate-500 tabular-nums">09</span>
+          <span class="col-span-3 text-sm flex items-center gap-2">Python <span class="text-[9px] text-emerald-400 mono">↑</span></span>
+          <div class="col-span-6 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full bar-fill rounded-full" style="width:42%; animation-delay:480ms"></div>
+          </div>
+          <span class="col-span-2 text-right num text-xs text-slate-300">91</span>
+        </div>
+        <div class="row grid grid-cols-12 items-center gap-3 px-2 py-1.5 rounded-sm">
+          <span class="col-span-1 mono text-[10px] text-slate-500 tabular-nums">10</span>
+          <span class="col-span-3 text-sm">Git</span>
+          <div class="col-span-6 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full bar-fill rounded-full" style="width:40%; animation-delay:540ms"></div>
+          </div>
+          <span class="col-span-2 text-right num text-xs text-slate-300">87</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Latest offers stream -->
+    <div class="col-span-4 panel corner-tick p-4 relative"><span></span>
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+        <h2 class="mono font-semibold tracking-wider text-sm">RECENT_OFFERS</h2>
+        <div class="flex items-center gap-2 mono text-[10px]">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span>
+          <span class="text-slate-500">live stream</span>
+        </div>
+      </div>
+      <div class="space-y-0">
+        <!-- Each row is tight -->
+        <div class="row py-2.5 border-b border-slate-800/50 cursor-pointer">
+          <div class="flex items-start justify-between gap-3 mb-1">
+            <p class="text-sm font-medium text-slate-100 leading-tight">Lead Developer Python</p>
+            <span class="mono text-[10px] text-amber-500 shrink-0">CDI</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-slate-500">
+            <span>Holenek · Nantes</span>
+            <span class="text-slate-700">·</span>
+            <span class="num text-emerald-400">55-70 k€</span>
+            <span class="text-slate-700">·</span>
+            <span class="mono">3h</span>
+          </div>
+        </div>
+        <div class="row py-2.5 border-b border-slate-800/50 cursor-pointer">
+          <div class="flex items-start justify-between gap-3 mb-1">
+            <p class="text-sm font-medium text-slate-100 leading-tight">Développeur C# / .NET confirmé</p>
+            <span class="mono text-[10px] text-slate-400 shrink-0">CDD</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-slate-500">
+            <span>SERA · Clermont-Ferrand</span>
+            <span class="text-slate-700">·</span>
+            <span class="num text-slate-400">n/a</span>
+            <span class="text-slate-700">·</span>
+            <span class="mono">5h</span>
+          </div>
+        </div>
+        <div class="row py-2.5 border-b border-slate-800/50 cursor-pointer">
+          <div class="flex items-start justify-between gap-3 mb-1">
+            <p class="text-sm font-medium text-slate-100 leading-tight">Data Engineer Senior · Remote</p>
+            <span class="mono text-[10px] text-amber-500 shrink-0">CDI</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-slate-500">
+            <span>Entreprise anonyme · Paris</span>
+            <span class="text-slate-700">·</span>
+            <span class="num text-emerald-400">60-80 k€</span>
+            <span class="text-slate-700">·</span>
+            <span class="mono">8h</span>
+          </div>
+        </div>
+        <div class="row py-2.5 border-b border-slate-800/50 cursor-pointer">
+          <div class="flex items-start justify-between gap-3 mb-1">
+            <p class="text-sm font-medium text-slate-100 leading-tight">Développeur fullstack JS H/F</p>
+            <span class="mono text-[10px] text-amber-500 shrink-0">CDI</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-slate-500">
+            <span>skaelia · Lamentin (Martinique)</span>
+            <span class="text-slate-700">·</span>
+            <span class="num text-emerald-400">45 k€</span>
+            <span class="text-slate-700">·</span>
+            <span class="mono">12h</span>
+          </div>
+        </div>
+        <div class="row py-2.5 border-b border-slate-800/50 cursor-pointer">
+          <div class="flex items-start justify-between gap-3 mb-1">
+            <p class="text-sm font-medium text-slate-100 leading-tight">Analyste Développeur ETL / Talend</p>
+            <span class="mono text-[10px] text-amber-500 shrink-0">CDI</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-slate-500">
+            <span>Entreprise anonyme · Essarts-En-Bocage</span>
+            <span class="text-slate-700">·</span>
+            <span class="num text-slate-400">n/a</span>
+            <span class="text-slate-700">·</span>
+            <span class="mono">14h</span>
+          </div>
+        </div>
+        <div class="row py-2.5 border-b border-slate-800/50 cursor-pointer">
+          <div class="flex items-start justify-between gap-3 mb-1">
+            <p class="text-sm font-medium text-slate-100 leading-tight">DevOps Engineer Kubernetes</p>
+            <span class="mono text-[10px] text-amber-500 shrink-0">CDI</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-slate-500">
+            <span>Entreprise anonyme · Toulouse</span>
+            <span class="text-slate-700">·</span>
+            <span class="num text-emerald-400">55 k€</span>
+            <span class="text-slate-700">·</span>
+            <span class="mono">1d</span>
+          </div>
+        </div>
+        <div class="row py-2.5 cursor-pointer">
+          <div class="flex items-start justify-between gap-3 mb-1">
+            <p class="text-sm font-medium text-slate-100 leading-tight">Développeur React Native H/F</p>
+            <span class="mono text-[10px] text-amber-500 shrink-0">CDI</span>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-slate-500">
+            <span>Entreprise anonyme · Strasbourg</span>
+            <span class="text-slate-700">·</span>
+            <span class="num text-slate-400">n/a</span>
+            <span class="text-slate-700">·</span>
+            <span class="mono">1d</span>
+          </div>
+        </div>
+      </div>
+      <button class="w-full mt-3 py-2 mono text-[11px] text-slate-500 hover:text-amber-500 border border-dashed border-slate-800 hover:border-slate-700 tracking-wider">[ LOAD 671 MORE ]</button>
+    </div>
+
+    <!-- Cities + mini-heatmap -->
+    <div class="col-span-3 space-y-3">
+      <div class="panel corner-tick p-4 relative"><span></span>
+        <h2 class="mono font-semibold tracking-wider text-sm pb-3 border-b border-slate-800 mb-3">TOP_CITIES</h2>
+        <div class="space-y-2.5 mono text-xs">
+          <div class="flex items-baseline justify-between"><span><span class="text-slate-500">01</span> Nantes <span class="text-slate-600">(44)</span></span><span class="text-amber-500 num">33</span></div>
+          <div class="flex items-baseline justify-between"><span><span class="text-slate-500">02</span> Toulouse <span class="text-slate-600">(31)</span></span><span class="text-slate-300 num">22</span></div>
+          <div class="flex items-baseline justify-between"><span><span class="text-slate-500">03</span> Bordeaux <span class="text-slate-600">(33)</span></span><span class="text-slate-300 num">21</span></div>
+          <div class="flex items-baseline justify-between"><span><span class="text-slate-500">04</span> Strasbourg <span class="text-slate-600">(67)</span></span><span class="text-slate-300 num">21</span></div>
+          <div class="flex items-baseline justify-between"><span><span class="text-slate-500">05</span> Montpellier <span class="text-slate-600">(34)</span></span><span class="text-slate-300 num">20</span></div>
+          <div class="flex items-baseline justify-between"><span><span class="text-slate-500">06</span> Paris <span class="text-slate-600">(75)</span></span><span class="text-slate-300 num">14</span></div>
+          <div class="flex items-baseline justify-between"><span><span class="text-slate-500">07</span> Grenoble <span class="text-slate-600">(38)</span></span><span class="text-slate-300 num">13</span></div>
+        </div>
+      </div>
+
+      <div class="panel corner-tick p-4 relative"><span></span>
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="mono font-semibold tracking-wider text-sm">REMOTE_DIST</h2>
+          <span class="mono text-[10px] text-slate-500">n=668</span>
+        </div>
+        <div class="space-y-2.5 text-xs">
+          <div>
+            <div class="flex justify-between mb-1"><span class="mono text-slate-400">on_site</span><span class="num text-slate-300">439 · 65%</span></div>
+            <div class="h-1 bg-slate-800 rounded"><div class="h-full bg-blue-600 rounded" style="width:65%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-1"><span class="mono text-slate-400">hybrid</span><span class="num text-slate-300">150 · 22%</span></div>
+            <div class="h-1 bg-slate-800 rounded"><div class="h-full bg-amber-500 rounded" style="width:22%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-1"><span class="mono text-slate-400">full_remote</span><span class="num text-emerald-400">79 · 12%</span></div>
+            <div class="h-1 bg-slate-800 rounded"><div class="h-full bg-emerald-400 rounded" style="width:12%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel corner-tick p-4 relative"><span></span>
+        <h2 class="mono font-semibold tracking-wider text-sm mb-3">SYSTEM</h2>
+        <div class="space-y-1.5 mono text-[11px]">
+          <div class="flex justify-between text-slate-500"><span>api.uptime</span><span class="text-emerald-400">99.94%</span></div>
+          <div class="flex justify-between text-slate-500"><span>last_scrape</span><span class="text-slate-300">2h ago</span></div>
+          <div class="flex justify-between text-slate-500"><span>next_scrape</span><span class="text-slate-300">03:00 UTC</span></div>
+          <div class="flex justify-between text-slate-500"><span>db.rows</span><span class="text-slate-300 num">12,483</span></div>
+          <div class="flex justify-between text-slate-500"><span>model.accuracy</span><span class="text-amber-500">0.738</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="relative z-10 border-t border-slate-800 mt-8 py-4 px-6">
+  <div class="max-w-[1400px] mx-auto flex items-center justify-between mono text-[10px] text-slate-600 tracking-wider">
+    <span>© TECHPULSE 2026 · OBSERVATOIRE EMPLOI TECH FR</span>
+    <span>M2 WEB SCRAPING · UNIVERSITÉ DE MONTPELLIER</span>
+    <span class="flex gap-4"><a href="#">GITHUB</a><a href="#">API</a><a href="#">STATUS</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

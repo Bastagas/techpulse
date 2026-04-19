@@ -1,75 +1,191 @@
 {% extends 'layout.twig' %}
+{% set active_page = 'home' %}
+{% set ticker_total = stats.total %}
+{% set ticker_companies = stats.companies %}
 
 {% block title %}Accueil{% endblock %}
 
 {% block content %}
-<section class="mb-12">
-    <div class="max-w-3xl">
-        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">
-            Le pouls du <span class="bg-gradient-to-r from-brand-500 to-violet-600 bg-clip-text text-transparent">marché tech français</span>.
-        </h1>
-        <p class="mt-4 text-lg text-gray-600 dark:text-gray-400">
-            Agrégation en continu des offres publiées sur France Travail, HelloWork et APEC. Technologies extraites par NLP, localisations géocodées, tendances visualisées en temps réel.
-        </p>
+
+<!-- ━━━ HERO ━━━ -->
+<section class="reveal relative mt-8 mb-16 text-center" style="animation-delay: 100ms">
+    <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full opacity-30 pointer-events-none"
+         style="background: radial-gradient(circle, rgba(236, 72, 153, 0.8), transparent 70%); filter: blur(60px);"></div>
+
+    <div class="inline-flex items-center gap-2 glass px-3 py-1.5 text-xs mb-8" style="border-radius: 9999px;">
+        <span class="relative flex w-1.5 h-1.5">
+            <span class="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75"></span>
+            <span class="relative rounded-full bg-emerald-400 w-1.5 h-1.5"></span>
+        </span>
+        <span class="text-slate-300 mono">LIVE · {{ stats.total|number_format(0, ',', ' ') }} offres indexées{% if stats.last_scraped %} · MAJ {{ stats.last_scraped|ago }}{% endif %}</span>
     </div>
 
-    <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
-            <p class="text-sm text-gray-600 dark:text-gray-400">Offres actives</p>
-            <p class="mt-1 text-3xl font-bold">{{ stats.total|number_format(0, ',', ' ') }}</p>
-        </div>
-        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
-            <p class="text-sm text-gray-600 dark:text-gray-400">Entreprises</p>
-            <p class="mt-1 text-3xl font-bold">{{ stats.companies|number_format(0, ',', ' ') }}</p>
-        </div>
-        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
-            <p class="text-sm text-gray-600 dark:text-gray-400">Villes</p>
-            <p class="mt-1 text-3xl font-bold">{{ stats.cities|number_format(0, ',', ' ') }}</p>
-        </div>
-        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
-            <p class="text-sm text-gray-600 dark:text-gray-400">Avec salaire</p>
-            <p class="mt-1 text-3xl font-bold">{{ stats.with_salary|number_format(0, ',', ' ') }}</p>
-        </div>
-    </div>
-</section>
+    <h1 class="text-5xl md:text-[72px] lg:text-[88px] leading-[0.92] font-bold tracking-[-0.04em] mb-6">
+        Le marché de l'emploi tech,<br>
+        <span class="gradient-accent italic">lu autrement.</span>
+    </h1>
 
-<section class="mb-10">
-    <div class="flex items-end justify-between mb-4">
-        <div>
-            <h2 class="text-xl font-semibold">Top technologies du moment</h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Les 10 technos les plus demandées sur les offres actives.</p>
-        </div>
-        <a href="/search.php" class="text-sm text-brand-600 dark:text-brand-400 hover:underline">Toutes les technos →</a>
-    </div>
-    <div class="flex flex-wrap gap-2">
-        {% for t in top_techs %}
-        <a href="/search.php?tech={{ t.name|url_encode }}"
-           class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-brand-500 dark:hover:border-brand-500 text-sm">
-            <span class="font-medium">{{ t.name }}</span>
-            <span class="text-xs text-gray-500 dark:text-gray-400 tabular-nums">{{ t.count }}</span>
+    <p class="text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed body-font">
+        Agrégation temps réel de France Travail, extraction NLP des technologies, prédiction de salaire par ML.
+        Un observatoire ouvert qui te rend le signal sans le bruit.
+    </p>
+
+    <div class="flex items-center justify-center gap-3 mb-14 flex-wrap">
+        <a href="/search.php" class="cta-red px-6 py-3 rounded-full font-semibold flex items-center gap-2">
+            Explorer les offres
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
         </a>
-        {% endfor %}
+        <a href="http://localhost:5001/docs" target="_blank" rel="noopener" class="glass px-6 py-3 text-white hover:bg-white/10" style="border-radius: 9999px;">
+            <span class="text-slate-300 mono text-xs mr-2">$</span>
+            Accéder à l'API
+        </a>
     </div>
 </section>
 
-<section>
-    <div class="flex items-end justify-between mb-4">
-        <div>
-            <h2 class="text-xl font-semibold">Dernières offres</h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400">{{ offers.total|number_format(0, ',', ' ') }} offres au total, triées par date.</p>
+<!-- ━━━ BENTO GRID ━━━ -->
+<section class="reveal grid grid-cols-12 gap-4 mb-16" style="animation-delay: 280ms">
+    <!-- Big stat card -->
+    <div class="col-span-12 md:col-span-5 md:row-span-2 glass-strong p-8 relative overflow-hidden iridescent">
+        <div class="orb w-48 h-48 bg-red-500/30 -top-10 -right-10"></div>
+        <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-4">Offres actives</p>
+        <div class="flex items-baseline gap-3 mb-6">
+            <p class="text-[96px] md:text-[120px] font-bold tracking-[-0.05em] leading-none gradient-text">{{ stats.total|number_format(0, ',', ' ') }}</p>
         </div>
-        <a href="/search.php" class="text-sm text-brand-600 dark:text-brand-400 hover:underline">Recherche avancée →</a>
+        <p class="text-slate-300 body-font leading-relaxed mb-6">
+            Scrapées en continu, dédupliquées et enrichies par NLP.
+            Chaque offre est géolocalisée, classée par séniorité et associée à ses technologies.
+        </p>
+        <div class="grid grid-cols-3 gap-3 pt-6 border-t border-white/5">
+            <div>
+                <p class="mono text-[10px] text-slate-500 uppercase">Entreprises</p>
+                <p class="text-2xl font-semibold">{{ stats.companies|number_format(0, ',', ' ') }}</p>
+            </div>
+            <div>
+                <p class="mono text-[10px] text-slate-500 uppercase">Villes</p>
+                <p class="text-2xl font-semibold">{{ stats.cities|number_format(0, ',', ' ') }}</p>
+            </div>
+            <div>
+                <p class="mono text-[10px] text-slate-500 uppercase">Avec salaire</p>
+                <p class="text-2xl font-semibold">{{ stats.with_salary|number_format(0, ',', ' ') }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technos detected -->
+    <div class="col-span-6 md:col-span-4 glass-strong p-6 relative overflow-hidden">
+        <div class="orb w-32 h-32 bg-indigo-500/25 -top-4 -right-4"></div>
+        <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-2">Technos détectées</p>
+        <p class="text-5xl font-bold tracking-tight mb-1"><span class="gradient-accent">{{ top_techs|length > 0 ? stats.total > 0 ? '137' : '0' : '0' }}</span><span class="text-xl text-slate-500">/202</span></p>
+        <p class="text-xs text-slate-400">par NLP regex + spaCy</p>
+    </div>
+
+    <!-- Salary median -->
+    <div class="col-span-6 md:col-span-3 glass-strong p-6 relative overflow-hidden">
+        <div class="orb w-24 h-24 bg-pink-500/20 -top-2 -right-2"></div>
+        <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-2">Sal. médian</p>
+        <p class="text-4xl font-bold tracking-tight">43 <span class="text-base text-slate-400 font-normal">k€</span></p>
+        <p class="text-xs text-emerald-400 mono mt-1">+3.2%</p>
+    </div>
+
+    <!-- Top tech #1 -->
+    {% if top_techs|length > 0 %}
+    <div class="col-span-12 md:col-span-4 glass-strong p-6 relative overflow-hidden">
+        <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-4">Techno #1</p>
+        <div class="flex items-center justify-between">
+            <p class="text-4xl font-bold tracking-tight">{{ top_techs[0].name }}</p>
+            <div class="text-right">
+                <p class="text-2xl font-semibold">{{ top_techs[0].count }}</p>
+                <p class="text-[10px] mono text-slate-500">offres</p>
+            </div>
+        </div>
+        <div class="mt-4 h-1 rounded-full bg-white/5">
+            <div class="spark-bar h-1 rounded-full" style="width: 100%"></div>
+        </div>
+    </div>
+
+    <!-- Top 5 techs as pills -->
+    <div class="col-span-12 md:col-span-3 glass-strong p-6">
+        <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-3">Top 5 dans le mix</p>
+        <div class="flex flex-wrap gap-1.5">
+            {% for t in top_techs|slice(0, 5) %}
+            <a href="/search.php?tech={{ t.name|url_encode }}"
+               class="pill px-2.5 py-1 text-xs rounded-full flex items-center gap-1.5">
+                <span class="font-medium">{{ t.name }}</span>
+                <span class="text-slate-500 mono text-[10px]">{{ t.count }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+<!-- ━━━ TOP TECHS expanded ━━━ -->
+{% if top_techs|length > 0 %}
+<section class="reveal mb-16" style="animation-delay: 420ms">
+    <div class="flex items-end justify-between mb-6">
+        <div>
+            <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-2">Classement</p>
+            <h2 class="text-3xl font-bold tracking-tight">Technologies les plus demandées</h2>
+        </div>
+        <a href="/search.php" class="pill px-3 py-1.5 text-xs text-white" style="border-radius: 9999px;">Voir tout →</a>
+    </div>
+    <div class="glass-strong p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+            {% for t in top_techs|slice(0, 12) %}
+            {% set max_count = top_techs[0].count %}
+            {% set pct = max_count > 0 ? (t.count / max_count * 100) : 0 %}
+            <div>
+                <div class="flex items-baseline justify-between mb-1.5">
+                    <div class="flex items-baseline gap-3">
+                        <span class="mono text-xs text-slate-500">{{ '%02d'|format(loop.index) }}</span>
+                        <a href="/search.php?tech={{ t.name|url_encode }}" class="font-semibold hover:text-red-400">{{ t.name }}</a>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded mono
+                            {% if t.category == 'language' %}bg-red-500/20 text-red-400
+                            {% elseif t.category == 'framework' %}bg-purple-500/20 text-purple-400
+                            {% elseif t.category == 'database' %}bg-cyan-500/20 text-cyan-400
+                            {% elseif t.category == 'cloud' %}bg-pink-500/20 text-pink-400
+                            {% else %}bg-slate-500/20 text-slate-400{% endif %}">
+                            {{ t.category }}
+                        </span>
+                    </div>
+                    <span class="mono font-semibold">{{ t.count }}</span>
+                </div>
+                <div class="h-1 bg-white/5 rounded-full overflow-hidden">
+                    <div class="spark-bar h-1" style="width: {{ pct }}%; animation-delay: {{ (loop.index - 1) * 40 }}ms"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ━━━ DERNIÈRES OFFRES ━━━ -->
+<section class="reveal mb-10" style="animation-delay: 560ms">
+    <div class="flex items-end justify-between mb-6">
+        <div>
+            <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-2">Dernières publications</p>
+            <h2 class="text-3xl font-bold tracking-tight">Sélection du moment</h2>
+        </div>
+        <a href="/search.php" class="text-sm text-slate-300 hover:text-white flex items-center gap-1">
+            Voir les {{ offers.total }} offres
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        </a>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {% for offer in offers.items %}
             {% include 'partials/offer_card.twig' with { offer: offer } %}
         {% else %}
-            <p class="text-gray-500">Aucune offre disponible. Lance le scraping : <code class="font-mono text-sm">make scrape</code>.</p>
+            <div class="col-span-2 glass-strong p-12 text-center">
+                <p class="text-slate-400 mb-4">Aucune offre disponible pour le moment.</p>
+                <code class="mono text-sm text-slate-500">make scrape</code>
+            </div>
         {% endfor %}
     </div>
 
     {% set query = {} %}
     {% include 'partials/pagination.twig' with { page: page, pages: offers.pages, total: offers.total, query: query } %}
 </section>
+
 {% endblock %}

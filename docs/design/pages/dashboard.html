@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TechPulse · Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+/* Leaflet dark theme override */
+.leaflet-container { background: transparent !important; border-radius: 20px; }
+.leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(1.1); }
+.leaflet-control-attribution { display: none; }
+.leaflet-control-zoom a { background: rgba(15,23,42,0.7) !important; color: #F1F5F9 !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+/* Heatmap matrix cells */
+.heat-cell { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.heat-cell:hover { transform: scale(1.1); box-shadow: 0 0 10px rgba(236,72,153,0.4); z-index: 10; position: relative; }
+.bar-tooltip { transition: opacity 0.2s; }
+</style>
+</head>
+<body class="noise body-font min-h-screen antialiased">
+<div class="mesh"><div></div></div>
+
+<!-- ━━━ TICKER ━━━ -->
+<div class="relative z-20 ticker-wrap">
+  <div class="ticker">
+    <span class="t-item"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span class="t-lbl">TECHPULSE.MARKET</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">LIVE</span> <span class="t-val">19.04.2026 · 17:32 UTC</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">OFFERS</span> <span class="t-val">678</span> <span class="t-up">▲ +12</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">▲ python +12% · rust +7% · typescript +5% · jquery ▼-4%</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">SCRAPER</span> <span class="t-up">OK</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span class="t-lbl">TECHPULSE.MARKET</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">LIVE</span> <span class="t-val">19.04.2026 · 17:32 UTC</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">OFFERS</span> <span class="t-val">678</span> <span class="t-up">▲ +12</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">▲ python +12% · rust +7% · typescript +5% · jquery ▼-4%</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">SCRAPER</span> <span class="t-up">OK</span></span>
+    <span class="t-sep">│</span>
+  </div>
+</div>
+
+<!-- ━━━ NAV ━━━ -->
+<header class="relative z-20 pt-5 px-6">
+  <div class="max-w-[1440px] mx-auto glass px-5 h-14 flex items-center justify-between" style="border-radius: 9999px;">
+    <div class="flex items-center gap-8">
+      <a href="#" class="flex items-center gap-2.5">
+        <div class="relative">
+          <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 via-pink-500 to-indigo-500 flex items-center justify-center">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 badge-pulse"></span>
+        </div>
+        <span class="font-bold tracking-tight text-lg">techpulse</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-1 text-sm">
+        <a href="#" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">Découvrir</a>
+        <a href="#" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">Offres</a>
+        <a href="#" class="px-3 py-1.5 rounded-full bg-white/5 text-white">Dashboard</a>
+        <a href="#" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">API</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-2 text-sm">
+      <button class="px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/5">Se connecter</button>
+      <button class="cta-red px-4 py-1.5 rounded-full text-white font-medium text-sm">Démarrer</button>
+    </div>
+  </div>
+</header>
+
+<main class="relative z-10 max-w-[1440px] mx-auto px-6 py-10">
+
+  <!-- ━━━ Header de page ━━━ -->
+  <section class="reveal flex items-end justify-between mb-10" style="animation-delay: 100ms">
+    <div>
+      <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-2">Dashboard analytique</p>
+      <h1 class="text-5xl font-bold tracking-[-0.03em] leading-tight">
+        Vue d'ensemble <span class="gradient-accent italic">en temps réel</span>
+      </h1>
+      <p class="text-slate-400 mt-2">Dernière MAJ il y a 42 minutes · prochain scrape dans 9h28m</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="glass px-4 py-2 text-sm text-white hover:bg-white/10" style="border-radius: 9999px;">
+        <span class="mono text-xs text-slate-400 mr-2">◄</span> 7 derniers jours
+      </button>
+      <button class="cta-red px-4 py-2 rounded-full text-sm text-white font-medium">Exporter CSV</button>
+    </div>
+  </section>
+
+  <!-- ━━━ KPI Ribbon ━━━ -->
+  <section class="reveal grid grid-cols-6 gap-3 mb-6" style="animation-delay: 180ms">
+    <div class="glass-strong p-4">
+      <p class="mono text-[10px] text-slate-500 uppercase tracking-widest">Offres actives</p>
+      <p class="text-3xl font-bold mt-1">678</p>
+      <p class="text-[11px] text-emerald-400 mono">+12 (24h)</p>
+    </div>
+    <div class="glass-strong p-4">
+      <p class="mono text-[10px] text-slate-500 uppercase tracking-widest">Entreprises</p>
+      <p class="text-3xl font-bold mt-1">316</p>
+      <p class="text-[11px] text-emerald-400 mono">+4 cette semaine</p>
+    </div>
+    <div class="glass-strong p-4">
+      <p class="mono text-[10px] text-slate-500 uppercase tracking-widest">Villes</p>
+      <p class="text-3xl font-bold mt-1">257</p>
+      <p class="text-[11px] text-slate-500 mono">géolocalisées</p>
+    </div>
+    <div class="glass-strong p-4 relative overflow-hidden">
+      <div class="orb w-16 h-16 bg-pink-500/30 -top-2 -right-2"></div>
+      <p class="mono text-[10px] text-slate-500 uppercase tracking-widest">Technos</p>
+      <p class="text-3xl font-bold mt-1"><span class="gradient-accent">137</span><span class="text-base text-slate-500">/202</span></p>
+      <p class="text-[11px] text-slate-500 mono">détectées</p>
+    </div>
+    <div class="glass-strong p-4">
+      <p class="mono text-[10px] text-slate-500 uppercase tracking-widest">Sal. médian</p>
+      <p class="text-3xl font-bold mt-1">43 <span class="text-base text-slate-400">k€</span></p>
+      <p class="text-[11px] text-emerald-400 mono">+3.2%</p>
+    </div>
+    <div class="glass-strong p-4">
+      <p class="mono text-[10px] text-slate-500 uppercase tracking-widest">Avec salaire</p>
+      <p class="text-3xl font-bold mt-1">173</p>
+      <p class="text-[11px] text-slate-500 mono">= 26%</p>
+    </div>
+  </section>
+
+  <!-- ━━━ ROW 1 : Top techs bar chart + Contract donut ━━━ -->
+  <section class="reveal grid grid-cols-12 gap-4 mb-6" style="animation-delay: 260ms">
+    <!-- Top 20 technos chart -->
+    <div class="col-span-8 glass-strong p-6 relative overflow-hidden">
+      <div class="flex items-end justify-between mb-6">
+        <div>
+          <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">Top 20 technologies</p>
+          <h2 class="text-2xl font-bold">Les plus demandées</h2>
+        </div>
+        <div class="flex gap-1 text-xs">
+          <button class="px-3 py-1 rounded-full bg-white/10 text-white">All</button>
+          <button class="px-3 py-1 rounded-full text-slate-400 hover:bg-white/5">Langages</button>
+          <button class="px-3 py-1 rounded-full text-slate-400 hover:bg-white/5">Frameworks</button>
+          <button class="px-3 py-1 rounded-full text-slate-400 hover:bg-white/5">Cloud</button>
+        </div>
+      </div>
+      <!-- Horizontal bars -->
+      <div class="space-y-2">
+        <!-- Row -->
+        <div class="grid grid-cols-12 items-center gap-3 group">
+          <span class="col-span-3 text-sm font-medium flex items-center gap-2">
+            <span class="mono text-[10px] text-slate-500 w-4">01</span> C
+            <span class="text-[9px] px-1 py-0.5 rounded bg-red-500/20 text-red-400 mono">lang</span>
+          </span>
+          <div class="col-span-8 h-3 bg-white/5 rounded-full overflow-hidden">
+            <div class="h-3 spark-bar rounded-full" style="width:100%; animation-delay:0ms"></div>
+          </div>
+          <span class="col-span-1 text-right mono text-sm font-semibold">216</span>
+        </div>
+        <div class="grid grid-cols-12 items-center gap-3 group">
+          <span class="col-span-3 text-sm font-medium flex items-center gap-2"><span class="mono text-[10px] text-slate-500 w-4">02</span> Java <span class="text-[9px] px-1 py-0.5 rounded bg-red-500/20 text-red-400 mono">lang</span></span>
+          <div class="col-span-8 h-3 bg-white/5 rounded-full overflow-hidden"><div class="h-3 spark-bar rounded-full" style="width:72%; animation-delay:40ms"></div></div>
+          <span class="col-span-1 text-right mono text-sm font-semibold">156</span>
+        </div>
+        <div class="grid grid-cols-12 items-center gap-3 group">
+          <span class="col-span-3 text-sm font-medium flex items-center gap-2"><span class="mono text-[10px] text-slate-500 w-4">03</span> SQL <span class="text-[9px] px-1 py-0.5 rounded bg-red-500/20 text-red-400 mono">lang</span></span>
+          <div class="col-span-8 h-3 bg-white/5 rounded-full overflow-hidden"><div class="h-3 spark-bar rounded-full" style="width:63%; animation-delay:80ms"></div></div>
+          <span class="col-span-1 text-right mono text-sm font-semibold">136</span>
+        </div>
+        <div class="grid grid-cols-12 items-center gap-3 group">
+          <span class="col-span-3 text-sm font-medium flex items-center gap-2"><span class="mono text-[10px] text-slate-500 w-4">04</span> Agile <span class="text-[9px] px-1 py-0.5 rounded bg-slate-500/20 text-slate-400 mono">method</span></span>
+          <div class="col-span-8 h-3 bg-white/5 rounded-full overflow-hidden"><div class="h-3 spark-bar rounded-full" style="width:57%; animation-delay:120ms"></div></div>
+          <span class="col-span-1 text-right mono text-sm font-semibold">124</span>
+        </div>
+        <div class="grid grid-cols-12 items-center gap-3 group">
+          <span class="col-span-3 text-sm font-medium flex items-center gap-2"><span class="mono text-[10px] text-slate-500 w-4">05</span> Angular <span class="text-[9px] px-1 py-0.5 rounded bg-purple-500/20 text-purple-400 mono">fw</span></span>
+          <div class="col-span-8 h-3 bg-white/5 rounded-full overflow-hidden"><div class="h-3 spark-bar rounded-full" style="width:47%; animation-delay:160ms"></div></div>
+          <span class="col-span-1 text-right mono text-sm font-semibold">102</span>
+        </div>
+        <div class="grid grid-cols-12 items-center gap-3 group">
+          <span class="col-span-3 text-sm font-medium flex items-center gap-2"><span class="mono text-[10px] text-slate-500 w-4">06</span> JavaScript <span class="text-[9px] px-1 py-0.5 rounded bg-red-500/20 text-red-400 mono">lang</span></span>
+          <div class="col-span-8 h-3 bg-white/5 rounded-full overflow-hidden"><div class="h-3 spark-bar rounded-full" style="width:46%; animation-delay:200ms"></div></div>
+          <span class="col-span-1 text-right mono text-sm font-semibold">99</span>
+        </div>
+        <div class="grid grid-cols-12 items-center gap-3 group">
+          <span class="col-span-3 text-sm font-medium flex items-center gap-2"><span class="mono text-[10px] text-slate-500 w-4">07</span> CI/CD <span class="text-[9px] px-1 py-0.5 rounded bg-slate-500/20 text-slate-400 mono">method</span></span>
+          <div class="col-span-8 h-3 bg-white/5 rounded-full overflow-hidden"><div class="h-3 spark-bar rounded-full" style="width:45%; animation-delay:240ms"></div></div>
+          <span class="col-span-1 text-right mono text-sm font-semibold">98</span>
+        </div>
+        <div class="grid grid-cols-12 items-center gap-3 group">
+          <span class="col-span-3 text-sm font-medium flex items-center gap-2"><span class="mono text-[10px] text-slate-500 w-4">08</span> DevOps <span class="text-[9px] px-1 py-0.5 rounded bg-slate-500/20 text-slate-400 mono">method</span></span>
+          <div class="col-span-8 h-3 bg-white/5 rounded-full overflow-hidden"><div class="h-3 spark-bar rounded-full" style="width:45%; animation-delay:280ms"></div></div>
+          <span class="col-span-1 text-right mono text-sm font-semibold">97</span>
+        </div>
+        <div class="grid grid-cols-12 items-center gap-3 group">
+          <span class="col-span-3 text-sm font-medium flex items-center gap-2"><span class="mono text-[10px] text-slate-500 w-4">09</span> Python <span class="text-[9px] px-1 py-0.5 rounded bg-red-500/20 text-red-400 mono">lang</span><span class="text-[9px] px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-400 mono">↑+12</span></span>
+          <div class="col-span-8 h-3 bg-white/5 rounded-full overflow-hidden"><div class="h-3 spark-bar rounded-full" style="width:42%; animation-delay:320ms"></div></div>
+          <span class="col-span-1 text-right mono text-sm font-semibold">91</span>
+        </div>
+        <div class="grid grid-cols-12 items-center gap-3 group">
+          <span class="col-span-3 text-sm font-medium flex items-center gap-2"><span class="mono text-[10px] text-slate-500 w-4">10</span> Git <span class="text-[9px] px-1 py-0.5 rounded bg-slate-500/20 text-slate-400 mono">tool</span></span>
+          <div class="col-span-8 h-3 bg-white/5 rounded-full overflow-hidden"><div class="h-3 spark-bar rounded-full" style="width:40%; animation-delay:360ms"></div></div>
+          <span class="col-span-1 text-right mono text-sm font-semibold">87</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contract types donut -->
+    <div class="col-span-4 glass-strong p-6 relative overflow-hidden">
+      <div class="orb w-32 h-32 bg-red-500/20 -top-6 -right-4"></div>
+      <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-4">Types de contrats</p>
+      <div class="relative flex items-center justify-center mb-6">
+        <svg viewBox="0 0 120 120" class="w-48 h-48 -rotate-90">
+          <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="14"/>
+          <circle cx="60" cy="60" r="48" fill="none" stroke="#EF4444" stroke-width="14" stroke-dasharray="183 301" stroke-dashoffset="0"/>
+          <circle cx="60" cy="60" r="48" fill="none" stroke="#EC4899" stroke-width="14" stroke-dasharray="42 301" stroke-dashoffset="-183"/>
+          <circle cx="60" cy="60" r="48" fill="none" stroke="#6366F1" stroke-width="14" stroke-dasharray="39 301" stroke-dashoffset="-225"/>
+          <circle cx="60" cy="60" r="48" fill="none" stroke="#22D3EE" stroke-width="14" stroke-dasharray="37 301" stroke-dashoffset="-264"/>
+        </svg>
+        <div class="absolute flex flex-col items-center rotate-0">
+          <p class="text-3xl font-bold">678</p>
+          <p class="mono text-[10px] text-slate-500">contrats</p>
+        </div>
+      </div>
+      <div class="space-y-2 text-sm">
+        <div class="flex items-center justify-between">
+          <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-sm bg-red-500"></span>CDI</span>
+          <span class="mono text-slate-300">412 <span class="text-slate-500">· 61%</span></span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-sm bg-pink-500"></span>Freelance</span>
+          <span class="mono text-slate-300">96 <span class="text-slate-500">· 14%</span></span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-sm bg-indigo-500"></span>Stage</span>
+          <span class="mono text-slate-300">87 <span class="text-slate-500">· 13%</span></span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-sm bg-cyan-400"></span>Alternance</span>
+          <span class="mono text-slate-300">83 <span class="text-slate-500">· 12%</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ━━━ ROW 2 : Heatmap Leaflet + Salaires ━━━ -->
+  <section class="reveal grid grid-cols-12 gap-4 mb-6" style="animation-delay: 340ms">
+    <div class="col-span-8 glass-strong p-6 relative overflow-hidden">
+      <div class="flex items-end justify-between mb-4">
+        <div>
+          <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">Distribution géographique</p>
+          <h2 class="text-2xl font-bold">257 villes géolocalisées</h2>
+        </div>
+        <span class="mono text-[11px] text-slate-500">API Adresse · Data Gouv</span>
+      </div>
+      <div id="map" class="h-96 rounded-2xl" style="border:1px solid rgba(255,255,255,0.06);"></div>
+    </div>
+
+    <div class="col-span-4 glass-strong p-6 relative overflow-hidden iridescent">
+      <div class="orb w-40 h-40 bg-red-500/25 -top-6 -right-8"></div>
+      <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-2">Distribution salaires</p>
+      <p class="text-4xl font-bold mb-6 gradient-text">43 000 €<span class="text-sm text-slate-400 font-normal ml-2">médian</span></p>
+      <!-- Boxplot visual -->
+      <div class="relative h-24 mb-5">
+        <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1 bg-white/5 rounded-full"></div>
+        <!-- IQR box p25-p75 -->
+        <div class="absolute top-1/2 -translate-y-1/2 left-[20%] right-[35%] h-8 bg-gradient-to-r from-red-500/50 via-pink-500/50 to-indigo-500/50 rounded-md border border-white/10"></div>
+        <!-- Median line -->
+        <div class="absolute top-1/2 -translate-y-1/2 left-[42%] w-0.5 h-10 bg-white"></div>
+        <!-- Whiskers -->
+        <div class="absolute top-[45%] left-[5%] w-0.5 h-2 bg-slate-400"></div>
+        <div class="absolute top-[45%] right-[5%] w-0.5 h-2 bg-slate-400"></div>
+        <!-- Min/max labels -->
+        <div class="absolute -bottom-5 left-0 mono text-[10px] text-slate-500">14 k</div>
+        <div class="absolute -bottom-5 left-[20%] mono text-[10px] text-slate-500">p25 · 33 k</div>
+        <div class="absolute -bottom-5 left-[40%] mono text-[10px] text-pink-400 font-semibold">med · 43 k</div>
+        <div class="absolute -bottom-5 left-[65%] mono text-[10px] text-slate-500">p75 · 55 k</div>
+        <div class="absolute -bottom-5 right-0 mono text-[10px] text-slate-500">480 k</div>
+      </div>
+      <dl class="grid grid-cols-2 gap-3 text-sm pt-8 border-t border-white/5">
+        <div><dt class="mono text-[10px] text-slate-500 uppercase">Moyenne</dt><dd class="text-lg font-semibold">51 k€</dd></div>
+        <div><dt class="mono text-[10px] text-slate-500 uppercase">Écart-type</dt><dd class="text-lg font-semibold">38 k€</dd></div>
+        <div><dt class="mono text-[10px] text-slate-500 uppercase">Observations</dt><dd class="text-lg font-semibold">173</dd></div>
+        <div><dt class="mono text-[10px] text-slate-500 uppercase">Couverture</dt><dd class="text-lg font-semibold">26%</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ━━━ ROW 3 : Villes (horizontal bars) + Timeline ━━━ -->
+  <section class="reveal grid grid-cols-12 gap-4 mb-6" style="animation-delay: 420ms">
+    <div class="col-span-5 glass-strong p-6">
+      <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">Top 10 villes</p>
+      <h2 class="text-2xl font-bold mb-4">Où ça recrute le plus</h2>
+      <div class="space-y-2.5">
+        <div class="grid grid-cols-12 items-center gap-3"><span class="col-span-5 text-sm font-medium">Nantes <span class="text-slate-500 text-xs">44</span></span><div class="col-span-5 h-2 bg-white/5 rounded-full overflow-hidden"><div class="h-2 spark-bar rounded-full" style="width:100%"></div></div><span class="col-span-2 text-right mono text-sm">33</span></div>
+        <div class="grid grid-cols-12 items-center gap-3"><span class="col-span-5 text-sm font-medium">Toulouse <span class="text-slate-500 text-xs">31</span></span><div class="col-span-5 h-2 bg-white/5 rounded-full overflow-hidden"><div class="h-2 spark-bar rounded-full" style="width:67%; animation-delay:40ms"></div></div><span class="col-span-2 text-right mono text-sm">22</span></div>
+        <div class="grid grid-cols-12 items-center gap-3"><span class="col-span-5 text-sm font-medium">Strasbourg <span class="text-slate-500 text-xs">67</span></span><div class="col-span-5 h-2 bg-white/5 rounded-full overflow-hidden"><div class="h-2 spark-bar rounded-full" style="width:64%; animation-delay:80ms"></div></div><span class="col-span-2 text-right mono text-sm">21</span></div>
+        <div class="grid grid-cols-12 items-center gap-3"><span class="col-span-5 text-sm font-medium">Bordeaux <span class="text-slate-500 text-xs">33</span></span><div class="col-span-5 h-2 bg-white/5 rounded-full overflow-hidden"><div class="h-2 spark-bar rounded-full" style="width:64%; animation-delay:120ms"></div></div><span class="col-span-2 text-right mono text-sm">21</span></div>
+        <div class="grid grid-cols-12 items-center gap-3"><span class="col-span-5 text-sm font-medium text-pink-400">Montpellier <span class="text-slate-500 text-xs">34</span></span><div class="col-span-5 h-2 bg-white/5 rounded-full overflow-hidden"><div class="h-2 bg-pink-500 rounded-full" style="width:61%"></div></div><span class="col-span-2 text-right mono text-sm text-pink-400">20</span></div>
+        <div class="grid grid-cols-12 items-center gap-3"><span class="col-span-5 text-sm font-medium">Paris <span class="text-slate-500 text-xs">75</span></span><div class="col-span-5 h-2 bg-white/5 rounded-full overflow-hidden"><div class="h-2 spark-bar rounded-full" style="width:42%; animation-delay:200ms"></div></div><span class="col-span-2 text-right mono text-sm">14</span></div>
+        <div class="grid grid-cols-12 items-center gap-3"><span class="col-span-5 text-sm font-medium">Grenoble <span class="text-slate-500 text-xs">38</span></span><div class="col-span-5 h-2 bg-white/5 rounded-full overflow-hidden"><div class="h-2 spark-bar rounded-full" style="width:39%; animation-delay:240ms"></div></div><span class="col-span-2 text-right mono text-sm">13</span></div>
+        <div class="grid grid-cols-12 items-center gap-3"><span class="col-span-5 text-sm font-medium">Lyon <span class="text-slate-500 text-xs">69</span></span><div class="col-span-5 h-2 bg-white/5 rounded-full overflow-hidden"><div class="h-2 spark-bar rounded-full" style="width:27%; animation-delay:280ms"></div></div><span class="col-span-2 text-right mono text-sm">9</span></div>
+      </div>
+    </div>
+
+    <div class="col-span-7 glass-strong p-6">
+      <div class="flex items-end justify-between mb-4">
+        <div>
+          <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">Offres publiées</p>
+          <h2 class="text-2xl font-bold">30 derniers jours</h2>
+        </div>
+        <div class="flex gap-1 text-xs">
+          <button class="px-3 py-1 rounded-full bg-white/10 text-white">30j</button>
+          <button class="px-3 py-1 rounded-full text-slate-400 hover:bg-white/5">90j</button>
+          <button class="px-3 py-1 rounded-full text-slate-400 hover:bg-white/5">1an</button>
+        </div>
+      </div>
+      <svg class="w-full h-56" viewBox="0 0 600 220" fill="none">
+        <defs>
+          <linearGradient id="gl" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#EF4444" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#EF4444" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- Grid lines -->
+        <g class="chart-grid">
+          <line x1="30" y1="40" x2="600" y2="40"/>
+          <line x1="30" y1="90" x2="600" y2="90"/>
+          <line x1="30" y1="140" x2="600" y2="140"/>
+          <line x1="30" y1="190" x2="600" y2="190"/>
+        </g>
+        <text class="chart-tick" x="0" y="44">50</text>
+        <text class="chart-tick" x="0" y="94">30</text>
+        <text class="chart-tick" x="0" y="144">15</text>
+        <text class="chart-tick" x="0" y="194">0</text>
+        <!-- Area -->
+        <path d="M30,165 L60,155 L90,170 L120,140 L150,130 L180,148 L210,115 L240,125 L270,95 L300,85 L330,105 L360,75 L390,60 L420,85 L450,70 L480,55 L510,40 L540,52 L570,35 L600,25 L600,220 L30,220 Z" fill="url(#gl)"/>
+        <!-- Line -->
+        <path d="M30,165 L60,155 L90,170 L120,140 L150,130 L180,148 L210,115 L240,125 L270,95 L300,85 L330,105 L360,75 L390,60 L420,85 L450,70 L480,55 L510,40 L540,52 L570,35 L600,25"
+              stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <!-- Data points -->
+        <circle cx="600" cy="25" r="5" fill="#EC4899" stroke="#050810" stroke-width="2"/>
+        <circle cx="600" cy="25" r="10" fill="none" stroke="#EC4899" stroke-width="1.5" opacity="0.4">
+          <animate attributeName="r" values="5;15;5" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <!-- X labels -->
+        <text class="chart-tick" x="30" y="215">20/03</text>
+        <text class="chart-tick" x="180" y="215">27/03</text>
+        <text class="chart-tick" x="330" y="215">03/04</text>
+        <text class="chart-tick" x="480" y="215">10/04</text>
+        <text class="chart-tick" x="575" y="215">19/04</text>
+      </svg>
+      <div class="flex gap-5 pt-3 text-xs">
+        <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500"></span>Offres/jour</span>
+        <span class="text-slate-500">Moyenne : 22/jour · Pic : 48 (12 avril)</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ━━━ ROW 4 : Tech correlation heatmap ━━━ -->
+  <section class="reveal glass-strong p-6 mb-6 relative overflow-hidden" style="animation-delay: 500ms">
+    <div class="orb w-64 h-64 bg-indigo-500/15 -top-20 -right-20"></div>
+    <div class="flex items-end justify-between mb-5">
+      <div>
+        <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">Corrélation entre technologies</p>
+        <h2 class="text-2xl font-bold">Qui va avec qui</h2>
+        <p class="text-sm text-slate-400 mt-1">P(ligne | colonne) — si la colonne est présente, à quelle fréquence la ligne l'est aussi.</p>
+      </div>
+      <button class="pill px-3 py-1.5 text-xs text-white" style="border-radius: 9999px;">Export →</button>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-xs tabular-nums">
+        <thead>
+          <tr>
+            <th class="p-2"></th>
+            <th class="p-2 font-semibold text-slate-400" style="writing-mode:vertical-rl; transform:rotate(180deg); height:80px;">C</th>
+            <th class="p-2 font-semibold text-slate-400" style="writing-mode:vertical-rl; transform:rotate(180deg);">Java</th>
+            <th class="p-2 font-semibold text-slate-400" style="writing-mode:vertical-rl; transform:rotate(180deg);">SQL</th>
+            <th class="p-2 font-semibold text-slate-400" style="writing-mode:vertical-rl; transform:rotate(180deg);">Agile</th>
+            <th class="p-2 font-semibold text-slate-400" style="writing-mode:vertical-rl; transform:rotate(180deg);">Angular</th>
+            <th class="p-2 font-semibold text-slate-400" style="writing-mode:vertical-rl; transform:rotate(180deg);">JS</th>
+            <th class="p-2 font-semibold text-slate-400" style="writing-mode:vertical-rl; transform:rotate(180deg);">CI/CD</th>
+            <th class="p-2 font-semibold text-slate-400" style="writing-mode:vertical-rl; transform:rotate(180deg);">DevOps</th>
+            <th class="p-2 font-semibold text-slate-400" style="writing-mode:vertical-rl; transform:rotate(180deg);">Python</th>
+            <th class="p-2 font-semibold text-slate-400" style="writing-mode:vertical-rl; transform:rotate(180deg);">Git</th>
+            <th class="p-2 font-semibold text-slate-400" style="writing-mode:vertical-rl; transform:rotate(180deg);">Docker</th>
+            <th class="p-2 font-semibold text-slate-400" style="writing-mode:vertical-rl; transform:rotate(180deg);">React</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="p-2 text-sm font-semibold text-left">C</td>
+            <td class="p-2 text-center text-slate-600">—</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">45%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.3);">38%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.5); color:white;">52%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.2);">28%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.2);">25%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.3);">35%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.3);">32%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.15);">18%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">48%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.3);">30%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.15);">17%</td>
+          </tr>
+          <tr>
+            <td class="p-2 text-sm font-semibold text-left">Java</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.6); color:white;">72%</td>
+            <td class="p-2 text-center text-slate-600">—</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.5); color:white;">58%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.6); color:white;">76%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.55); color:white;">76%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">48%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.5); color:white;">55%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.5); color:white;">54%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.25);">26%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.6); color:white;">68%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.5); color:white;">52%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.3);">35%</td>
+          </tr>
+          <tr>
+            <td class="p-2 text-sm font-semibold text-left">SQL</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">48%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.55); color:white;">62%</td>
+            <td class="p-2 text-center text-slate-600">—</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.45); color:white;">50%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">45%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.45); color:white;">50%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">44%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">45%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.5); color:white;">52%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.55); color:white;">65%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">42%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.35);">38%</td>
+          </tr>
+          <tr>
+            <td class="p-2 text-sm font-semibold text-left">Agile</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">44%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.55); color:white;">60%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.45); color:white;">50%</td>
+            <td class="p-2 text-center text-slate-600">—</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.45); color:white;">48%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">42%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.55); color:white;">58%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.5); color:white;">52%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">45%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">44%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.5); color:white;">55%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.35);">38%</td>
+          </tr>
+          <tr>
+            <td class="p-2 text-sm font-semibold text-left">Docker</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.3);">30%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">48%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">42%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.5); color:white;">55%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">45%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.45); color:white;">48%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.55); color:white;">60%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.5); color:white;">53%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.45); color:white;">50%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">42%</td>
+            <td class="p-2 text-center text-slate-600">—</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(220,38,38,0.4); color:white;">45%</td>
+          </tr>
+          <tr>
+            <td class="p-2 text-sm font-semibold text-left">Python</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(236,72,153,0.25);">22%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(236,72,153,0.3);">26%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(236,72,153,0.4); color:white;">38%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(236,72,153,0.4); color:white;">42%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(236,72,153,0.25);">20%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(236,72,153,0.35);">30%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(236,72,153,0.45); color:white;">45%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(236,72,153,0.5); color:white;">48%</td>
+            <td class="p-2 text-center text-slate-600">—</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(236,72,153,0.35);">35%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(236,72,153,0.55); color:white;">62%</td>
+            <td class="p-2 text-center heat-cell" style="background:rgba(236,72,153,0.3);">25%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-4 flex items-center gap-3 text-xs text-slate-500">
+      <span>Intensité</span>
+      <div class="h-2 w-40 rounded-full bg-gradient-to-r from-red-500/15 via-red-500/40 to-red-500/70"></div>
+      <span>+</span>
+      <span class="ml-auto mono">Hover les cellules pour les détails</span>
+    </div>
+  </section>
+
+</main>
+
+<!-- ━━━ FOOTER ━━━ -->
+<footer class="relative z-10 border-t border-white/5 mt-8 py-10 px-6">
+  <div class="max-w-[1440px] mx-auto flex items-center justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-6">
+      <a href="#" class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 via-pink-500 to-indigo-500"></div>
+        <span class="font-bold tracking-tight">techpulse</span>
+      </a>
+      <span class="text-slate-600 text-sm">© 2026 · Bastien Ruedas</span>
+    </div>
+    <div class="flex items-center gap-6 text-sm text-slate-400">
+      <a href="#" class="hover:text-white">GitHub</a>
+      <a href="#" class="hover:text-white">API</a>
+      <a href="#" class="hover:text-white">Mentions</a>
+    </div>
+    <div class="mono text-[10px] text-slate-600 tracking-widest uppercase">M2 Web Scraping · Montpellier</div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const map = L.map('map', { zoomControl: true, attributionControl: false }).setView([46.5, 2.5], 6);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 18 }).addTo(map);
+const cities = [
+  { name: 'Nantes', lat: 47.218, lng: -1.553, count: 33 },
+  { name: 'Toulouse', lat: 43.604, lng: 1.444, count: 22 },
+  { name: 'Strasbourg', lat: 48.573, lng: 7.752, count: 21 },
+  { name: 'Bordeaux', lat: 44.837, lng: -0.579, count: 21 },
+  { name: 'Montpellier', lat: 43.610, lng: 3.876, count: 20 },
+  { name: 'Paris', lat: 48.857, lng: 2.351, count: 14 },
+  { name: 'Grenoble', lat: 45.188, lng: 5.724, count: 13 },
+  { name: 'Lyon', lat: 45.764, lng: 4.835, count: 9 },
+  { name: 'Marseille', lat: 43.296, lng: 5.369, count: 8 },
+  { name: 'Lille', lat: 50.629, lng: 3.057, count: 7 },
+  { name: 'Rennes', lat: 48.117, lng: -1.678, count: 6 },
+  { name: 'Nice', lat: 43.710, lng: 7.262, count: 5 },
+];
+cities.forEach(c => {
+  const radius = 8 + c.count * 1.2;
+  L.circleMarker([c.lat, c.lng], {
+    radius, fillColor: '#EF4444', color: '#B91C1C', weight: 1.5, fillOpacity: 0.6
+  }).bindPopup(`<b>${c.name}</b><br>${c.count} offres`).addTo(map);
+});
+</script>
+</body>
+</html>
