@@ -1,0 +1,31 @@
+/* Custom styles — minimum, Tailwind gère la majorité via CDN */
+
+/* Line-clamp fallback (géré par Tailwind 3 mais sécurité si besoin) */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Smooth scrolling entre ancres */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Empêche le flash of unstyled dark mode */
+html.dark {
+    color-scheme: dark;
+}
+
+/* Focus ring plus visible sur les inputs */
+input:focus, select:focus, textarea:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+/* Transition douce sur dark mode toggle */
+html * {
+    transition-property: background-color, border-color, color;
+    transition-duration: 150ms;
+}

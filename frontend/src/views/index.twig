@@ -1,0 +1,75 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block content %}
+<section class="mb-12">
+    <div class="max-w-3xl">
+        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">
+            Le pouls du <span class="bg-gradient-to-r from-brand-500 to-violet-600 bg-clip-text text-transparent">marché tech français</span>.
+        </h1>
+        <p class="mt-4 text-lg text-gray-600 dark:text-gray-400">
+            Agrégation en continu des offres publiées sur France Travail, HelloWork et APEC. Technologies extraites par NLP, localisations géocodées, tendances visualisées en temps réel.
+        </p>
+    </div>
+
+    <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p class="text-sm text-gray-600 dark:text-gray-400">Offres actives</p>
+            <p class="mt-1 text-3xl font-bold">{{ stats.total|number_format(0, ',', ' ') }}</p>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p class="text-sm text-gray-600 dark:text-gray-400">Entreprises</p>
+            <p class="mt-1 text-3xl font-bold">{{ stats.companies|number_format(0, ',', ' ') }}</p>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p class="text-sm text-gray-600 dark:text-gray-400">Villes</p>
+            <p class="mt-1 text-3xl font-bold">{{ stats.cities|number_format(0, ',', ' ') }}</p>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p class="text-sm text-gray-600 dark:text-gray-400">Avec salaire</p>
+            <p class="mt-1 text-3xl font-bold">{{ stats.with_salary|number_format(0, ',', ' ') }}</p>
+        </div>
+    </div>
+</section>
+
+<section class="mb-10">
+    <div class="flex items-end justify-between mb-4">
+        <div>
+            <h2 class="text-xl font-semibold">Top technologies du moment</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Les 10 technos les plus demandées sur les offres actives.</p>
+        </div>
+        <a href="/search.php" class="text-sm text-brand-600 dark:text-brand-400 hover:underline">Toutes les technos →</a>
+    </div>
+    <div class="flex flex-wrap gap-2">
+        {% for t in top_techs %}
+        <a href="/search.php?tech={{ t.name|url_encode }}"
+           class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-brand-500 dark:hover:border-brand-500 text-sm">
+            <span class="font-medium">{{ t.name }}</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400 tabular-nums">{{ t.count }}</span>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+
+<section>
+    <div class="flex items-end justify-between mb-4">
+        <div>
+            <h2 class="text-xl font-semibold">Dernières offres</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ offers.total|number_format(0, ',', ' ') }} offres au total, triées par date.</p>
+        </div>
+        <a href="/search.php" class="text-sm text-brand-600 dark:text-brand-400 hover:underline">Recherche avancée →</a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for offer in offers.items %}
+            {% include 'partials/offer_card.twig' with { offer: offer } %}
+        {% else %}
+            <p class="text-gray-500">Aucune offre disponible. Lance le scraping : <code class="font-mono text-sm">make scrape</code>.</p>
+        {% endfor %}
+    </div>
+
+    {% set query = {} %}
+    {% include 'partials/pagination.twig' with { page: page, pages: offers.pages, total: offers.total, query: query } %}
+</section>
+{% endblock %}

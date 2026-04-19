@@ -1,0 +1,27 @@
+{% if pages > 1 %}
+<nav class="flex items-center justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-800">
+    <p class="text-sm text-gray-600 dark:text-gray-400">
+        Page <span class="font-medium text-gray-900 dark:text-white">{{ page }}</span> sur {{ pages }}
+        <span class="mx-2">·</span>
+        <span class="font-medium text-gray-900 dark:text-white">{{ total }}</span> offres au total
+    </p>
+    <div class="flex items-center gap-2">
+        {% if page > 1 %}
+            <a href="?{{ query|merge({page: page - 1})|url_encode }}"
+               class="px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
+                ← Précédent
+            </a>
+        {% else %}
+            <span class="px-3 py-1.5 text-sm rounded-md border border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed">← Précédent</span>
+        {% endif %}
+        {% if page < pages %}
+            <a href="?{{ query|merge({page: page + 1})|url_encode }}"
+               class="px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
+                Suivant →
+            </a>
+        {% else %}
+            <span class="px-3 py-1.5 text-sm rounded-md border border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed">Suivant →</span>
+        {% endif %}
+    </div>
+</nav>
+{% endif %}

@@ -1,0 +1,118 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Recherche avancée{% endblock %}
+
+{% block content %}
+<section class="mb-8">
+    <h1 class="text-2xl font-bold mb-1">Recherche avancée</h1>
+    <p class="text-sm text-gray-600 dark:text-gray-400">Combine plusieurs filtres pour trouver l'offre qui te correspond.</p>
+</section>
+
+<form action="/search.php" method="get" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <div class="lg:col-span-2">
+            <label class="block text-sm font-medium mb-1.5" for="keyword">Mot-clé</label>
+            <input type="text" name="keyword" id="keyword" value="{{ filters.keyword|default('') }}"
+                   placeholder="ex. data, senior, remote…"
+                   class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-brand-500 focus:ring-brand-500">
+        </div>
+
+        <div x-data="techAutocomplete('{{ filters.tech|default('')|e('js') }}')" class="relative">
+            <label class="block text-sm font-medium mb-1.5" for="tech">Technologie</label>
+            <input type="text" name="tech" id="tech" x-model="query"
+                   @input.debounce.250ms="fetchSuggestions"
+                   @focus="fetchSuggestions"
+                   @click.outside="open = false"
+                   placeholder="ex. Python, React…" autocomplete="off"
+                   class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-brand-500 focus:ring-brand-500">
+
+            <div x-show="open && suggestions.length" x-transition
+                 class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md shadow-lg max-h-60 overflow-auto">
+                <template x-for="s in suggestions" :key="s.canonical_name">
+                    <button type="button"
+                            @click="query = s.canonical_name; open = false; $el.closest('form').submit()"
+                            class="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-between">
+                        <span x-text="s.display_name"></span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400" x-text="s.count + ' offres'"></span>
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium mb-1.5" for="city">Ville</label>
+            <select name="city" id="city"
+                    class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-brand-500 focus:ring-brand-500">
+                <option value="">Toutes les villes</option>
+                {% for c in cities %}
+                <option value="{{ c }}"{% if filters.city == c %} selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium mb-1.5" for="contract">Type de contrat</label>
+            <select name="contract" id="contract"
+                    class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-brand-500 focus:ring-brand-500">
+                <option value="">Tous types</option>
+                {% for c in contracts %}
+                <option value="{{ c }}"{% if filters.contract == c %} selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="md:col-span-2 lg:col-span-3 flex gap-2 items-end">
+            <button type="submit"
+                    class="px-5 py-2.5 rounded-md bg-brand-600 hover:bg-brand-700 text-white font-medium">
+                Rechercher
+            </button>
+            <a href="/search.php" class="px-5 py-2.5 rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
+                Réinitialiser
+            </a>
+        </div>
+    </div>
+</form>
+
+<section>
+    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        <span class="font-semibold text-gray-900 dark:text-white">{{ offers.total }}</span> offre(s) trouvée(s)
+    </p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for offer in offers.items %}
+            {% include 'partials/offer_card.twig' with { offer: offer } %}
+        {% else %}
+            <p class="col-span-2 text-center py-12 text-gray-500 dark:text-gray-400">Aucune offre ne correspond à vos critères.</p>
+        {% endfor %}
+    </div>
+
+    {% include 'partials/pagination.twig' with { page: page, pages: offers.pages, total: offers.total, query: filters } %}
+</section>
+
+<script>
+function techAutocomplete(initial) {
+    return {
+        query: initial,
+        suggestions: [],
+        open: false,
+        async fetchSuggestions() {
+            const q = this.query.trim();
+            if (q.length < 1) {
+                this.suggestions = [];
+                this.open = false;
+                return;
+            }
+            try {
+                const res = await fetch('/api/autocomplete.php?q=' + encodeURIComponent(q));
+                this.suggestions = await res.json();
+                this.open = this.suggestions.length > 0;
+            } catch (e) {
+                console.error(e);
+                this.suggestions = [];
+                this.open = false;
+            }
+        },
+    };
+}
+</script>
+{% endblock %}

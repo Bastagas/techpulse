@@ -1,0 +1,46 @@
+{% extends 'layout.twig' %}
+{% block title %}À propos{% endblock %}
+{% block content %}
+<article class="prose prose-gray dark:prose-invert max-w-3xl">
+    <h1>À propos de TechPulse</h1>
+    <p class="lead">
+        TechPulse est un observatoire open-source du marché de l'emploi tech en France.
+        Projet réalisé dans le cadre du cours de Web Scraping du Master 2 à l'Université de Montpellier.
+    </p>
+
+    <h2>Fonctionnement</h2>
+    <p>
+        Un pipeline Python asynchrone agrège en continu les offres publiées sur l'API officielle
+        France Travail (anciennement Pôle Emploi) et, à terme, HelloWork et APEC. Un référentiel
+        canonique de <strong>202 technologies</strong> (langages, frameworks, bases de données, cloud…)
+        permet d'extraire les stacks demandées via une approche hybride regex + NLP.
+    </p>
+
+    <h2>Stats live</h2>
+    <ul>
+        <li><strong>{{ stats.total|number_format(0, ',', ' ') }}</strong> offres actives en BDD</li>
+        <li><strong>{{ stats.companies|number_format(0, ',', ' ') }}</strong> entreprises différentes</li>
+        <li><strong>{{ stats.cities|number_format(0, ',', ' ') }}</strong> villes couvertes</li>
+        <li><strong>{{ stats.with_salary|number_format(0, ',', ' ') }}</strong> offres avec salaire renseigné</li>
+        {% if stats.last_scraped %}
+        <li>Dernière actualisation : <strong>{{ stats.last_scraped|ago }}</strong></li>
+        {% endif %}
+    </ul>
+
+    <h2>Éthique du scraping</h2>
+    <ul>
+        <li>Respect systématique du <code>robots.txt</code>.</li>
+        <li>Rate limiting respectueux (1 req/2s par domaine, configurable).</li>
+        <li>Usage privilégié des APIs officielles quand disponibles (France Travail).</li>
+        <li>Données publiques uniquement, pas de contournement de CAPTCHA.</li>
+    </ul>
+
+    <h2>Stack technique</h2>
+    <p>Python 3.11 · httpx async · SQLAlchemy 2 · Pydantic v2 · Flask + flask-smorest ·
+       PHP 8 · Twig · Tailwind CSS · Alpine.js · Chart.js · Docker · GitHub Actions.</p>
+
+    <p>
+        Code source sur <a href="https://github.com/Bastagas/techpulse" target="_blank" rel="noopener">GitHub</a>.
+    </p>
+</article>
+{% endblock %}
