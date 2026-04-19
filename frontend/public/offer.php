@@ -25,16 +25,27 @@ if ($offer === null) {
     exit;
 }
 
-// Récupère la prédiction salaire via l'API Flask (s'il tourne)
-$salaryPrediction = null;
+// Récupère ML (salary + similarity) via l'API Flask
 $apiPort = $_ENV['API_PORT'] ?? '5001';
-$ctx = stream_context_create(['http' => ['timeout' => 1.5]]);
+$ctx = stream_context_create(['http' => ['timeout' => 2.0]]);
+
+$salaryPrediction = null;
 $apiResponse = @file_get_contents("http://127.0.0.1:{$apiPort}/offers/{$id}/salary-prediction", false, $ctx);
 if ($apiResponse !== false) {
     $salaryPrediction = json_decode($apiResponse, true) ?: null;
 }
 
+$similar = [];
+$simResponse = @file_get_contents("http://127.0.0.1:{$apiPort}/offers/{$id}/similar", false, $ctx);
+if ($simResponse !== false) {
+    $decoded = json_decode($simResponse, true);
+    if ($decoded && !empty($decoded['items'])) {
+        $similar = $decoded['items'];
+    }
+}
+
 echo $twig->render('offer.twig', [
     'offer' => $offer,
     'salary_prediction' => $salaryPrediction,
+    'similar_offers' => $similar,
 ]);

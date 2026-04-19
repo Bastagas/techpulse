@@ -121,6 +121,26 @@ class OfferDetail(MethodView):
             return _serialize_offer(offer)
 
 
+@blp.route("/<int:offer_id>/similar")
+class OfferSimilar(MethodView):
+    @blp.doc(tags=["offers"])
+    def get(self, offer_id: int):
+        """Retourne les 5 offres les plus similaires (TF-IDF cosine).
+
+        Le modèle doit être entraîné au préalable :
+            python -m techpulse_api.ml.similarity train
+        """
+        from techpulse_api.ml.similarity import get_similar
+
+        with get_session() as session:
+            offer = session.get(Offer, offer_id)
+            if offer is None:
+                abort(404, message=f"Offre {offer_id} introuvable")
+
+        similar = get_similar(offer_id)
+        return {"available": len(similar) > 0, "items": similar}
+
+
 @blp.route("/<int:offer_id>/salary-prediction")
 class OfferSalaryPrediction(MethodView):
     @blp.doc(tags=["offers"])

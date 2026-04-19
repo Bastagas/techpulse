@@ -68,3 +68,4 @@ Thumbs.db
 .cache/
 instance.config.yaml
 api/src/techpulse_api/ml/salary_model.pkl
+api/src/techpulse_api/ml/similarity_model.pkl

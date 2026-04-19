@@ -16,6 +16,8 @@ $filters = array_filter([
     'city' => trim((string) ($_GET['city'] ?? '')),
     'tech' => trim((string) ($_GET['tech'] ?? '')),
     'contract' => trim((string) ($_GET['contract'] ?? '')),
+    'seniority' => trim((string) ($_GET['seniority'] ?? '')),
+    'remote' => trim((string) ($_GET['remote'] ?? '')),
 ], static fn (string $v) => $v !== '');
 
 $page = max(1, (int) ($_GET['page'] ?? 1));

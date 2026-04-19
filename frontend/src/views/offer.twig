@@ -99,4 +99,29 @@
     </div>
     {% endif %}
 </article>
+
+{# ─── Offres similaires (TF-IDF cosine) ─── #}
+{% if similar_offers|length > 0 %}
+<section class="mt-8">
+    <h2 class="text-xl font-semibold mb-4">Offres similaires</h2>
+    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        Calculé par similarité TF-IDF sur le titre + la description (score cosine, plus proche de 1 = plus similaire).
+    </p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {% for s in similar_offers %}
+        <a href="/offer.php?id={{ s.id }}" class="block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-brand-500 rounded-lg p-4">
+            <div class="flex items-start justify-between gap-3 mb-2">
+                <h3 class="font-semibold text-gray-900 dark:text-white line-clamp-2 flex-1">{{ s.title }}</h3>
+                <span class="shrink-0 text-xs font-mono tabular-nums px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300">
+                    {{ (s.score * 100)|round }}%
+                </span>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                {{ s.company ?: 'Entreprise anonyme' }}{% if s.city %} · {{ s.city }}{% endif %}
+            </p>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 {% endblock %}

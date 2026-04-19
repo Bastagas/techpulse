@@ -158,6 +158,14 @@ final class OfferRepository
             $conditions[] = 'o.contract_type = :contract';
             $params[':contract'] = $filters['contract'];
         }
+        if (!empty($filters['seniority'])) {
+            $conditions[] = 'o.seniority = :seniority';
+            $params[':seniority'] = $filters['seniority'];
+        }
+        if (!empty($filters['remote'])) {
+            $conditions[] = 'o.remote_policy = :remote';
+            $params[':remote'] = $filters['remote'];
+        }
 
         return [' WHERE ' . implode(' AND ', $conditions), $params, $joinTech];
     }
@@ -179,6 +187,35 @@ final class OfferRepository
         $sql = 'SELECT DISTINCT contract_type FROM offers '
             . 'WHERE contract_type IS NOT NULL AND is_active = 1 ORDER BY contract_type';
         return array_column($this->pdo->query($sql)->fetchAll(), 'contract_type');
+    }
+
+    /** @return array<string, int> */
+    public function seniorityDistribution(): array
+    {
+        $rows = $this->pdo->query(
+            'SELECT seniority, COUNT(*) n FROM offers '
+                . 'WHERE seniority IS NOT NULL AND is_active = 1 '
+                . 'GROUP BY seniority ORDER BY FIELD(seniority, "junior", "mid", "senior", "lead")'
+        )->fetchAll();
+        $result = [];
+        foreach ($rows as $r) {
+            $result[(string) $r['seniority']] = (int) $r['n'];
+        }
+        return $result;
+    }
+
+    /** @return array<string, int> */
+    public function remoteDistribution(): array
+    {
+        $rows = $this->pdo->query(
+            'SELECT remote_policy, COUNT(*) n FROM offers '
+                . 'WHERE remote_policy IS NOT NULL AND is_active = 1 '
+                . 'GROUP BY remote_policy ORDER BY n DESC'
+        )->fetchAll();
+        return array_combine(
+            array_column($rows, 'remote_policy'),
+            array_map('intval', array_column($rows, 'n')),
+        );
     }
 
     /** @return array<string, int|float|string> */

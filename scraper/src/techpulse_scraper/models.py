@@ -110,6 +110,7 @@ class Offer(Base):
     description_html: Mapped[str | None] = mapped_column(Text, nullable=True)
     contract_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
     experience_level: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    seniority: Mapped[str | None] = mapped_column(String(20), nullable=True)
     remote_policy: Mapped[str | None] = mapped_column(String(50), nullable=True)
     salary_min: Mapped[int | None] = mapped_column(Integer, nullable=True)
     salary_max: Mapped[int | None] = mapped_column(Integer, nullable=True)
