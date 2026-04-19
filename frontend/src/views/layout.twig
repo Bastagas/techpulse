@@ -98,6 +98,96 @@
     {% block content %}{% endblock %}
 </main>
 
+{# ─── Barre flottante comparateur ─── #}
+<div id="compare-bar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 hidden pointer-events-none">
+    <div class="glass-strong iridescent pointer-events-auto px-4 py-2.5 rounded-full flex items-center gap-3 shadow-2xl">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 via-pink-500 to-indigo-500 flex items-center justify-center mono text-xs font-bold text-white">
+            <span id="compare-count">0</span>
+        </div>
+        <span class="text-sm text-slate-200">offre<span id="compare-plural"></span> sélectionnée<span id="compare-plural2"></span></span>
+        <span class="mono text-[10px] text-slate-500 uppercase tracking-widest">· max 4</span>
+        <button id="compare-go" class="cta-red px-4 py-1.5 rounded-full text-white text-sm font-semibold inline-flex items-center gap-1.5">
+            Comparer
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+        </button>
+        <button id="compare-clear" class="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors" title="Tout désélectionner">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+    </div>
+</div>
+
+<script>
+(() => {
+    const STORE = 'techpulse_compare';
+    const getIds = () => JSON.parse(localStorage.getItem(STORE) || '[]');
+    const setIds = (ids) => localStorage.setItem(STORE, JSON.stringify(ids));
+    const bar = document.getElementById('compare-bar');
+    const countEl = document.getElementById('compare-count');
+    const plural1 = document.getElementById('compare-plural');
+    const plural2 = document.getElementById('compare-plural2');
+
+    function refresh() {
+        const ids = getIds();
+        if (ids.length > 0) {
+            bar.classList.remove('hidden');
+            countEl.textContent = ids.length;
+            const s = ids.length > 1 ? 's' : '';
+            plural1.textContent = s;
+            plural2.textContent = s;
+        } else {
+            bar.classList.add('hidden');
+        }
+        document.querySelectorAll('.compare-checkbox').forEach(cb => {
+            cb.checked = ids.includes(parseInt(cb.dataset.offerId));
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        const cb = e.target.closest('.compare-checkbox');
+        if (cb) {
+            e.stopPropagation();
+            const id = parseInt(cb.dataset.offerId);
+            let ids = getIds();
+            if (cb.checked) {
+                if (ids.length >= 4) {
+                    alert('Maximum 4 offres pour la comparaison.');
+                    cb.checked = false;
+                    return;
+                }
+                if (!ids.includes(id)) ids.push(id);
+            } else {
+                ids = ids.filter(x => x !== id);
+            }
+            setIds(ids);
+            refresh();
+            return;
+        }
+        // Bloque le clic sur le label d'ajout au comparateur (évite navigation vers l'offre)
+        const lbl = e.target.closest('label[title="Ajouter au comparateur"]');
+        if (lbl) {
+            e.stopPropagation();
+        }
+    }, true);
+
+    document.getElementById('compare-go')?.addEventListener('click', () => {
+        const ids = getIds();
+        if (ids.length < 2) {
+            alert('Sélectionne au moins 2 offres.');
+            return;
+        }
+        window.location = '/compare.php?ids=' + ids.join(',');
+    });
+
+    document.getElementById('compare-clear')?.addEventListener('click', () => {
+        setIds([]);
+        refresh();
+    });
+
+    document.addEventListener('DOMContentLoaded', refresh);
+    refresh();
+})();
+</script>
+
 <footer class="relative z-10 border-t border-white/5 mt-12 py-10 px-4 sm:px-6">
     <div class="max-w-[1440px] mx-auto flex items-center justify-between flex-wrap gap-4">
         <div class="flex items-center gap-6">
