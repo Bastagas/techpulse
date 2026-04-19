@@ -151,6 +151,24 @@ class OfferTechnology(Base):
 
 
 # ─── ScrapeRun (traçabilité) ────────────────────────
+class Alert(Base):
+    __tablename__ = "alerts"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    email: Mapped[str] = mapped_column(String(255))
+    token: Mapped[str] = mapped_column(String(32), unique=True)
+    filter_keyword: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    filter_city: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    filter_tech: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    filter_contract: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    filter_salary_min: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    last_notified_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    notification_count: Mapped[int] = mapped_column(Integer, default=0)
+    last_offers_count: Mapped[int] = mapped_column(Integer, default=0)
+
+
 class ScrapeRun(Base):
     __tablename__ = "scrape_runs"
 

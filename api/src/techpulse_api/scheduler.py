@@ -63,8 +63,32 @@ def init_scheduler() -> BackgroundScheduler | None:
         name="Scrape tous les spiders",
         replace_existing=True,
     )
+    scheduler.add_job(
+        _alerts_check_job,
+        trigger=CronTrigger(minute=15),  # Chaque heure à :15
+        id="check_alerts",
+        name="Vérifie les alertes email",
+        replace_existing=True,
+    )
     scheduler.start()
     return scheduler
+
+
+def _alerts_check_job() -> None:
+    """Check alertes et envoie les emails. Import tardif pour éviter boucle."""
+    from techpulse_api.alerts_job import check_alerts
+
+    start = datetime.utcnow()
+    print(f"[scheduler] {start.isoformat()} check des alertes…", flush=True)
+    try:
+        stats = check_alerts()
+        print(
+            f"[scheduler] alertes : {stats['alerts_checked']} vérifiées, "
+            f"{stats['emails_sent']} emails envoyés, {stats['errors']} erreurs",
+            flush=True,
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"[scheduler] erreur alertes : {exc}", flush=True)
 
 
 def get_next_run() -> datetime | None:

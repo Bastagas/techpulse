@@ -91,6 +91,13 @@
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
                 Export JSON
             </a>
+            {% if filters|length > 0 %}
+            <button type="button" x-data="alertModal()" @click="open = true"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-brand-600 hover:bg-brand-700 text-white font-medium">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                M'alerter
+            </button>
+            {% endif %}
         </div>
         {% endif %}
     </div>
@@ -104,6 +111,84 @@
 
     {% include 'partials/pagination.twig' with { page: page, pages: offers.pages, total: offers.total, query: filters } %}
 </section>
+
+{# ─── Modal alerte email ─── #}
+{% if filters|length > 0 %}
+<div x-data="alertModal()" x-show="open" x-cloak
+     @keydown.escape.window="open = false"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+    <div @click.outside="open = false" class="bg-white dark:bg-gray-900 rounded-xl max-w-md w-full p-6 shadow-2xl">
+        <h2 class="text-xl font-bold mb-2">Créer une alerte email</h2>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Reçois un email chaque fois qu'une nouvelle offre matche :
+        </p>
+        <ul class="text-xs text-gray-600 dark:text-gray-400 mb-4 space-y-0.5">
+            {% if filters.keyword %}<li>· Mot-clé : <b>{{ filters.keyword }}</b></li>{% endif %}
+            {% if filters.city %}<li>· Ville : <b>{{ filters.city }}</b></li>{% endif %}
+            {% if filters.tech %}<li>· Techno : <b>{{ filters.tech }}</b></li>{% endif %}
+            {% if filters.contract %}<li>· Contrat : <b>{{ filters.contract }}</b></li>{% endif %}
+        </ul>
+        <form @submit.prevent="submit">
+            <label class="block text-sm font-medium mb-1.5">Ton email</label>
+            <input type="email" x-model="email" required placeholder="toi@exemple.com"
+                   class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 mb-4">
+            <template x-if="status === 'success'">
+                <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-300 text-sm rounded p-3 mb-3">
+                    ✓ Alerte créée ! Tu recevras un email à la prochaine offre matchante.
+                </div>
+            </template>
+            <template x-if="status === 'error'">
+                <div class="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-sm rounded p-3 mb-3">
+                    ❌ <span x-text="errorMessage"></span>
+                </div>
+            </template>
+            <div class="flex gap-2 justify-end">
+                <button type="button" @click="open = false" class="px-4 py-2 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">Annuler</button>
+                <button type="submit" :disabled="loading || status === 'success'"
+                        class="px-4 py-2 rounded bg-brand-600 hover:bg-brand-700 text-white disabled:opacity-50">
+                    <span x-show="!loading">Créer l'alerte</span>
+                    <span x-show="loading">Envoi…</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+function alertModal() {
+    return {
+        open: false,
+        email: '',
+        loading: false,
+        status: null,
+        errorMessage: '',
+        filters: {{ filters|json_encode|raw }},
+        async submit() {
+            this.loading = true;
+            this.status = null;
+            try {
+                const response = await fetch('http://localhost:5001/alerts', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email: this.email, ...this.filters}),
+                });
+                if (response.ok) {
+                    this.status = 'success';
+                } else {
+                    const err = await response.json();
+                    this.status = 'error';
+                    this.errorMessage = err.message || err.errors ? JSON.stringify(err.errors) : 'Erreur inconnue';
+                }
+            } catch (e) {
+                this.status = 'error';
+                this.errorMessage = 'API TechPulse inaccessible (vérifie qu\'elle tourne sur :5001)';
+            } finally {
+                this.loading = false;
+            }
+        },
+    };
+}
+</script>
+{% endif %}
 
 <script>
 function techAutocomplete(initial) {
