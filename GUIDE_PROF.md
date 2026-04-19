@@ -77,7 +77,7 @@ Dans le terminal (venv toujours activé) :
 python -m techpulse_api
 ```
 
-L'API est accessible sur **http://localhost:5000** avec la documentation Swagger sur **http://localhost:5000/docs**.
+L'API est accessible sur **http://localhost:5001** avec la documentation Swagger sur **http://localhost:5001/docs**.
 
 ## Étape 6 — Lancer le frontend PHP
 
@@ -112,7 +112,7 @@ Cela scrape 20 offres récentes depuis France Travail et HelloWork, les ajoute �
 | Service | URL |
 |---|---|
 | **Frontend** (liste des offres, recherche, dashboard) | http://localhost:8000 |
-| **API Swagger** (doc interactive) | http://localhost:5000/docs |
+| **API Swagger** (doc interactive) | http://localhost:5001/docs |
 | **phpMyAdmin** (exploration BDD) | http://localhost:8888/phpMyAdmin |
 
 ---

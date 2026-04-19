@@ -47,7 +47,7 @@ make dev        # démarre le frontend et l'API en parallèle
 Services exposés :
 - **phpMyAdmin** : http://localhost:8080 (`root` / `rootpass`)
 - **Frontend PHP** : http://localhost:8000 *(Sprint 2)*
-- **API Flask** : http://localhost:5000/docs *(Sprint 3)*
+- **API Flask** : http://localhost:5001/docs *(Sprint 3)*
 
 ### Option B — MAMP (sans Docker, pour grading)
 
