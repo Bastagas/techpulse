@@ -7,7 +7,7 @@
 [![Docker](https://img.shields.io/badge/docker-compose-2496ed.svg)](https://docs.docker.com/compose/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Observatoire du marché de l'emploi tech en France.** Scrape en continu France Travail (API officielle), HelloWork et APEC pour cartographier les technologies demandées, les salaires, les localisations et les tendances du moment.
+> **Observatoire du marché de l'emploi tech en France.** Scrape en continu France Travail (API officielle) pour cartographier les technologies demandées, les salaires, les localisations et les tendances du moment. Prédit votre salaire via RandomForest. Design Liquid Glass avec command palette ⌘K, cursor-glow, count-up, heatmap calendaire, progress ring percentile.
 
 ![TechPulse Dashboard](docs/demo/dashboard.png)
 
@@ -114,16 +114,27 @@ bash setup_mamp.sh    # venv + deps + config MAMP
 ## 📖 Commandes Makefile
 
 ```bash
-make help        # liste toutes les commandes
-make setup       # setup complet Docker
-make up / down   # stack up / down
-make scrape      # scraper France Travail
-make geocode     # géocoder les villes
-make dev         # front + API en parallèle
-make test        # pytest scraper + api
-make lint        # ruff check
-make backup      # dump BDD → db/backup/
-make snapshot    # snapshot pour livrable prof → db/techpulse_snapshot.sql
+make help              # liste toutes les commandes
+make setup             # setup complet Docker
+make up / down         # stack up / down
+make scrape            # scraper France Travail (8 codes ROME)
+make scheduler-enable  # active APScheduler (cron quotidien 03:00 UTC)
+make retrain           # réentraîne salary RF + similarity TF-IDF
+make frontend-build    # build Tailwind CSS local minifié (30 KB)
+make frontend-watch    # rebuild Tailwind en watch
+make dev               # front + API en parallèle
+make test              # pytest scraper + api
+make lint              # ruff check
+make backup            # dump BDD → db/backup/
+make snapshot          # snapshot pour livrable prof → db/techpulse_snapshot.sql
+```
+
+```bash
+# Tests frontend (PHPUnit + Playwright)
+cd frontend
+composer install && vendor/bin/phpunit               # 7 tests d'intégration DB
+npm install && npx playwright install chromium
+npx playwright test                                  # 5 tests E2E
 ```
 
 ## 🗂️ Structure
@@ -167,18 +178,31 @@ techpulse/
 
 ## 🧪 Tests & qualité
 
-- **32 tests pytest scraper** : fingerprint, parsers (salary, location), dedup
+- **21 tests pytest scraper** : fingerprint, parsers (salary, location), dedup
 - **14 tests pytest API** : /offers, /stats/*, /openapi, /health
+- **7 tests PHPUnit** (intégration BDD réelle) : OfferRepository, filtres, pagination, timeline
+- **5 tests Playwright E2E** (headless Chromium) : home, search, simulateur, dashboard, ⌘K palette
 - **Ruff** : lint + format automatiques (CI bloquante)
 - **GitHub Actions** : lint Python + tests + validation docker-compose
 
+## 🔒 Sécurité & production
+
+- **Rate limiting** Flask-Limiter : 120 req/min + 2000 req/h par IP
+- **HTTP caching** : ETag/If-None-Match (304 conditional GET) + Cache-Control
+- **Secrets** : `.env.local` gitignored, `.env.example` comme template vide
+- **PDO paramétré à 100%** côté PHP, **SQLAlchemy ORM** côté Python — pas de concat SQL
+- **Twig autoescape='html'** par défaut → pas de XSS sur rendu de description
+- **Tailwind build local** (30 KB minifié) — plus de CDN runtime en prod
+
 ## 📊 Chiffres clés
 
-- **678 offres** actives en BDD (France Travail, 4 codes ROME)
-- **316 entreprises**, **137 technologies distinctes** détectées
-- **257 villes géocodées** (Leaflet heatmap)
-- **173 offres avec salaire parsé** (p25 = 33 k €, médiane = 43 k €, p75 = 300 k €)
-- **Top 5 technos** : C · Java · SQL · Agile · Angular
+- **6 098 offres actives** en BDD (France Travail, 8 codes ROME tech)
+- **1 012 entreprises**, **200+ technologies distinctes** détectées
+- **1 554 villes** couvertes
+- **1 214 offres avec salaire** parsé (médiane = 40 k €)
+- **RandomForest** entraîné sur 1214 offres, 838 features → fourchette P25-P75 + confidence
+- **TF-IDF similarité** sur 6098 offres × 5000 features → recommandations `/offers/<id>/similar`
+- **Scheduler APScheduler** activé (scrape quotidien 03:00 UTC)
 
 ## ⚖️ Éthique du scraping
 

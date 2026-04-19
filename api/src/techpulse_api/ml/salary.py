@@ -209,6 +209,53 @@ def get_metadata() -> dict[str, Any] | None:
     return metadata
 
 
+def predict_from_features(
+    city: str | None,
+    department: str | None,
+    experience: str | None,
+    contract: str | None,
+    technologies: list[str],
+) -> SalaryPrediction | None:
+    """Prédit un salaire depuis des features brutes (sans offer_id existante).
+
+    Utilisé par le simulateur salaire : l'utilisateur décrit un profil,
+    on renvoie une fourchette estimée.
+    """
+    pipeline, metadata = _load_model()
+    if pipeline is None:
+        return None
+
+    features: dict[str, Any] = {
+        "city": (city or "unknown")[:50],
+        "department": (department or "unknown")[:10],
+        "experience": (experience or "unknown")[:50],
+        "contract": (contract or "unknown")[:50],
+    }
+    for tech in technologies:
+        if tech:
+            features[f"tech_{tech.strip().lower()}"] = 1
+
+    rf = pipeline.named_steps["model"]
+    vectorizer = pipeline.named_steps["vectorizer"]
+    X = vectorizer.transform([features])
+    tree_predictions = np.array([tree.predict(X)[0] for tree in rf.estimators_])
+
+    point = float(np.mean(tree_predictions))
+    low = float(np.percentile(tree_predictions, 25))
+    high = float(np.percentile(tree_predictions, 75))
+    std = float(np.std(tree_predictions))
+    confidence = max(0.0, min(1.0, 1.0 - std / 15_000.0))
+
+    return SalaryPrediction(
+        point=int(round(point)),
+        low=int(round(low)),
+        high=int(round(high)),
+        confidence=round(confidence, 2),
+        training_size=metadata["training_size"],
+        feature_count=metadata["feature_count"],
+    )
+
+
 def main() -> int:
     """CLI : python -m techpulse_api.ml.salary train"""
     if len(sys.argv) < 2 or sys.argv[1] != "train":

@@ -10,24 +10,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Space Grotesk', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-              body: ['DM Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-              mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
-            },
-          },
-        },
-      };
-    </script>
-
-    <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="/assets/css/tailwind.min.css">
     <link rel="stylesheet" href="/assets/css/app.css">
+    <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
     {% block head_extra %}{% endblock %}
 </head>
 <body class="noise min-h-screen antialiased">
@@ -82,12 +67,14 @@
                 <a href="/" class="px-3 py-1.5 rounded-full {% if active_page == 'home' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">Découvrir</a>
                 <a href="/search.php" class="px-3 py-1.5 rounded-full {% if active_page == 'search' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">Offres</a>
                 <a href="/dashboard.php" class="px-3 py-1.5 rounded-full {% if active_page == 'dashboard' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">Dashboard</a>
+                <a href="/simulator.php" class="px-3 py-1.5 rounded-full {% if active_page == 'simulator' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">Simulateur</a>
+                <a href="/scraper.php" class="px-3 py-1.5 rounded-full {% if active_page == 'scraper' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">Scraper</a>
                 <a href="http://localhost:5001/docs" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">API</a>
                 <a href="/about.php" class="px-3 py-1.5 rounded-full {% if active_page == 'about' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">À propos</a>
             </nav>
         </div>
         <div class="flex items-center gap-2 text-sm">
-            <button type="button" onclick="window.__cmdk?.open()" class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full pill text-slate-300 hover:text-white text-sm" aria-label="Ouvrir le menu rapide">
+            <button type="button" onclick="window.__cmdk?.toggle()" class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full pill text-slate-300 hover:text-white text-sm" aria-label="Ouvrir le menu rapide">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 <span class="mono text-[11px] tracking-wider">⌘K</span>
             </button>

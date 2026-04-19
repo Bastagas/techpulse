@@ -1,0 +1,18 @@
+{
+  "name": "techpulse-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build Tailwind CSS local pour TechPulse (évite le CDN non prod-ready).",
+  "scripts": {
+    "build:css": "tailwindcss -i src/assets/input.css -o public/assets/css/tailwind.min.css --minify",
+    "watch:css": "tailwindcss -i src/assets/input.css -o public/assets/css/tailwind.min.css --watch",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.14",
+    "@tailwindcss/forms": "^0.5.9",
+    "@tailwindcss/typography": "^0.5.15",
+    "@playwright/test": "^1.48.0"
+  }
+}

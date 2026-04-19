@@ -1,0 +1,213 @@
+{% extends 'layout.twig' %}
+{% set active_page = 'scraper' %}
+{% block title %}Scraper Status{% endblock %}
+
+{% block content %}
+
+<!-- ─── HEADER ─── -->
+<section class="reveal flex items-end justify-between mb-8 flex-wrap gap-4" style="animation-delay:100ms">
+    <div>
+        <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-2">Pipeline · supervision</p>
+        <h1 class="text-4xl md:text-5xl font-bold tracking-[-0.03em] leading-tight">
+            Scraper <span class="gradient-accent italic">en direct</span>
+        </h1>
+        <p class="text-slate-400 mt-2 max-w-2xl body-font">
+            État du pipeline d'agrégation : runs planifiés, succès/erreurs, offres nouvelles et mises à jour.
+        </p>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+        <div class="glass px-4 py-2 flex items-center gap-2 text-xs" style="border-radius: 9999px;">
+            {% if scheduler.status == 'running' %}
+            <span class="live-dot"></span>
+            <span class="text-emerald-400 mono">SCHEDULER · ON</span>
+            {% else %}
+            <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+            <span class="text-slate-400 mono">SCHEDULER · UNKNOWN</span>
+            {% endif %}
+        </div>
+        {% if scheduler.next_run %}
+        <div class="glass px-4 py-2 text-xs mono text-slate-300" style="border-radius: 9999px;">
+            Next run · <span class="text-white">{{ scheduler.next_run }}</span>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- ─── KPI snapshot ─── -->
+<section class="reveal grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6" style="animation-delay:180ms">
+    <div class="glass-strong p-5 relative overflow-hidden iridescent">
+        <div class="orb w-20 h-20 bg-red-500/25 -top-3 -right-3"></div>
+        <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-2">Offres en base</p>
+        <p class="text-3xl font-bold gradient-accent countup" data-countup="{{ snapshot.total }}">0</p>
+    </div>
+    <div class="glass-strong p-5">
+        <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-2">Actives</p>
+        <p class="text-3xl font-bold text-white countup" data-countup="{{ snapshot.active }}">0</p>
+    </div>
+    <div class="glass-strong p-5">
+        <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-2">Entreprises</p>
+        <p class="text-3xl font-bold text-white countup" data-countup="{{ snapshot.companies }}">0</p>
+    </div>
+    <div class="glass-strong p-5">
+        <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-2">Villes</p>
+        <p class="text-3xl font-bold text-white countup" data-countup="{{ snapshot.cities }}">0</p>
+    </div>
+</section>
+
+<!-- ─── Agrégats 30 jours ─── -->
+<section class="reveal glass-strong p-6 mb-6 relative overflow-hidden" style="animation-delay:260ms">
+    <div class="orb w-48 h-48 bg-indigo-500/15 -top-10 -right-10"></div>
+    <div class="flex items-end justify-between mb-5 flex-wrap gap-3">
+        <div>
+            <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">30 derniers jours</p>
+            <h2 class="text-xl font-bold">Activité cumulée</h2>
+        </div>
+        <div class="flex items-center gap-2 mono text-[10px] text-slate-500 uppercase tracking-widest">
+            <span class="live-dot"></span>
+            <span>Updated live</span>
+        </div>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div>
+            <p class="mono text-[9px] text-slate-500 uppercase tracking-widest mb-1">Runs</p>
+            <p class="text-2xl font-bold countup" data-countup="{{ aggregates.runs_total ?? 0 }}">0</p>
+        </div>
+        <div>
+            <p class="mono text-[9px] text-slate-500 uppercase tracking-widest mb-1">Succès</p>
+            <p class="text-2xl font-bold text-emerald-400 countup" data-countup="{{ aggregates.success_count ?? 0 }}">0</p>
+        </div>
+        <div>
+            <p class="mono text-[9px] text-slate-500 uppercase tracking-widest mb-1">Échecs</p>
+            <p class="text-2xl font-bold text-red-400 countup" data-countup="{{ aggregates.failed_count ?? 0 }}">0</p>
+        </div>
+        <div>
+            <p class="mono text-[9px] text-slate-500 uppercase tracking-widest mb-1">Offres nouvelles</p>
+            <p class="text-2xl font-bold countup" data-countup="{{ aggregates.offers_new_30d ?? 0 }}">0</p>
+        </div>
+        <div>
+            <p class="mono text-[9px] text-slate-500 uppercase tracking-widest mb-1">Durée moy.</p>
+            <p class="text-2xl font-bold">{{ aggregates.avg_duration ? (aggregates.avg_duration|round) ~ ' s' : '—' }}</p>
+        </div>
+    </div>
+    {% if timeline|length > 1 %}
+    <div class="mt-6 pt-5 border-t border-white/5">
+        <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-3">Offres nouvelles par jour</p>
+        <div class="h-32"><canvas id="chart-scraper-timeline"></canvas></div>
+    </div>
+    {% endif %}
+</section>
+
+<!-- ─── Tableau des runs ─── -->
+<section class="reveal glass-strong overflow-hidden" style="animation-delay:340ms">
+    <div class="p-6 border-b border-white/5">
+        <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">Historique</p>
+        <h2 class="text-xl font-bold">20 derniers runs</h2>
+    </div>
+    {% if runs|length == 0 %}
+    <div class="p-12 text-center">
+        <p class="text-slate-400 mb-4">Aucun run enregistré pour le moment.</p>
+        <code class="mono text-sm text-slate-500">make scrape</code>
+    </div>
+    {% else %}
+    <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+            <thead>
+                <tr class="border-b border-white/5 text-left mono text-[10px] uppercase tracking-widest text-slate-500">
+                    <th class="p-4">#</th>
+                    <th class="p-4">Spider</th>
+                    <th class="p-4">Démarré</th>
+                    <th class="p-4">Durée</th>
+                    <th class="p-4">Status</th>
+                    <th class="p-4 text-right">Trouvées</th>
+                    <th class="p-4 text-right">Nouvelles</th>
+                    <th class="p-4 text-right">MàJ</th>
+                    <th class="p-4 text-right">Erreurs</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in runs %}
+                <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                    <td class="p-4 mono text-xs text-slate-500">#{{ r.id }}</td>
+                    <td class="p-4 font-semibold">
+                        <span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 mono text-[10px] uppercase tracking-wider">
+                            {{ r.spider }}
+                        </span>
+                    </td>
+                    <td class="p-4 mono text-xs text-slate-400">{{ r.started_at|slice(0, 16)|replace({'T': ' '}) }}</td>
+                    <td class="p-4 mono text-xs text-slate-400">{{ r.duration_s ? r.duration_s ~ 's' : '—' }}</td>
+                    <td class="p-4">
+                        {% if r.status == 'success' %}
+                            <span class="inline-flex items-center gap-1.5 text-[11px] mono uppercase tracking-wider text-emerald-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>success
+                            </span>
+                        {% elseif r.status == 'running' %}
+                            <span class="inline-flex items-center gap-1.5 text-[11px] mono uppercase tracking-wider text-amber-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>running
+                            </span>
+                        {% elseif r.status == 'partial' %}
+                            <span class="inline-flex items-center gap-1.5 text-[11px] mono uppercase tracking-wider text-amber-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>partial
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center gap-1.5 text-[11px] mono uppercase tracking-wider text-red-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>{{ r.status }}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="p-4 text-right mono tabular-nums">{{ r.offers_found }}</td>
+                    <td class="p-4 text-right font-semibold text-emerald-400 tabular-nums">+{{ r.offers_new }}</td>
+                    <td class="p-4 text-right mono text-slate-400 tabular-nums">~{{ r.offers_updated }}</td>
+                    <td class="p-4 text-right mono {{ r.errors_count > 0 ? 'text-red-400' : 'text-slate-600' }} tabular-nums">{{ r.errors_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+
+{% endblock %}
+
+{% block scripts_extra %}
+{% if timeline|length > 1 %}
+<script id="scraper-timeline-data" type="application/json">
+{{ timeline|json_encode|raw }}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+(() => {
+    const data = JSON.parse(document.getElementById('scraper-timeline-data').textContent);
+    Chart.defaults.color = '#94A3B8';
+    Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+    Chart.defaults.font.family = 'Space Grotesk, ui-sans-serif, system-ui, sans-serif';
+
+    new Chart(document.getElementById('chart-scraper-timeline'), {
+        type: 'line',
+        data: {
+            labels: data.map(d => d.d),
+            datasets: [{
+                label: 'Offres nouvelles',
+                data: data.map(d => parseInt(d.n)),
+                borderColor: '#EC4899',
+                backgroundColor: 'rgba(236, 72, 153, 0.15)',
+                borderWidth: 2,
+                tension: 0.35,
+                fill: true,
+                pointRadius: 3,
+                pointBackgroundColor: '#EC4899',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                y: { beginAtZero: true, ticks: { font: { size: 10 } } }
+            }
+        }
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}
