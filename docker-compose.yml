@@ -1,11 +1,13 @@
-# TechPulse — stack docker-compose pour dev local + déploiement
-# Setup : make setup (ou : docker compose up -d)
+# TechPulse — stack docker-compose (dev local + simulation prod)
+#
+# Démarrage rapide  : make setup
+# Démarrage complet : docker compose --profile full up -d
 #
 # Services exposés :
 #   - MySQL 8          : localhost:3306
-#   - phpMyAdmin       : http://localhost:8080   (root / rootpass par défaut)
-#   - Frontend PHP     : http://localhost:8000   (ajouté en Sprint 2)
-#   - API Flask        : http://localhost:5000   (ajoutée en Sprint 3)
+#   - phpMyAdmin       : http://localhost:8080   (root / rootpass)
+#   - API Flask        : http://localhost:5001   (profile 'full')
+#   - Frontend PHP     : http://localhost:8000   (profile 'full')
 
 services:
   mysql:
@@ -25,8 +27,6 @@ services:
       - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-      # MySQL entrypoint n'explore pas les sous-dossiers → on monte les fichiers un par un.
-      # Ajouter de nouveaux scripts ici en conservant l'ordre alphabétique (01_, 02_, 03_).
       - ./db/migrations/001_init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
       - ./db/seeds/02_technologies.sql:/docker-entrypoint-initdb.d/02_technologies.sql:ro
     healthcheck:
@@ -55,6 +55,49 @@ services:
       UPLOAD_LIMIT: 128M
     ports:
       - "${PHPMYADMIN_PORT:-8080}:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  api:
+    profiles: ["full"]
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: techpulse-api
+    restart: unless-stopped
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: ${MYSQL_USER:-techpulse}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-techpass}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-techpulse}
+      FRANCE_TRAVAIL_CLIENT_ID: ${FRANCE_TRAVAIL_CLIENT_ID:-}
+      FRANCE_TRAVAIL_CLIENT_SECRET: ${FRANCE_TRAVAIL_CLIENT_SECRET:-}
+      PORT: 5001
+      APSCHEDULER_ENABLED: ${APSCHEDULER_ENABLED:-0}
+    ports:
+      - "${API_PORT:-5001}:5001"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    profiles: ["full"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: techpulse-frontend
+    restart: unless-stopped
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: ${MYSQL_USER:-techpulse}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-techpass}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-techpulse}
+      PORT: 80
+    ports:
+      - "${FRONTEND_PORT:-8000}:80"
     depends_on:
       mysql:
         condition: service_healthy

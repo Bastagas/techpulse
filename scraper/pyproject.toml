@@ -2,7 +2,6 @@
 name = "techpulse-scraper"
 version = "0.1.0"
 description = "Web scraper du marché emploi tech français — TechPulse"
-readme = "../README.md"
 requires-python = ">=3.11"
 authors = [{ name = "Bastien Ruedas" }]
 license = { text = "MIT" }

@@ -2,7 +2,6 @@
 name = "techpulse-api"
 version = "0.1.0"
 description = "API REST Flask pour TechPulse"
-readme = "../README.md"
 requires-python = ">=3.11"
 authors = [{ name = "Bastien Ruedas" }]
 license = { text = "MIT" }
