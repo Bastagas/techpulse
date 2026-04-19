@@ -193,7 +193,8 @@ techpulse/
 - **[01-cadrage.md](01-cadrage.md)** — cadrage du projet (Phase 1)
 - **[02-roadmap.md](02-roadmap.md)** — roadmap d'exécution (Phase 2)
 - **[GUIDE_PROF.md](GUIDE_PROF.md)** — guide correction sans Docker
-- **[DEPLOY.md](DEPLOY.md)** — guide déploiement Railway
+- **[DEPLOY.md](DEPLOY.md)** — guide déploiement Railway (rapide, payant 5 $/mo)
+- **[deploy/oracle/ORACLE.md](deploy/oracle/ORACLE.md)** — guide déploiement Oracle Cloud (gratuit à vie, ARM 24 GB)
 - **API Swagger** : http://localhost:5001/docs quand l'API tourne
 
 ## 👤 Auteur

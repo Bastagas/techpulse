@@ -1,0 +1,23 @@
+# Caddyfile.ip-only — version SANS domaine, juste IP publique.
+#
+# À utiliser si tu n'as pas encore acheté de domaine.
+# Renomme ce fichier en Caddyfile pour l'activer :
+#   cp deploy/oracle/Caddyfile.ip-only Caddyfile
+#
+# ⚠️ Pas de HTTPS valide sans domaine. Pour avoir HTTPS sans domaine :
+#   → utilise sslip.io (ex: 152-67-12-34.sslip.io) et remplace par ce Caddyfile.
+#
+# Accès via :
+#   http://<IP>          → frontend
+#   http://<IP>:5001     → API (port alternatif)
+
+:80 {
+    reverse_proxy frontend:80
+    encode zstd gzip
+}
+
+:5001 {
+    reverse_proxy api:5001
+    encode zstd gzip
+    header Access-Control-Allow-Origin "*"
+}

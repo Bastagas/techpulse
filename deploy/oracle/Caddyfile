@@ -1,0 +1,60 @@
+# Caddyfile — reverse proxy HTTPS pour TechPulse sur Oracle.
+#
+# À copier à la racine du projet sur le serveur :
+#   cp deploy/oracle/Caddyfile Caddyfile
+#   # Puis éditer pour remplacer techpulse.xyz par ton vrai domaine.
+#
+# Caddy récupère automatiquement les certificats Let's Encrypt
+# à la première requête HTTPS. Renouvellement auto tous les 60 jours.
+#
+# Si tu n'as pas de domaine : utilise sslip.io qui donne un domaine
+# gratuit mappant sur ton IP, ex: 152-67-12-34.sslip.io
+
+# ─── Frontend PHP ────────────────────────────────
+techpulse.xyz, www.techpulse.xyz {
+    reverse_proxy frontend:80
+
+    # Compression gzip + zstd
+    encode zstd gzip
+
+    # Headers sécurité
+    header {
+        # HSTS 1 an
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        # Pas de tracking par référer
+        Referrer-Policy "same-origin"
+        # Bloque le MIME sniffing
+        X-Content-Type-Options "nosniff"
+        # Empêche l'iframing (clickjacking)
+        X-Frame-Options "SAMEORIGIN"
+    }
+
+    # Logs
+    log {
+        output file /data/logs/frontend.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+    }
+}
+
+# ─── API Flask ──────────────────────────────────
+api.techpulse.xyz {
+    reverse_proxy api:5001
+
+    encode zstd gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        Access-Control-Allow-Origin "*"
+        Access-Control-Allow-Methods "GET, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization"
+    }
+
+    log {
+        output file /data/logs/api.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+    }
+}

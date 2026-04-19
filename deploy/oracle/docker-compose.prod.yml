@@ -1,0 +1,53 @@
+# docker-compose override pour la production Oracle.
+#
+# Usage sur le serveur :
+#   cp deploy/oracle/docker-compose.prod.yml docker-compose.override.yml
+#   docker compose --profile full up -d
+#
+# Différences avec le docker-compose.yml de dev :
+#  - MySQL et phpMyAdmin ne sont PAS exposés publiquement (réseau interne uniquement)
+#  - Ajout d'un service Caddy qui fait reverse-proxy HTTPS automatique
+#  - Les ports 80 et 443 sont ouverts au monde, pas les ports applicatifs
+#  - Redémarrage systématique en cas de crash
+
+services:
+  mysql:
+    ports: []  # on ferme 3306 au monde, accès via réseau Docker interne uniquement
+    restart: always
+
+  phpmyadmin:
+    ports: []  # phpMyAdmin accessible via tunnel SSH uniquement, cf. README
+    restart: always
+
+  api:
+    ports: []  # on ferme 5001, Caddy proxifie
+    restart: always
+    environment:
+      APP_ENV: production
+      LOG_FORMAT: json
+
+  frontend:
+    ports: []  # on ferme 8000, Caddy proxifie
+    restart: always
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: techpulse-caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api
+      - frontend
+
+volumes:
+  caddy-data:
+    name: techpulse-caddy-data
+  caddy-config:
+    name: techpulse-caddy-config
