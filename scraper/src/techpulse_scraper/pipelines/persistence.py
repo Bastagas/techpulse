@@ -26,7 +26,12 @@ from techpulse_scraper.models import (
     ScrapeStatus,
     Source,
 )
-from techpulse_scraper.parsers import TechExtractor, parse_location, parse_salary
+from techpulse_scraper.parsers import (
+    TechExtractor,
+    detect_remote_policy,
+    parse_location,
+    parse_salary,
+)
 from techpulse_scraper.pipelines.deduplication import find_existing_offer
 from techpulse_scraper.spiders.base import RawOffer
 from techpulse_scraper.utils.fingerprint import offer_fingerprint
@@ -71,9 +76,10 @@ class PersistencePipeline:
         # Entreprise
         company = self._get_or_create_company(raw.company_name, raw.company_sector)
 
-        # Location + salary parsing
+        # Location + salary + remote parsing
         location = parse_location(raw.location_raw)
         salary = parse_salary(raw.salary_text)
+        remote = raw.remote_policy or detect_remote_policy(raw.title, raw.description)
 
         # Fingerprint
         fingerprint = offer_fingerprint(
@@ -93,6 +99,7 @@ class PersistencePipeline:
             existing.experience_level = (raw.experience_level or "")[:50] or None
             existing.salary_min = salary.min if salary else None
             existing.salary_max = salary.max if salary else None
+            existing.remote_policy = remote or existing.remote_policy
             existing.is_active = True
             self.session.flush()
             self._update_tech_links(existing)
@@ -109,7 +116,7 @@ class PersistencePipeline:
             description_html=raw.description_html,
             contract_type=(raw.contract_type or "")[:50] or None,
             experience_level=(raw.experience_level or "")[:50] or None,
-            remote_policy=(raw.remote_policy or "")[:50] or None,
+            remote_policy=remote,
             salary_min=salary.min if salary else None,
             salary_max=salary.max if salary else None,
             salary_currency="EUR",

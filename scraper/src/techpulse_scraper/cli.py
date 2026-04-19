@@ -117,6 +117,25 @@ def geocode(limit: int | None) -> None:
 
 
 @cli.command()
+def backfill_remote() -> None:
+    """Recalcule remote_policy sur toutes les offres via le parser regex."""
+    from techpulse_scraper.parsers import detect_remote_policy
+    from techpulse_scraper.models import Offer
+
+    updated = 0
+    total = 0
+    with get_session() as session:
+        offers = session.scalars(select(Offer)).all()
+        for o in offers:
+            total += 1
+            new_policy = detect_remote_policy(o.title, o.description)
+            if new_policy and new_policy != o.remote_policy:
+                o.remote_policy = new_policy
+                updated += 1
+    click.echo(f"✓ {updated} / {total} offres mises à jour avec remote_policy")
+
+
+@cli.command()
 def stats() -> None:
     """Affiche quelques stats rapides sur le contenu de la BDD."""
     with get_session() as session:
