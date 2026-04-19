@@ -8,6 +8,8 @@
     'library':     'bg-indigo-500/15 border border-indigo-500/25 text-indigo-300',
     'methodology': 'bg-white/5 border border-white/10 text-slate-300',
 } %}
-<span class="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full {{ colors[tech.category]|default(colors['methodology']) }}">
+<span class="tech-badge-clickable inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full {{ colors[tech.category]|default(colors['methodology']) }}"
+      data-canonical="{{ tech.canonical_name }}"
+      title="Voir les stats de {{ tech.display_name }}">
     {{ tech.display_name }}
 </span>

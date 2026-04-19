@@ -13,11 +13,8 @@
          style="background: radial-gradient(circle, rgba(236, 72, 153, 0.8), transparent 70%); filter: blur(60px);"></div>
 
     <div class="inline-flex items-center gap-2 glass px-3 py-1.5 text-xs mb-8" style="border-radius: 9999px;">
-        <span class="relative flex w-1.5 h-1.5">
-            <span class="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75"></span>
-            <span class="relative rounded-full bg-emerald-400 w-1.5 h-1.5"></span>
-        </span>
-        <span class="text-slate-300 mono">LIVE · {{ stats.total|number_format(0, ',', ' ') }} offres indexées{% if stats.last_scraped %} · MAJ {{ stats.last_scraped|ago }}{% endif %}</span>
+        <span class="live-dot"></span>
+        <span class="text-slate-300 mono">LIVE · <span class="countup" data-countup="{{ stats.total }}">0</span> offres indexées{% if stats.last_scraped %} · MAJ {{ stats.last_scraped|ago }}{% endif %}</span>
     </div>
 
     <h1 class="text-5xl md:text-[72px] lg:text-[88px] leading-[0.92] font-bold tracking-[-0.04em] mb-6">
@@ -49,7 +46,7 @@
         <div class="orb w-48 h-48 bg-red-500/30 -top-10 -right-10"></div>
         <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-4">Offres actives</p>
         <div class="flex items-baseline gap-3 mb-6">
-            <p class="text-[96px] md:text-[120px] font-bold tracking-[-0.05em] leading-none gradient-text">{{ stats.total|number_format(0, ',', ' ') }}</p>
+            <p class="text-[96px] md:text-[120px] font-bold tracking-[-0.05em] leading-none gradient-text countup" data-countup="{{ stats.total }}">0</p>
         </div>
         <p class="text-slate-300 body-font leading-relaxed mb-6">
             Scrapées en continu, dédupliquées et enrichies par NLP.
@@ -58,15 +55,15 @@
         <div class="grid grid-cols-3 gap-3 pt-6 border-t border-white/5">
             <div>
                 <p class="mono text-[10px] text-slate-500 uppercase">Entreprises</p>
-                <p class="text-2xl font-semibold">{{ stats.companies|number_format(0, ',', ' ') }}</p>
+                <p class="text-2xl font-semibold countup" data-countup="{{ stats.companies }}">0</p>
             </div>
             <div>
                 <p class="mono text-[10px] text-slate-500 uppercase">Villes</p>
-                <p class="text-2xl font-semibold">{{ stats.cities|number_format(0, ',', ' ') }}</p>
+                <p class="text-2xl font-semibold countup" data-countup="{{ stats.cities }}">0</p>
             </div>
             <div>
                 <p class="mono text-[10px] text-slate-500 uppercase">Avec salaire</p>
-                <p class="text-2xl font-semibold">{{ stats.with_salary|number_format(0, ',', ' ') }}</p>
+                <p class="text-2xl font-semibold countup" data-countup="{{ stats.with_salary }}">0</p>
             </div>
         </div>
     </div>
@@ -94,12 +91,12 @@
         <div class="flex items-center justify-between">
             <p class="text-4xl font-bold tracking-tight">{{ top_techs[0].name }}</p>
             <div class="text-right">
-                <p class="text-2xl font-semibold">{{ top_techs[0].count }}</p>
+                <p class="text-2xl font-semibold countup" data-countup="{{ top_techs[0].count }}">0</p>
                 <p class="text-[10px] mono text-slate-500">offres</p>
             </div>
         </div>
-        <div class="mt-4 h-1 rounded-full bg-white/5">
-            <div class="spark-bar h-1 rounded-full" style="width: 100%"></div>
+        <div class="mt-4 rounded-full bg-white/5 overflow-hidden">
+            <div class="spark-bar-io rounded-full" style="--bar-target:100%"></div>
         </div>
     </div>
 
@@ -150,8 +147,8 @@
                     </div>
                     <span class="mono font-semibold">{{ t.count }}</span>
                 </div>
-                <div class="h-1 bg-white/5 rounded-full overflow-hidden">
-                    <div class="spark-bar h-1" style="width: {{ pct }}%; animation-delay: {{ (loop.index - 1) * 40 }}ms"></div>
+                <div class="bg-white/5 rounded-full overflow-hidden">
+                    <div class="spark-bar-io" style="--bar-target:{{ pct }}%; --bar-delay:{{ (loop.index - 1) * 40 }}ms"></div>
                 </div>
             </div>
             {% endfor %}

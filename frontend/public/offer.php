@@ -48,4 +48,5 @@ echo $twig->render('offer.twig', [
     'offer' => $offer,
     'salary_prediction' => $salaryPrediction,
     'similar_offers' => $similar,
+    'market_salary' => $repo->salaryStats(),
 ]);

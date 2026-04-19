@@ -40,10 +40,48 @@
     <div class="glass-strong p-4 relative overflow-hidden">
         {% if kpi.accent %}<div class="orb w-16 h-16 bg-pink-500/20 -top-2 -right-2"></div>{% endif %}
         <p class="mono text-[10px] text-slate-500 uppercase tracking-widest">{{ kpi.label }}</p>
-        <p class="text-2xl md:text-3xl font-bold mt-1 {% if kpi.accent %}gradient-accent{% endif %}">{{ (kpi.value ?? 0)|number_format(0, ',', ' ') }}{{ kpi.suffix }}</p>
+        <p class="text-2xl md:text-3xl font-bold mt-1 countup {% if kpi.accent %}gradient-accent{% endif %}" data-countup="{{ kpi.value ?? 0 }}" data-suffix="{{ kpi.suffix }}">0{{ kpi.suffix }}</p>
     </div>
     {% endfor %}
 </section>
+
+{# ─── Heatmap calendaire 90 jours ─── #}
+{% if calendar|length > 0 %}
+<section class="reveal glass-strong p-6 mb-6 relative overflow-hidden" style="animation-delay: 220ms">
+    <div class="orb w-48 h-48 bg-pink-500/15 -top-10 -right-10"></div>
+    <div class="flex items-end justify-between mb-4 flex-wrap gap-3">
+        <div>
+            <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">Activité · 90 jours glissants</p>
+            <h2 class="text-xl font-bold">Publications par jour</h2>
+        </div>
+        <div class="flex items-center gap-2 mono text-[10px] text-slate-500 uppercase tracking-widest">
+            <span>Moins</span>
+            <span class="cal-legend-cell" style="background: rgba(255,255,255,0.03);"></span>
+            <span class="cal-legend-cell cal-l1"></span>
+            <span class="cal-legend-cell cal-l2"></span>
+            <span class="cal-legend-cell cal-l3"></span>
+            <span class="cal-legend-cell cal-l4"></span>
+            <span>Plus</span>
+        </div>
+    </div>
+    {# Indexer le calendrier par date ISO (YYYY-MM-DD) #}
+    {% set cal_by_day = {} %}
+    {% for c in calendar %}{% set cal_by_day = cal_by_day|merge({(c.date): c.count}) %}{% endfor %}
+    {% set max_c = 1 %}
+    {% for c in calendar %}{% if c.count > max_c %}{% set max_c = c.count %}{% endif %}{% endfor %}
+    <div class="overflow-x-auto">
+        <div class="flex gap-[3px] py-2 min-w-max" id="calendar-heatmap"
+             data-max="{{ max_c }}"
+             data-days='{{ cal_by_day|json_encode|e('html_attr') }}'>
+            {# Grille 14 semaines × 7 jours. On génère via JS pour avoir les bonnes dates #}
+        </div>
+    </div>
+    <p class="text-xs text-slate-500 mono mt-3 flex items-center gap-2">
+        <span class="live-dot"></span>
+        <span id="calendar-summary">Chargement…</span>
+    </p>
+</section>
+{% endif %}
 
 {# ─── Row 1 : Top techs + Contrats ─── #}
 <section class="reveal grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6" style="animation-delay: 260ms">
@@ -325,6 +363,66 @@
             }).bindPopup(`<strong>${p.city}</strong><br>${p.count} offre${p.count > 1 ? 's' : ''}`)
               .addTo(map);
         });
+    }
+
+    // ── Heatmap calendaire 90 jours ──
+    const cal = document.getElementById('calendar-heatmap');
+    if (cal) {
+        const days = JSON.parse(cal.dataset.days);
+        const maxC = Math.max(1, parseInt(cal.dataset.max, 10));
+        const levelFor = (n) => {
+            if (!n) return 'cal-l0';
+            const r = n / maxC;
+            if (r < 0.25) return 'cal-l1';
+            if (r < 0.5)  return 'cal-l2';
+            if (r < 0.75) return 'cal-l3';
+            return 'cal-l4';
+        };
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        // 14 semaines (98 jours), aligné pour finir le dernier dimanche inclus
+        const weeks = 14;
+        const totalDays = weeks * 7;
+        const end = new Date(today);
+        end.setDate(end.getDate() + (6 - today.getDay())); // fin de la semaine en cours (dimanche)
+        const start = new Date(end);
+        start.setDate(start.getDate() - totalDays + 1);
+
+        let totalPubs = 0, activeDays = 0, maxDay = null;
+
+        const frag = document.createDocumentFragment();
+        for (let w = 0; w < weeks; w++) {
+            const col = document.createElement('div');
+            col.className = 'flex flex-col gap-[3px]';
+            for (let d = 0; d < 7; d++) {
+                const date = new Date(start);
+                date.setDate(date.getDate() + w * 7 + d);
+                const iso = date.toISOString().slice(0, 10);
+                const n = days[iso] || 0;
+                if (date > today) {
+                    const empty = document.createElement('div');
+                    empty.className = 'cal-cell';
+                    empty.style.visibility = 'hidden';
+                    col.appendChild(empty);
+                    continue;
+                }
+                const cell = document.createElement('div');
+                cell.className = 'cal-cell ' + levelFor(n);
+                cell.title = `${iso} · ${n} offre${n > 1 ? 's' : ''}`;
+                col.appendChild(cell);
+                totalPubs += n;
+                if (n > 0) activeDays++;
+                if (!maxDay || n > maxDay.n) maxDay = { iso, n };
+            }
+            frag.appendChild(col);
+        }
+        cal.appendChild(frag);
+
+        const summary = document.getElementById('calendar-summary');
+        if (summary) {
+            const avg = activeDays ? (totalPubs / activeDays).toFixed(1) : '0';
+            summary.innerHTML = `${totalPubs} publications sur ${activeDays} jour${activeDays > 1 ? 's' : ''} actif${activeDays > 1 ? 's' : ''} · moy. ${avg.replace('.', ',')}/jour · pic ${maxDay ? maxDay.n + ' le ' + maxDay.iso : '—'}`;
+        }
     }
 })();
 </script>

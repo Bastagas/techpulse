@@ -83,6 +83,100 @@
     {% endif %}
 </article>
 
+<!-- ─── Salary vs market (progress ring) ─── -->
+{% if offer.salary_min and market_salary and market_salary.count > 5 %}
+    {% set sal = offer.salary_min %}
+    {% set p = 50 %}
+    {% if sal <= market_salary.min %}
+        {% set p = 0 %}
+    {% elseif sal >= market_salary.max %}
+        {% set p = 100 %}
+    {% elseif sal <= market_salary.p25 %}
+        {% set span = (market_salary.p25 - market_salary.min) ?: 1 %}
+        {% set p = (sal - market_salary.min) / span * 25 %}
+    {% elseif sal <= market_salary.median %}
+        {% set span = (market_salary.median - market_salary.p25) ?: 1 %}
+        {% set p = 25 + (sal - market_salary.p25) / span * 25 %}
+    {% elseif sal <= market_salary.p75 %}
+        {% set span = (market_salary.p75 - market_salary.median) ?: 1 %}
+        {% set p = 50 + (sal - market_salary.median) / span * 25 %}
+    {% else %}
+        {% set span = (market_salary.max - market_salary.p75) ?: 1 %}
+        {% set p = 75 + (sal - market_salary.p75) / span * 25 %}
+    {% endif %}
+    {% set p_rounded = p|round %}
+    {% set dash = (p * 2.51)|round(2) %}
+<section class="reveal glass-strong p-6 sm:p-8 mb-6 relative overflow-hidden" style="animation-delay: 220ms">
+    <div class="orb w-48 h-48 bg-red-500/15 -top-10 -left-10"></div>
+    <div class="flex items-start gap-6 flex-wrap">
+        <div class="relative shrink-0">
+            <svg width="140" height="140" viewBox="0 0 100 100" class="-rotate-90">
+                <defs>
+                    <linearGradient id="salaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#DC2626"/>
+                        <stop offset="50%" stop-color="#EC4899"/>
+                        <stop offset="100%" stop-color="#22D3EE"/>
+                    </linearGradient>
+                </defs>
+                <circle class="salary-ring-track" cx="50" cy="50" r="40" fill="none" stroke-width="6"/>
+                <circle class="salary-ring-fill" cx="50" cy="50" r="40" fill="none" stroke-width="6"
+                        stroke-dasharray="0 999" data-target-dash="{{ dash }}"/>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center rotate-0 flex-col">
+                <p class="text-3xl font-bold countup" data-countup="{{ p_rounded }}" data-suffix="%">0%</p>
+                <p class="mono text-[9px] text-slate-500 uppercase tracking-widest">percentile</p>
+            </div>
+        </div>
+        <div class="flex-1 min-w-[220px]">
+            <p class="mono text-[10px] text-slate-400 uppercase tracking-widest mb-1">Positionnement marché</p>
+            <h2 class="text-xl font-bold mb-3">
+                {% if p_rounded >= 80 %}<span class="gradient-accent">Top {{ 100 - p_rounded }}%</span> du marché
+                {% elseif p_rounded >= 60 %}<span class="text-emerald-400">Au-dessus</span> de la médiane
+                {% elseif p_rounded >= 40 %}<span class="text-amber-400">Autour</span> de la médiane
+                {% else %}<span class="text-slate-300">En dessous</span> de la médiane
+                {% endif %}
+            </h2>
+            <p class="text-sm text-slate-400 mb-4 leading-relaxed">
+                Sur {{ market_salary.count }} offres avec salaire, cette offre ({{ sal|salary }}) se situe au percentile <strong class="text-white">{{ p_rounded }}</strong>.
+            </p>
+            <div class="grid grid-cols-4 gap-2 text-center">
+                <div class="p-2 rounded-lg bg-white/[0.03] border border-white/5">
+                    <p class="mono text-[9px] text-slate-500 uppercase">P25</p>
+                    <p class="text-sm font-semibold">{{ market_salary.p25|salary }}</p>
+                </div>
+                <div class="p-2 rounded-lg bg-white/[0.03] border border-white/5">
+                    <p class="mono text-[9px] text-slate-500 uppercase">Médian</p>
+                    <p class="text-sm font-semibold text-pink-400">{{ market_salary.median|salary }}</p>
+                </div>
+                <div class="p-2 rounded-lg bg-white/[0.03] border border-white/5">
+                    <p class="mono text-[9px] text-slate-500 uppercase">P75</p>
+                    <p class="text-sm font-semibold">{{ market_salary.p75|salary }}</p>
+                </div>
+                <div class="p-2 rounded-lg bg-white/[0.03] border border-white/5">
+                    <p class="mono text-[9px] text-slate-500 uppercase">Moy.</p>
+                    <p class="text-sm font-semibold">{{ market_salary.mean|number_format(0, ',', ' ') }} €</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    (() => {
+        const ring = document.querySelector('.salary-ring-fill[data-target-dash]');
+        if (!ring) return;
+        const target = ring.getAttribute('data-target-dash');
+        new IntersectionObserver((entries, obs) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    requestAnimationFrame(() => ring.setAttribute('stroke-dasharray', `${target} 999`));
+                    obs.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.4 }).observe(ring);
+    })();
+    </script>
+</section>
+{% endif %}
+
 <!-- ─── ML Salary Prediction ─── -->
 {% if salary_prediction and salary_prediction.available %}
 <section class="reveal glass-strong p-6 mb-6 relative overflow-hidden iridescent" style="animation-delay:260ms">

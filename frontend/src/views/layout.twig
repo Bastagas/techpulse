@@ -87,6 +87,10 @@
             </nav>
         </div>
         <div class="flex items-center gap-2 text-sm">
+            <button type="button" onclick="window.__cmdk?.open()" class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full pill text-slate-300 hover:text-white text-sm" aria-label="Ouvrir le menu rapide">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <span class="mono text-[11px] tracking-wider">⌘K</span>
+            </button>
             <a href="/search.php" class="cta-red px-4 py-1.5 rounded-full text-white font-medium text-sm">
                 Rechercher
             </a>
@@ -186,6 +190,333 @@
     document.addEventListener('DOMContentLoaded', refresh);
     refresh();
 })();
+</script>
+
+{# ─── Command palette (⌘K) ─── #}
+<div x-data="cmdk" x-show="open" x-cloak @keydown.window.prevent.meta.k="toggle()" @keydown.window.prevent.ctrl.k="toggle()" @keydown.escape.window="close()" style="display:none;">
+    <div class="cmdk-backdrop" @click="close()" x-transition.opacity></div>
+    <div class="cmdk-modal glass-strong iridescent" @click.stop>
+        <div class="flex items-center border-b border-white/5">
+            <svg class="w-5 h-5 text-slate-500 ml-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input x-ref="input" x-model="q" @input.debounce.180ms="search()" @keydown.down.prevent="move(1)" @keydown.up.prevent="move(-1)" @keydown.enter.prevent="run()" placeholder="Rechercher une offre, une techno, une page…" class="cmdk-input" autocomplete="off" spellcheck="false" />
+            <span class="cmdk-kbd mr-4">ESC</span>
+        </div>
+        <div class="max-h-[52vh] overflow-y-auto pb-3">
+            <template x-if="groups.length === 0 && q.length > 0 && !loading">
+                <p class="text-sm text-slate-500 px-5 py-8 text-center">Aucun résultat pour « <span class="text-slate-300" x-text="q"></span> »</p>
+            </template>
+            <template x-for="(group, gi) in groups" :key="gi">
+                <div>
+                    <p class="cmdk-group-label" x-text="group.label"></p>
+                    <template x-for="(hit, hi) in group.items" :key="group.label + hi">
+                        <a :href="hit.href" class="cmdk-hit" :class="{ 'active': active === group.offset + hi }" @mouseenter="active = group.offset + hi">
+                            <span class="cmdk-hit-icon" x-html="hit.icon"></span>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm text-slate-100 truncate" x-text="hit.title"></p>
+                                <p class="text-xs text-slate-500 truncate" x-show="hit.subtitle" x-text="hit.subtitle"></p>
+                            </div>
+                            <span class="mono text-[10px] text-slate-500" x-text="hit.badge"></span>
+                        </a>
+                    </template>
+                </div>
+            </template>
+        </div>
+        <div class="flex items-center justify-between border-t border-white/5 px-5 py-2 text-[11px] text-slate-500 mono">
+            <span>↑↓ naviguer · ⏎ ouvrir</span>
+            <span>TechPulse · ⌘K</span>
+        </div>
+    </div>
+</div>
+
+{# ─── Tech stats modal ─── #}
+<div x-data="techModal" x-show="open" x-cloak @keydown.escape.window="close()" style="display:none;">
+    <div class="tech-modal-backdrop" @click="close()"></div>
+    <div class="tech-modal glass-strong iridescent p-6 sm:p-8" @click.stop>
+        <button @click="close()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <template x-if="loading">
+            <div class="py-16 text-center text-slate-500 mono text-sm">Chargement…</div>
+        </template>
+        <template x-if="!loading && data">
+            <div>
+                <div class="flex items-center gap-3 mb-5">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-bold" :style="`background: ${data.color_bg}; color: ${data.color_fg}; border: 1px solid ${data.color_fg}40;`" x-text="data.display_name.charAt(0).toUpperCase()"></div>
+                    <div>
+                        <p class="mono text-[10px] text-slate-500 uppercase tracking-widest" x-text="data.category"></p>
+                        <h2 class="text-2xl font-bold" x-text="data.display_name"></h2>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-5">
+                    <div class="p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                        <p class="mono text-[9px] text-slate-500 uppercase tracking-widest mb-1">Offres</p>
+                        <p class="text-xl font-bold text-white" x-text="data.total_offers"></p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                        <p class="mono text-[9px] text-slate-500 uppercase tracking-widest mb-1">Salaire médian</p>
+                        <p class="text-xl font-bold text-emerald-400" x-text="data.salary_median ? (data.salary_median/1000).toFixed(0) + ' k€' : '—'"></p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                        <p class="mono text-[9px] text-slate-500 uppercase tracking-widest mb-1">Entreprises</p>
+                        <p class="text-xl font-bold text-white" x-text="data.companies_count"></p>
+                    </div>
+                </div>
+                <template x-if="data.top_companies && data.top_companies.length">
+                    <div class="mb-5">
+                        <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-2">Top entreprises</p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <template x-for="c in data.top_companies">
+                                <span class="text-[11px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300" x-text="`${c.name} · ${c.n}`"></span>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+                <template x-if="data.top_cities && data.top_cities.length">
+                    <div class="mb-5">
+                        <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-2">Top villes</p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <template x-for="c in data.top_cities">
+                                <span class="text-[11px] px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300" x-text="`${c.city} · ${c.n}`"></span>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+                <div class="pt-4 border-t border-white/5">
+                    <a :href="`/search.php?tech=${encodeURIComponent(data.canonical_name)}`" class="cta-red inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold">
+                        Voir toutes les offres
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+
+{# ─── Interactive primitives JS ─── #}
+<script>
+(() => {
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ── Scroll reveal + spark-bar reveal + count-up ──
+    const io = new IntersectionObserver((entries, obs) => {
+        entries.forEach(e => {
+            if (!e.isIntersecting) return;
+            e.target.classList.add('in-view');
+
+            if (e.target.hasAttribute('data-countup')) {
+                const target = parseFloat(e.target.dataset.countup);
+                if (isNaN(target)) return;
+                const format = e.target.dataset.format || 'int';
+                const suffix = e.target.dataset.suffix || '';
+                const duration = reduced ? 0 : 1400;
+                const start = performance.now();
+                const fmt = (n) => {
+                    if (format === 'k') return (n / 1000).toFixed(1).replace('.0', '') + 'k';
+                    if (format === 'k-euro') return Math.round(n / 1000) + ' k€';
+                    if (format === 'decimal') return n.toFixed(2).replace('.', ',');
+                    return Math.round(n).toLocaleString('fr-FR');
+                };
+                if (duration === 0) { e.target.textContent = fmt(target) + suffix; obs.unobserve(e.target); return; }
+                const step = (now) => {
+                    const t = Math.min(1, (now - start) / duration);
+                    const eased = 1 - Math.pow(1 - t, 3);
+                    e.target.textContent = fmt(target * eased) + suffix;
+                    if (t < 1) requestAnimationFrame(step);
+                };
+                requestAnimationFrame(step);
+            }
+            obs.unobserve(e.target);
+        });
+    }, { threshold: 0.25, rootMargin: '0px 0px -50px 0px' });
+
+    const attachIO = () => {
+        document.querySelectorAll('.reveal-io:not([data-io]), .spark-bar-io:not([data-io]), [data-countup]:not([data-io])').forEach(el => {
+            el.setAttribute('data-io', '1');
+            io.observe(el);
+        });
+    };
+
+    // ── Cursor glow (only on hovered card) ──
+    document.addEventListener('mousemove', (e) => {
+        const card = e.target.closest('.glass, .glass-strong');
+        if (!card) return;
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+        card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+    }, { passive: true });
+
+    // ── Magnetic CTAs ──
+    const attachMagnetic = () => {
+        document.querySelectorAll('.cta-red, .pill').forEach(btn => {
+            if (btn.dataset.mag) return;
+            btn.dataset.mag = '1';
+            let raf = null;
+            btn.addEventListener('mousemove', (e) => {
+                if (raf) return;
+                raf = requestAnimationFrame(() => {
+                    const r = btn.getBoundingClientRect();
+                    const dx = (e.clientX - (r.left + r.width/2)) * 0.2;
+                    const dy = (e.clientY - (r.top  + r.height/2)) * 0.25;
+                    btn.style.transform = `translate(${dx}px, ${dy}px)`;
+                    raf = null;
+                });
+            });
+            btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+        });
+    };
+
+    // ── Haptic on interactive elements ──
+    const buzz = (ms = 10) => { if ('vibrate' in navigator) navigator.vibrate(ms); };
+    document.addEventListener('change', (e) => {
+        if (e.target.matches('.compare-checkbox')) buzz(10);
+    });
+    document.addEventListener('submit', () => buzz(18));
+
+    // ── Mesh parallax ──
+    const mesh = document.querySelector('.mesh');
+    let lastY = 0, meshRaf = null;
+    window.addEventListener('scroll', () => {
+        if (reduced || !mesh) return;
+        lastY = window.scrollY;
+        if (meshRaf) return;
+        meshRaf = requestAnimationFrame(() => {
+            mesh.style.setProperty('--scroll', lastY);
+            meshRaf = null;
+        });
+    }, { passive: true });
+
+    // ── MutationObserver so Alpine-rendered content gets IO + magnetic ──
+    const mo = new MutationObserver(() => { attachIO(); attachMagnetic(); });
+    mo.observe(document.body, { childList: true, subtree: true });
+
+    document.addEventListener('DOMContentLoaded', () => { attachIO(); attachMagnetic(); });
+    if (document.readyState !== 'loading') { attachIO(); attachMagnetic(); }
+})();
+
+// ── Alpine components: Command palette + Tech modal ──
+document.addEventListener('alpine:init', () => {
+
+    Alpine.data('cmdk', () => ({
+        open: false,
+        q: '',
+        active: 0,
+        loading: false,
+        groups: [],
+        staticPages: [
+            { title: 'Accueil',        subtitle: 'Découvrir TechPulse', href: '/',             icon: '🏠', badge: 'PAGE', kw: 'home accueil decouvrir' },
+            { title: 'Offres',         subtitle: 'Recherche + filtres', href: '/search.php',   icon: '🔎', badge: 'PAGE', kw: 'offres recherche search emploi job' },
+            { title: 'Dashboard',      subtitle: 'KPI et visualisations', href: '/dashboard.php', icon: '📊', badge: 'PAGE', kw: 'dashboard stats kpi graph chart' },
+            { title: 'Comparateur',    subtitle: 'Side-by-side jusqu\'à 4 offres', href: '/compare.php', icon: '⇄', badge: 'PAGE', kw: 'compare comparer diff' },
+            { title: 'À propos',       subtitle: 'Manifesto + stack', href: '/about.php',      icon: 'ℹ', badge: 'PAGE', kw: 'about propos manifesto' },
+            { title: 'API Swagger',    subtitle: 'Documentation OpenAPI', href: 'http://localhost:5001/docs', icon: '⚡', badge: 'EXT', kw: 'api swagger docs documentation' },
+            { title: 'GitHub',         subtitle: 'Code source TechPulse', href: 'https://github.com/Bastagas/techpulse', icon: '{ }', badge: 'EXT', kw: 'github code repo source' },
+        ],
+        init() {
+            window.__cmdk = this;
+            window.addEventListener('keydown', (e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+                    e.preventDefault(); this.toggle();
+                }
+            });
+            this.search();
+        },
+        toggle() { this.open ? this.close() : this.openNow(); },
+        openNow() {
+            this.open = true; this.q = ''; this.active = 0; this.search();
+            this.$nextTick(() => this.$refs.input?.focus());
+        },
+        close() { this.open = false; },
+        async search() {
+            const q = this.q.trim().toLowerCase();
+            const iconWrap = (svg) => `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">${svg}</svg>`;
+
+            const pages = this.staticPages
+                .filter(p => !q || p.title.toLowerCase().includes(q) || p.kw.includes(q))
+                .map(p => ({ ...p, icon: p.icon.length <= 2 ? `<span class="text-base">${p.icon}</span>` : p.icon }));
+
+            const groups = [];
+            let offset = 0;
+            if (pages.length) {
+                groups.push({ label: 'Navigation', items: pages, offset });
+                offset += pages.length;
+            }
+
+            if (q.length >= 2) {
+                this.loading = true;
+                try {
+                    const res = await fetch(`/api/palette.php?q=${encodeURIComponent(q)}`);
+                    if (res.ok) {
+                        const json = await res.json();
+                        if (json.technologies?.length) {
+                            const items = json.technologies.map(t => ({
+                                title: t.display_name,
+                                subtitle: `${t.n} offre(s) · ${t.category}`,
+                                href: `/search.php?tech=${encodeURIComponent(t.canonical_name)}`,
+                                icon: `<span class="mono text-[10px]">#</span>`,
+                                badge: 'TECH',
+                            }));
+                            groups.push({ label: 'Technologies', items, offset });
+                            offset += items.length;
+                        }
+                        if (json.offers?.length) {
+                            const items = json.offers.map(o => ({
+                                title: o.title,
+                                subtitle: `${o.company_name || 'Entreprise anonyme'}${o.city ? ' · ' + o.city : ''}`,
+                                href: `/offer.php?id=${o.id}`,
+                                icon: iconWrap(`<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>`),
+                                badge: 'OFFRE',
+                            }));
+                            groups.push({ label: 'Offres', items, offset });
+                            offset += items.length;
+                        }
+                    }
+                } catch (_) {}
+                this.loading = false;
+            }
+
+            this.groups = groups;
+            this.active = 0;
+        },
+        _flat() { return this.groups.flatMap((g, gi) => g.items.map((h, hi) => ({ ...h, _idx: g.offset + hi }))); },
+        move(dir) {
+            const flat = this._flat();
+            if (!flat.length) return;
+            this.active = (this.active + dir + flat.length) % flat.length;
+            this.$nextTick(() => {
+                const el = document.querySelector('.cmdk-hit.active');
+                el?.scrollIntoView({ block: 'nearest' });
+            });
+        },
+        run() {
+            const flat = this._flat();
+            const hit = flat[this.active];
+            if (hit) window.location = hit.href;
+        },
+    }));
+
+    Alpine.data('techModal', () => ({
+        open: false, loading: false, data: null,
+        init() {
+            window.__techModal = this;
+            document.addEventListener('click', (e) => {
+                const badge = e.target.closest('.tech-badge-clickable');
+                if (badge && badge.dataset.canonical) {
+                    e.preventDefault();
+                    this.show(badge.dataset.canonical);
+                }
+            });
+        },
+        async show(canonical) {
+            this.open = true; this.loading = true; this.data = null;
+            try {
+                const res = await fetch(`/api/tech_stats.php?name=${encodeURIComponent(canonical)}`);
+                if (res.ok) this.data = await res.json();
+            } catch (_) {}
+            this.loading = false;
+        },
+        close() { this.open = false; this.data = null; },
+    }));
+});
 </script>
 
 <footer class="relative z-10 border-t border-white/5 mt-12 py-10 px-4 sm:px-6">

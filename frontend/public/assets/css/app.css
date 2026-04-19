@@ -239,3 +239,200 @@ input[type="checkbox"] {
 .prose-invert-tp h1, .prose-invert-tp h2, .prose-invert-tp h3, .prose-invert-tp h4 { color: #F1F5F9; }
 .prose-invert-tp strong { color: #F1F5F9; }
 .prose-invert-tp a { color: #EF4444; text-decoration: underline; }
+
+/* ────────────────────────────────────────────────────────
+   V4.1 — Interactive primitives
+   ──────────────────────────────────────────────────────── */
+
+/* ── Cursor-glow on glass surfaces ── */
+.glass, .glass-strong {
+  --mx: 50%; --my: 50%;
+  position: relative;
+  isolation: isolate;
+}
+.glass::after, .glass-strong::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: inherit;
+  background: radial-gradient(320px circle at var(--mx) var(--my),
+    rgba(220, 38, 38, 0.18), transparent 45%);
+  opacity: 0;
+  transition: opacity .35s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+.glass:hover::after, .glass-strong:hover::after { opacity: 1; }
+.glass > *, .glass-strong > * { position: relative; z-index: 1; }
+
+/* ── Magnetic CTAs ── */
+.cta-red, .pill {
+  transition: transform .18s cubic-bezier(.2,.8,.2,1),
+              background-color .2s ease,
+              border-color .2s ease,
+              box-shadow .3s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+}
+
+/* ── Mesh scroll parallax (JS-driven --scroll) ── */
+.mesh { --scroll: 0; }
+.mesh::before { transform: translateY(calc(var(--scroll) * -0.15px)) translateZ(0); }
+.mesh::after  { transform: translateY(calc(var(--scroll) * 0.08px)) translateZ(0); }
+.mesh > div   { transform: translateY(calc(var(--scroll) * -0.05px)) translateZ(0); }
+@media (prefers-reduced-motion: reduce) {
+  .mesh::before, .mesh::after, .mesh > div { transform: none !important; }
+}
+
+/* ── Noise shimmer ── */
+.noise::after { animation: noiseShift 2s steps(3) infinite; }
+@keyframes noiseShift {
+  0%   { background-position: 0 0; }
+  33%  { background-position: 60px -40px; }
+  66%  { background-position: -50px 90px; }
+  100% { background-position: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) { .noise::after { animation: none; } }
+
+/* ── Scroll reveal (IO-based) ── */
+.reveal-io {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .7s cubic-bezier(.22,1,.36,1),
+              transform .7s cubic-bezier(.22,1,.36,1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.reveal-io.in-view { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal-io { opacity: 1; transform: none; }
+}
+
+/* ── Spark bar: animate width from 0 on intersect ── */
+.spark-bar-io {
+  height: 4px;
+  background: linear-gradient(90deg, rgba(220,38,38,1) 0%, rgba(236,72,153,0.7) 100%);
+  border-radius: 2px;
+  width: 0;
+  transition: width 1s cubic-bezier(.22,1,.36,1);
+  transition-delay: var(--bar-delay, 0ms);
+}
+.spark-bar-io.in-view { width: var(--bar-target, 100%); }
+@media (prefers-reduced-motion: reduce) {
+  .spark-bar-io { width: var(--bar-target, 100%); transition: none; }
+}
+
+/* ── Salary progress ring ── */
+.salary-ring-track { stroke: rgba(255,255,255,0.06); }
+.salary-ring-fill {
+  stroke: url(#salaryGradient);
+  stroke-linecap: round;
+  stroke-dasharray: 0 999;
+  transition: stroke-dasharray 1.6s cubic-bezier(.22,1,.36,1);
+  transition-delay: .2s;
+  filter: drop-shadow(0 0 8px rgba(236, 72, 153, 0.5));
+}
+
+/* ── Heatmap calendaire (GitHub-style) ── */
+.cal-cell {
+  width: 11px; height: 11px; border-radius: 2px;
+  background: rgba(255,255,255,0.03);
+  transition: transform .15s ease, background-color .2s ease;
+}
+.cal-cell:hover { transform: scale(1.35); z-index: 2; }
+.cal-l1 { background: rgba(220, 38, 38, 0.18); }
+.cal-l2 { background: rgba(220, 38, 38, 0.38); }
+.cal-l3 { background: rgba(236, 72, 153, 0.58); }
+.cal-l4 { background: rgba(236, 72, 153, 0.85); box-shadow: 0 0 6px rgba(236,72,153,0.45); }
+.cal-legend-cell { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+/* ── Command palette ── */
+.cmdk-backdrop {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(5, 8, 16, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: fadeIn .18s ease-out;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.cmdk-modal {
+  position: fixed; top: 15vh; left: 50%; transform: translateX(-50%);
+  width: min(640px, 92vw); z-index: 101;
+  animation: cmdkIn .25s cubic-bezier(.22, 1, .36, 1);
+}
+@keyframes cmdkIn { from { opacity: 0; transform: translateX(-50%) translateY(-12px) scale(.97); } }
+.cmdk-input {
+  width: 100%;
+  background: transparent; border: 0; outline: 0;
+  color: #F1F5F9;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  padding: 18px 22px;
+}
+.cmdk-input::placeholder { color: rgba(148, 163, 184, 0.55); }
+.cmdk-hit {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; cursor: pointer;
+  border-radius: 12px; margin: 0 8px;
+  transition: background-color .15s ease;
+}
+.cmdk-hit.active, .cmdk-hit:hover { background: rgba(220, 38, 38, 0.12); }
+.cmdk-hit-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  color: rgba(241, 245, 249, 0.8);
+}
+.cmdk-kbd {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  padding: 2px 6px; border-radius: 5px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(148, 163, 184, 0.9);
+}
+.cmdk-group-label {
+  padding: 10px 20px 4px; text-transform: uppercase; letter-spacing: 0.12em;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(148,163,184,0.55);
+}
+
+/* ── Tech modal ── */
+.tech-modal-backdrop {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(5, 8, 16, 0.74);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  animation: fadeIn .2s ease-out;
+}
+.tech-modal {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: min(640px, 92vw); max-height: 85vh; overflow-y: auto; z-index: 101;
+  animation: cmdkIn .28s cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Clickable tech badge */
+.tech-badge-clickable {
+  cursor: pointer;
+  transition: transform .15s ease, filter .15s ease;
+}
+.tech-badge-clickable:hover { transform: translateY(-1px); filter: brightness(1.18); }
+
+/* ── View Transitions (Chromium 126+) ── */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) {
+  animation-duration: .32s;
+  animation-timing-function: cubic-bezier(.22, 1, .36, 1);
+}
+
+/* ── Pulse emerald (live indicator) ── */
+.live-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, .7);
+  animation: livePulse 2.2s cubic-bezier(.66, 0, 0, 1) infinite;
+}
+@keyframes livePulse {
+  0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, .55); }
+  70%  { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* ── Count-up anchor (prevents layout shift) ── */
+.countup {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}

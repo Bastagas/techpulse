@@ -49,21 +49,21 @@
         <span class="mono text-xs text-slate-500">màj continue</span>
     </div>
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div class="glass-strong p-5 relative overflow-hidden iridescent">
+        <div class="reveal-io glass-strong p-5 relative overflow-hidden iridescent" style="--reveal-delay: 40ms">
             <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-2">Offres actives</p>
-            <p class="text-3xl font-bold gradient-accent">{{ stats.total|number_format(0, ',', ' ') }}</p>
+            <p class="text-3xl font-bold gradient-accent countup" data-countup="{{ stats.total }}">0</p>
         </div>
-        <div class="glass-strong p-5">
+        <div class="reveal-io glass-strong p-5" style="--reveal-delay: 90ms">
             <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-2">Entreprises</p>
-            <p class="text-3xl font-bold text-white">{{ stats.companies|number_format(0, ',', ' ') }}</p>
+            <p class="text-3xl font-bold text-white countup" data-countup="{{ stats.companies }}">0</p>
         </div>
-        <div class="glass-strong p-5">
+        <div class="reveal-io glass-strong p-5" style="--reveal-delay: 140ms">
             <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-2">Villes couvertes</p>
-            <p class="text-3xl font-bold text-white">{{ stats.cities|number_format(0, ',', ' ') }}</p>
+            <p class="text-3xl font-bold text-white countup" data-countup="{{ stats.cities }}">0</p>
         </div>
-        <div class="glass-strong p-5">
+        <div class="reveal-io glass-strong p-5" style="--reveal-delay: 190ms">
             <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-2">Avec salaire</p>
-            <p class="text-3xl font-bold text-emerald-400">{{ stats.with_salary|number_format(0, ',', ' ') }}</p>
+            <p class="text-3xl font-bold text-emerald-400 countup" data-countup="{{ stats.with_salary }}">0</p>
         </div>
     </div>
     {% if stats.last_scraped %}
