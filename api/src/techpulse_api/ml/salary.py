@@ -21,15 +21,13 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.pipeline import Pipeline
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-
 from techpulse_scraper.db import get_session
-from techpulse_scraper.models import Offer, OfferTechnology, Technology
+from techpulse_scraper.models import Offer
 
 MODEL_FILE = Path(__file__).parent / "salary_model.pkl"
 
@@ -181,7 +179,7 @@ def predict_for_offer(session: Session, offer_id: int) -> SalaryPrediction | Non
     # Prédictions individuelles de chaque arbre → dispersion pour fourchette
     rf = pipeline.named_steps["model"]
     vectorizer = pipeline.named_steps["vectorizer"]
-    X = vectorizer.transform([features])
+    X = vectorizer.transform([features])  # noqa: N806 (convention scikit-learn)
     tree_predictions = np.array([tree.predict(X)[0] for tree in rf.estimators_])
 
     point = float(np.mean(tree_predictions))
@@ -209,6 +207,53 @@ def get_metadata() -> dict[str, Any] | None:
     return metadata
 
 
+def predict_from_features(
+    city: str | None,
+    department: str | None,
+    experience: str | None,
+    contract: str | None,
+    technologies: list[str],
+) -> SalaryPrediction | None:
+    """Prédit un salaire depuis des features brutes (sans offer_id existante).
+
+    Utilisé par le simulateur salaire : l'utilisateur décrit un profil,
+    on renvoie une fourchette estimée.
+    """
+    pipeline, metadata = _load_model()
+    if pipeline is None:
+        return None
+
+    features: dict[str, Any] = {
+        "city": (city or "unknown")[:50],
+        "department": (department or "unknown")[:10],
+        "experience": (experience or "unknown")[:50],
+        "contract": (contract or "unknown")[:50],
+    }
+    for tech in technologies:
+        if tech:
+            features[f"tech_{tech.strip().lower()}"] = 1
+
+    rf = pipeline.named_steps["model"]
+    vectorizer = pipeline.named_steps["vectorizer"]
+    X = vectorizer.transform([features])  # noqa: N806 (convention scikit-learn)
+    tree_predictions = np.array([tree.predict(X)[0] for tree in rf.estimators_])
+
+    point = float(np.mean(tree_predictions))
+    low = float(np.percentile(tree_predictions, 25))
+    high = float(np.percentile(tree_predictions, 75))
+    std = float(np.std(tree_predictions))
+    confidence = max(0.0, min(1.0, 1.0 - std / 15_000.0))
+
+    return SalaryPrediction(
+        point=int(round(point)),
+        low=int(round(low)),
+        high=int(round(high)),
+        confidence=round(confidence, 2),
+        training_size=metadata["training_size"],
+        feature_count=metadata["feature_count"],
+    )
+
+
 def main() -> int:
     """CLI : python -m techpulse_api.ml.salary train"""
     if len(sys.argv) < 2 or sys.argv[1] != "train":
@@ -221,7 +266,7 @@ def main() -> int:
     print(f"  R² training        : {metadata['r2_train']:.3f}")
     print(f"  Salaire médian     : {metadata['salary_median']:.0f} €")
     print(f"  Salaire moyen      : {metadata['salary_mean']:.0f} €")
-    print(f"\n  Top 10 features les plus importantes :")
+    print("\n  Top 10 features les plus importantes :")
     for f in metadata["top_features"][:10]:
         print(f"    {f['name']:40s} {f['importance']:.4f}")
     print(f"\n  Modèle sauvegardé dans : {MODEL_FILE}")

@@ -6,7 +6,7 @@ CYAN  := \033[0;36m
 GREEN := \033[0;32m
 RESET := \033[0m
 
-.PHONY: help setup up down restart logs ps scrape scrape-sample dev test lint format clean backup snapshot setup-mamp check-docker
+.PHONY: help setup up down restart logs ps scrape scrape-sample dev test lint format clean backup snapshot setup-mamp check-docker frontend-build frontend-watch scheduler-enable
 
 help: ## Affiche cette aide
 	@echo ""
@@ -98,3 +98,24 @@ snapshot: ## Génère db/techpulse_snapshot.sql (livrable prof)
 
 setup-mamp: ## Setup pour path MAMP (sans Docker) — pour grading prof
 	@bash setup_mamp.sh
+
+frontend-build: ## Build Tailwind CSS local minifié (remplace le CDN en prod)
+	@cd frontend && npm install --silent && npx tailwindcss -i src/assets/input.css -o public/assets/css/tailwind.min.css --minify
+	@echo "✓ frontend/public/assets/css/tailwind.min.css rebuilt"
+
+frontend-watch: ## Rebuild Tailwind en continu (dev)
+	@cd frontend && npx tailwindcss -i src/assets/input.css -o public/assets/css/tailwind.min.css --watch
+
+scheduler-enable: ## Active APScheduler (cron scraping quotidien 03:00 UTC)
+	@grep -q '^APSCHEDULER_ENABLED=' .env.local 2>/dev/null || echo -e '\n# Scheduler\nAPSCHEDULER_ENABLED=1\nAPSCHEDULER_CRON_HOUR=3\nAPSCHEDULER_CRON_MINUTE=0' >> .env.local
+	@sed -i.bak 's/^APSCHEDULER_ENABLED=.*/APSCHEDULER_ENABLED=1/' .env.local && rm -f .env.local.bak
+	@docker compose --profile full up -d --force-recreate api
+	@echo "✓ Scheduler activé — prochain run à 03:00 UTC"
+
+retrain: ## Réentraîne les modèles ML (salary RF + similarity TF-IDF)
+	@echo "→ Salary RandomForest…"
+	@cd api && MYSQL_HOST=127.0.0.1 .venv/bin/python -m techpulse_api.ml.salary train
+	@echo "→ TF-IDF similarity…"
+	@cd api && MYSQL_HOST=127.0.0.1 .venv/bin/python -m techpulse_api.ml.similarity train
+	@docker compose --profile full restart api
+	@echo "✓ Modèles réentraînés, API redémarrée"

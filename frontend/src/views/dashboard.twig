@@ -1,112 +1,187 @@
 {% extends 'layout.twig' %}
-{% block title %}Dashboard analytique{% endblock %}
+{% set active_page = 'dashboard' %}
+{% set ticker_total = stats.total %}
+{% set ticker_companies = stats.companies %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+{% endblock %}
 
 {% block content %}
-<section class="mb-8">
-    <h1 class="text-3xl font-bold tracking-tight">Dashboard analytique</h1>
-    <p class="mt-1 text-gray-600 dark:text-gray-400">
-        Vue d'ensemble en temps réel du marché de l'emploi tech en France.
-        {% if stats.last_scraped %}<span class="mx-2">·</span>Dernière MAJ : {{ stats.last_scraped|ago }}{% endif %}
-    </p>
+<section class="reveal flex items-end justify-between mb-8 flex-wrap gap-3" style="animation-delay: 100ms">
+    <div>
+        <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-2">Dashboard analytique</p>
+        <h1 class="text-4xl md:text-5xl font-bold tracking-[-0.03em] leading-tight">
+            Vue d'ensemble <span class="gradient-accent italic">en temps réel</span>
+        </h1>
+        {% if stats.last_scraped %}
+        <p class="text-slate-400 mt-2 mono text-sm">Dernière MAJ {{ stats.last_scraped|ago }}</p>
+        {% endif %}
+    </div>
+    <div class="flex items-center gap-2">
+        <a href="/export.php?format=csv" class="glass px-4 py-2 text-sm text-white hover:bg-white/10" style="border-radius: 9999px;">Exporter CSV</a>
+        <a href="http://localhost:5001/docs" target="_blank" rel="noopener" class="cta-red px-4 py-2 rounded-full text-sm font-medium">API Swagger</a>
+    </div>
 </section>
 
-{# ─── KPI cards ─────────────────────── #}
-<section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+{# ─── KPI ribbon ─── #}
+<section class="reveal grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6" style="animation-delay: 180ms">
     {% set kpis = [
-        {label: 'Offres actives', value: stats.total, accent: 'text-brand-600'},
-        {label: 'Entreprises', value: stats.companies, accent: 'text-purple-600'},
-        {label: 'Villes', value: stats.cities, accent: 'text-emerald-600'},
-        {label: 'Avec salaire', value: stats.with_salary, accent: 'text-amber-600'},
-        {label: 'Salaire médian', value: salary_stats.median, accent: 'text-emerald-600', suffix: ' €'},
-        {label: 'Technos uniques', value: top_techs|length, accent: 'text-pink-600', suffix: '+'}
+        {label: 'Offres actives', value: stats.total, suffix: ''},
+        {label: 'Entreprises', value: stats.companies, suffix: ''},
+        {label: 'Villes', value: stats.cities, suffix: ''},
+        {label: 'Avec salaire', value: stats.with_salary, suffix: ''},
+        {label: 'Sal. médian', value: salary_stats.median, suffix: ' €', accent: true},
+        {label: 'Technos', value: top_techs|length, suffix: '', accent: true}
     ] %}
     {% for kpi in kpis %}
-    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
-        <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 font-semibold">{{ kpi.label }}</p>
-        <p class="mt-1 text-2xl font-bold {{ kpi.accent }}">{{ (kpi.value ?? 0)|number_format(0, ',', ' ') }}{{ kpi.suffix|default('') }}</p>
+    <div class="glass-strong p-4 relative overflow-hidden">
+        {% if kpi.accent %}<div class="orb w-16 h-16 bg-pink-500/20 -top-2 -right-2"></div>{% endif %}
+        <p class="mono text-[10px] text-slate-500 uppercase tracking-widest">{{ kpi.label }}</p>
+        <p class="text-2xl md:text-3xl font-bold mt-1 countup {% if kpi.accent %}gradient-accent{% endif %}" data-countup="{{ kpi.value ?? 0 }}" data-suffix="{{ kpi.suffix }}">0{{ kpi.suffix }}</p>
     </div>
     {% endfor %}
 </section>
 
-{# ─── Row 1 : Top techs + Contrats ──── #}
-<section class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
-    <div class="lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-        <h2 class="text-lg font-semibold mb-4">Top 20 technologies demandées</h2>
+{# ─── Heatmap calendaire 90 jours ─── #}
+{% if calendar|length > 0 %}
+<section class="reveal glass-strong p-6 mb-6 relative overflow-hidden" style="animation-delay: 220ms">
+    <div class="orb w-48 h-48 bg-pink-500/15 -top-10 -right-10"></div>
+    <div class="flex items-end justify-between mb-4 flex-wrap gap-3">
+        <div>
+            <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">Activité · 90 jours glissants</p>
+            <h2 class="text-xl font-bold">Publications par jour</h2>
+        </div>
+        <div class="flex items-center gap-2 mono text-[10px] text-slate-500 uppercase tracking-widest">
+            <span>Moins</span>
+            <span class="cal-legend-cell" style="background: rgba(255,255,255,0.03);"></span>
+            <span class="cal-legend-cell cal-l1"></span>
+            <span class="cal-legend-cell cal-l2"></span>
+            <span class="cal-legend-cell cal-l3"></span>
+            <span class="cal-legend-cell cal-l4"></span>
+            <span>Plus</span>
+        </div>
+    </div>
+    {# Indexer le calendrier par date ISO (YYYY-MM-DD) #}
+    {% set cal_by_day = {} %}
+    {% for c in calendar %}{% set cal_by_day = cal_by_day|merge({(c.date): c.count}) %}{% endfor %}
+    {% set max_c = 1 %}
+    {% for c in calendar %}{% if c.count > max_c %}{% set max_c = c.count %}{% endif %}{% endfor %}
+    <div class="overflow-x-auto">
+        <div class="flex gap-[3px] py-2 min-w-max" id="calendar-heatmap"
+             data-max="{{ max_c }}"
+             data-days='{{ cal_by_day|json_encode|e('html_attr') }}'>
+            {# Grille 14 semaines × 7 jours. On génère via JS pour avoir les bonnes dates #}
+        </div>
+    </div>
+    <p class="text-xs text-slate-500 mono mt-3 flex items-center gap-2">
+        <span class="live-dot"></span>
+        <span id="calendar-summary">Chargement…</span>
+    </p>
+</section>
+{% endif %}
+
+{# ─── Row 1 : Top techs + Contrats ─── #}
+<section class="reveal grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6" style="animation-delay: 260ms">
+    <div class="lg:col-span-2 glass-strong p-6">
+        <div class="flex items-end justify-between mb-4">
+            <div>
+                <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">Classement</p>
+                <h2 class="text-xl font-bold">Top 20 technologies demandées</h2>
+            </div>
+        </div>
         <div class="h-80"><canvas id="chart-techs"></canvas></div>
     </div>
-    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-        <h2 class="text-lg font-semibold mb-4">Types de contrats</h2>
+    <div class="glass-strong p-6 relative overflow-hidden">
+        <div class="orb w-32 h-32 bg-red-500/20 -top-4 -right-4"></div>
+        <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">Répartition</p>
+        <h2 class="text-xl font-bold mb-4">Types de contrats</h2>
         <div class="h-80"><canvas id="chart-contracts"></canvas></div>
     </div>
 </section>
 
-{# ─── Row 2 : Heatmap + Salaires ─────── #}
-<section class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
-    <div class="lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-        <h2 class="text-lg font-semibold mb-4">Distribution géographique · {{ geo|length }} villes</h2>
-        <div id="map" class="h-96 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800"></div>
+{# ─── Row 2 : Heatmap + Salaires ─── #}
+<section class="reveal grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6" style="animation-delay: 340ms">
+    <div class="lg:col-span-2 glass-strong p-6">
+        <div class="flex items-end justify-between mb-4">
+            <div>
+                <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">Géographie</p>
+                <h2 class="text-xl font-bold">{{ geo|length }} villes géolocalisées</h2>
+            </div>
+            <span class="mono text-[11px] text-slate-500">API Adresse · Data Gouv</span>
+        </div>
+        <div id="map" class="h-96 rounded-2xl" style="border:1px solid rgba(255,255,255,0.06);"></div>
     </div>
-    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-        <h2 class="text-lg font-semibold mb-4">Distribution des salaires</h2>
+    <div class="glass-strong p-6 relative overflow-hidden iridescent">
+        <div class="orb w-40 h-40 bg-red-500/25 -top-6 -right-8"></div>
+        <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-2">Salaires</p>
+        <h2 class="text-xl font-bold mb-4">Distribution</h2>
         {% if salary_stats.count > 0 %}
-        <dl class="grid grid-cols-2 gap-3 mb-4">
+        <p class="text-4xl font-bold mb-6 gradient-text">{{ salary_stats.median|salary }}<span class="text-sm text-slate-400 font-normal ml-2">médian</span></p>
+        <dl class="grid grid-cols-2 gap-3 mb-4 pt-4 border-t border-white/5">
             <div>
-                <dt class="text-xs uppercase text-gray-500 dark:text-gray-400">Médiane</dt>
-                <dd class="text-xl font-bold text-emerald-600">{{ salary_stats.median|salary }}</dd>
+                <dt class="mono text-[10px] text-slate-500 uppercase">Moyenne</dt>
+                <dd class="text-lg font-semibold">{{ salary_stats.mean|number_format(0, ',', ' ') }} €</dd>
             </div>
             <div>
-                <dt class="text-xs uppercase text-gray-500 dark:text-gray-400">Moyenne</dt>
-                <dd class="text-xl font-bold">{{ salary_stats.mean|number_format(0, ',', ' ') }} €</dd>
-            </div>
-            <div>
-                <dt class="text-xs uppercase text-gray-500 dark:text-gray-400">25ᵉ percentile</dt>
+                <dt class="mono text-[10px] text-slate-500 uppercase">P25</dt>
                 <dd class="text-lg font-semibold">{{ salary_stats.p25|salary }}</dd>
             </div>
             <div>
-                <dt class="text-xs uppercase text-gray-500 dark:text-gray-400">75ᵉ percentile</dt>
+                <dt class="mono text-[10px] text-slate-500 uppercase">P75</dt>
                 <dd class="text-lg font-semibold">{{ salary_stats.p75|salary }}</dd>
             </div>
+            <div>
+                <dt class="mono text-[10px] text-slate-500 uppercase">Observations</dt>
+                <dd class="text-lg font-semibold">{{ salary_stats.count }}</dd>
+            </div>
         </dl>
-        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-200 dark:border-gray-800">
-            <span>min : {{ salary_stats.min|salary }}</span>
-            <span>max : {{ salary_stats.max|salary }}</span>
+        <div class="flex justify-between text-xs text-slate-500 mono pt-3 border-t border-white/5">
+            <span>min {{ salary_stats.min|salary }}</span>
+            <span>max {{ salary_stats.max|salary }}</span>
         </div>
-        <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
-            Calculé sur <strong>{{ salary_stats.count }}</strong> offres ayant un salaire renseigné.
-        </p>
         {% else %}
-        <p class="text-gray-500 dark:text-gray-400">Pas encore d'offres avec salaire en BDD.</p>
+        <p class="text-slate-500">Pas encore d'offres avec salaire.</p>
         {% endif %}
     </div>
 </section>
 
-{# ─── Row 3 : Villes + Timeline ──────── #}
-<section class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-        <h2 class="text-lg font-semibold mb-4">Top 15 villes</h2>
+{# ─── Row 3 : Villes + Timeline ─── #}
+<section class="reveal grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6" style="animation-delay: 420ms">
+    <div class="glass-strong p-6">
+        <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">Top 15</p>
+        <h2 class="text-xl font-bold mb-4">Villes qui recrutent</h2>
         <div class="h-80"><canvas id="chart-cities"></canvas></div>
     </div>
-    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-        <h2 class="text-lg font-semibold mb-4">Offres publiées · 30 derniers jours</h2>
+    <div class="glass-strong p-6">
+        <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">30 derniers jours</p>
+        <h2 class="text-xl font-bold mb-4">Offres publiées</h2>
         <div class="h-80"><canvas id="chart-timeline"></canvas></div>
     </div>
 </section>
 
-{# ─── Row 4 : Matrice de corrélation des technos ─────── #}
+{# ─── Corrélation matrix ─── #}
 {% if correlations.techs|length >= 3 %}
-<section class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-    <h2 class="text-lg font-semibold mb-1">Corrélation entre technologies</h2>
-    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        Probabilité conditionnelle <code class="font-mono text-xs">P(ligne | colonne)</code> :
-        dans les offres qui mentionnent la <b>colonne</b>, quel pourcentage mentionne aussi la <b>ligne</b> ?
-    </p>
+<section class="reveal glass-strong p-6 mb-6 relative overflow-hidden" style="animation-delay: 500ms">
+    <div class="orb w-64 h-64 bg-indigo-500/15 -top-20 -right-20"></div>
+    <div class="flex items-end justify-between mb-4">
+        <div>
+            <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-1">Corrélation technologies</p>
+            <h2 class="text-xl font-bold">Qui va avec qui</h2>
+            <p class="text-sm text-slate-400 mt-1">
+                <code class="mono text-xs">P(ligne | colonne)</code> — offres contenant la colonne qui contiennent aussi la ligne
+            </p>
+        </div>
+    </div>
     <div class="overflow-x-auto">
         <table class="min-w-full text-xs tabular-nums">
             <thead>
                 <tr>
-                    <th class="sticky left-0 bg-white dark:bg-gray-900 z-10 p-2 text-left font-semibold"></th>
+                    <th class="p-2"></th>
                     {% for tech in correlations.techs %}
-                    <th class="p-2 text-center font-semibold whitespace-nowrap" style="writing-mode: vertical-rl; transform: rotate(180deg); height: 110px;">
+                    <th class="p-2 text-center font-semibold whitespace-nowrap text-slate-400" style="writing-mode: vertical-rl; transform: rotate(180deg); height: 100px;">
                         {{ tech.name }}
                     </th>
                     {% endfor %}
@@ -115,18 +190,16 @@
             <tbody>
                 {% for row_tech in correlations.techs %}
                 <tr>
-                    <td class="sticky left-0 bg-white dark:bg-gray-900 z-10 p-2 text-left font-semibold whitespace-nowrap">
-                        {{ row_tech.name }}
-                    </td>
+                    <td class="p-2 text-sm font-semibold text-left whitespace-nowrap">{{ row_tech.name }}</td>
                     {% for col_tech in correlations.techs %}
                         {% if row_tech.name == col_tech.name %}
-                            <td class="p-2 text-center text-gray-400 dark:text-gray-600">—</td>
+                            <td class="p-2 text-center text-slate-600">—</td>
                         {% else %}
                             {% set match = correlations.pairs|filter(p => p.a == col_tech.name and p.b == row_tech.name)|first %}
                             {% set conf = match ? match.conf : 0 %}
                             {% set pct = (conf * 100)|round %}
-                            {% set opacity = (conf > 0 ? (0.15 + conf * 0.85)|round(2) : 0) %}
-                            <td class="p-2 text-center" style="background-color: rgba(59, 130, 246, {{ opacity }}); color: {{ conf > 0.5 ? 'white' : 'inherit' }};"
+                            {% set opacity = (conf > 0 ? (0.15 + conf * 0.7)|round(2) : 0) %}
+                            <td class="p-2 text-center transition-transform hover:scale-110 hover:z-10 relative" style="background-color: rgba(220, 38, 38, {{ opacity }}); color: {{ conf > 0.5 ? 'white' : '#cbd5e1' }};"
                                 title="{{ match ? match.count ~ ' offres communes · ' ~ pct ~ '%' : 'Aucune offre commune' }}">
                                 {{ pct > 0 ? pct ~ '%' : '·' }}
                             </td>
@@ -137,13 +210,16 @@
             </tbody>
         </table>
     </div>
-    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
-        Plus la cellule est bleue, plus la techno de la ligne est fréquente chez celles qui mentionnent la techno de la colonne.
-    </p>
+    <div class="mt-4 flex items-center gap-3 text-xs text-slate-500">
+        <span>Intensité</span>
+        <div class="h-2 w-40 rounded-full bg-gradient-to-r from-red-500/15 via-red-500/40 to-red-500/70"></div>
+        <span>+</span>
+        <span class="ml-auto mono">Hover les cellules pour le détail</span>
+    </div>
 </section>
 {% endif %}
 
-{# ─── Data bundled as JSON for JS ─────── #}
+{# ─── Data bundle ─── #}
 <script id="dashboard-data" type="application/json">
 {{ {
     top_techs: top_techs,
@@ -153,30 +229,28 @@
     geo: geo
 }|json_encode|raw }}
 </script>
+{% endblock %}
 
-{# ─── Chart.js + Leaflet ─────────────── #}
+{% block scripts_extra %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
 (() => {
     const data = JSON.parse(document.getElementById('dashboard-data').textContent);
 
     const CATEGORY_COLORS = {
-        language:    '#3b82f6', framework:   '#a855f7', database:    '#10b981',
-        cloud:       '#f97316', tool:        '#f59e0b', library:     '#ec4899',
-        methodology: '#64748b',
+        language:    '#EF4444', framework:   '#A855F7', database:    '#22D3EE',
+        cloud:       '#EC4899', tool:        '#F59E0B', library:     '#6366F1',
+        methodology: '#64748B',
     };
 
-    const dark = document.documentElement.classList.contains('dark');
-    const gridColor = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
-    const textColor = dark ? '#cbd5e1' : '#475569';
+    const gridColor = 'rgba(255,255,255,0.06)';
+    const textColor = '#94A3B8';
     Chart.defaults.color = textColor;
     Chart.defaults.borderColor = gridColor;
-    Chart.defaults.font.family = 'Inter, ui-sans-serif, system-ui, sans-serif';
+    Chart.defaults.font.family = 'Space Grotesk, ui-sans-serif, system-ui, sans-serif';
 
-    // ─── Top technos (horizontal bar) ───
+    // Top techs (horizontal bar)
     new Chart(document.getElementById('chart-techs'), {
         type: 'bar',
         data: {
@@ -200,8 +274,8 @@
         },
     });
 
-    // ─── Contracts (doughnut) ───
-    const palette = ['#3b82f6', '#a855f7', '#10b981', '#f59e0b', '#ec4899', '#64748b', '#f97316', '#14b8a6'];
+    // Contracts (doughnut)
+    const palette = ['#EF4444', '#EC4899', '#6366F1', '#22D3EE', '#F59E0B', '#A855F7', '#10B981', '#F97316'];
     new Chart(document.getElementById('chart-contracts'), {
         type: 'doughnut',
         data: {
@@ -215,12 +289,12 @@
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '60%',
-            plugins: { legend: { position: 'bottom' } },
+            cutout: '65%',
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10 } } },
         },
     });
 
-    // ─── Villes (vertical bar) ───
+    // Cities (vertical bar)
     new Chart(document.getElementById('chart-cities'), {
         type: 'bar',
         data: {
@@ -228,7 +302,7 @@
             datasets: [{
                 label: 'Offres',
                 data: data.cities.map(c => c.count),
-                backgroundColor: '#3b82f6',
+                backgroundColor: 'rgba(220, 38, 38, 0.8)',
                 borderRadius: 4,
             }],
         },
@@ -243,7 +317,7 @@
         },
     });
 
-    // ─── Timeline (line) ───
+    // Timeline (line area)
     new Chart(document.getElementById('chart-timeline'), {
         type: 'line',
         data: {
@@ -251,12 +325,15 @@
             datasets: [{
                 label: 'Offres/jour',
                 data: data.timeline.map(t => t.count),
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                borderColor: '#EF4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.15)',
                 fill: true,
                 tension: 0.3,
                 pointRadius: 3,
-                pointHoverRadius: 5,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#EF4444',
+                pointBorderColor: '#050810',
+                pointBorderWidth: 2,
             }],
         },
         options: {
@@ -270,28 +347,82 @@
         },
     });
 
-    // ─── Heatmap (Leaflet circles) ───
+    // Heatmap Leaflet
     if (data.geo.length > 0) {
-        const map = L.map('map').setView([46.7, 2.5], 6);
-        L.tileLayer(dark
-            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-            : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap &copy; CartoDB',
-            maxZoom: 18,
-        }).addTo(map);
-
+        const map = L.map('map', { attributionControl: false }).setView([46.7, 2.5], 6);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 18 }).addTo(map);
         const maxCount = Math.max(...data.geo.map(p => p.count));
         data.geo.forEach(p => {
-            const radius = 5 + (p.count / maxCount) * 25;
+            const radius = 6 + (p.count / maxCount) * 22;
             L.circleMarker([p.lat, p.lng], {
                 radius: radius,
-                fillColor: '#3b82f6',
-                color: '#1e40af',
-                weight: 1,
-                fillOpacity: 0.55,
+                fillColor: '#EF4444',
+                color: '#B91C1C',
+                weight: 1.5,
+                fillOpacity: 0.6,
             }).bindPopup(`<strong>${p.city}</strong><br>${p.count} offre${p.count > 1 ? 's' : ''}`)
               .addTo(map);
         });
+    }
+
+    // ── Heatmap calendaire 90 jours ──
+    const cal = document.getElementById('calendar-heatmap');
+    if (cal) {
+        const days = JSON.parse(cal.dataset.days);
+        const maxC = Math.max(1, parseInt(cal.dataset.max, 10));
+        const levelFor = (n) => {
+            if (!n) return 'cal-l0';
+            const r = n / maxC;
+            if (r < 0.25) return 'cal-l1';
+            if (r < 0.5)  return 'cal-l2';
+            if (r < 0.75) return 'cal-l3';
+            return 'cal-l4';
+        };
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        // 14 semaines (98 jours), aligné pour finir le dernier dimanche inclus
+        const weeks = 14;
+        const totalDays = weeks * 7;
+        const end = new Date(today);
+        end.setDate(end.getDate() + (6 - today.getDay())); // fin de la semaine en cours (dimanche)
+        const start = new Date(end);
+        start.setDate(start.getDate() - totalDays + 1);
+
+        let totalPubs = 0, activeDays = 0, maxDay = null;
+
+        const frag = document.createDocumentFragment();
+        for (let w = 0; w < weeks; w++) {
+            const col = document.createElement('div');
+            col.className = 'flex flex-col gap-[3px]';
+            for (let d = 0; d < 7; d++) {
+                const date = new Date(start);
+                date.setDate(date.getDate() + w * 7 + d);
+                const iso = date.toISOString().slice(0, 10);
+                const n = days[iso] || 0;
+                if (date > today) {
+                    const empty = document.createElement('div');
+                    empty.className = 'cal-cell';
+                    empty.style.visibility = 'hidden';
+                    col.appendChild(empty);
+                    continue;
+                }
+                const cell = document.createElement('div');
+                cell.className = 'cal-cell ' + levelFor(n);
+                cell.title = `${iso} · ${n} offre${n > 1 ? 's' : ''}`;
+                col.appendChild(cell);
+                totalPubs += n;
+                if (n > 0) activeDays++;
+                if (!maxDay || n > maxDay.n) maxDay = { iso, n };
+            }
+            frag.appendChild(col);
+        }
+        cal.appendChild(frag);
+
+        const summary = document.getElementById('calendar-summary');
+        if (summary) {
+            const avg = activeDays ? (totalPubs / activeDays).toFixed(1) : '0';
+            summary.innerHTML = `${totalPubs} publications sur ${activeDays} jour${activeDays > 1 ? 's' : ''} actif${activeDays > 1 ? 's' : ''} · moy. ${avg.replace('.', ',')}/jour · pic ${maxDay ? maxDay.n + ' le ' + maxDay.iso : '—'}`;
+        }
     }
 })();
 </script>

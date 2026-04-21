@@ -2,43 +2,123 @@
 {% block title %}Se désabonner{% endblock %}
 
 {% block content %}
+
 <section class="max-w-xl mx-auto py-8">
-    <h1 class="text-2xl font-bold mb-4">Désabonnement</h1>
+
+    <!-- ─── HEADER ─── -->
+    <div class="reveal mb-8" style="animation-delay:120ms">
+        <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-2">Alertes · gestion</p>
+        <h1 class="text-4xl font-bold tracking-[-0.03em] leading-[1.05]">
+            Désabonnement
+        </h1>
+    </div>
 
     {% if result and result.type == 'error' %}
-        <div class="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 rounded-lg p-4">
-            ❌ {{ result.msg }}
+    <!-- ─── ERROR ─── -->
+    <div class="reveal glass-strong p-6 relative overflow-hidden" style="animation-delay:200ms">
+        <div class="orb w-40 h-40 bg-red-500/20 -top-5 -right-5"></div>
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <div>
+                <p class="mono text-[10px] text-red-400 uppercase tracking-widest mb-1">Erreur</p>
+                <p class="text-slate-200">{{ result.msg }}</p>
+            </div>
         </div>
+    </div>
+
     {% elseif result and result.type == 'success' %}
-        <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-lg p-4">
-            ✓ {{ result.msg }}
+    <!-- ─── SUCCESS ─── -->
+    <div class="reveal glass-strong p-6 relative overflow-hidden iridescent" style="animation-delay:200ms">
+        <div class="orb w-40 h-40 bg-emerald-500/25 -top-5 -right-5"></div>
+        <div class="flex items-start gap-3 mb-5">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <div>
+                <p class="mono text-[10px] text-emerald-400 uppercase tracking-widest mb-1">Confirmé</p>
+                <p class="text-slate-200">{{ result.msg }}</p>
+            </div>
         </div>
-        <a href="/" class="inline-block mt-4 text-brand-600 hover:underline">← Retour à l'accueil</a>
+        <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-full pill text-sm text-white">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            Retour à l'accueil
+        </a>
+    </div>
+
     {% elseif alert %}
-        <p class="text-gray-700 dark:text-gray-300 mb-4">
-            Tu vas désactiver l'alerte pour <strong>{{ alert.email }}</strong> avec les filtres suivants :
+    <!-- ─── CONFIRM ─── -->
+    <div class="reveal glass-strong p-6 sm:p-8 relative overflow-hidden" style="animation-delay:200ms">
+        <div class="orb w-56 h-56 bg-amber-500/15 -top-10 -right-10"></div>
+
+        <div class="flex items-start gap-3 mb-5">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            </div>
+            <div>
+                <p class="mono text-[10px] text-amber-400 uppercase tracking-widest mb-1">Confirmation requise</p>
+                <h2 class="text-lg font-bold">Désactiver cette alerte ?</h2>
+            </div>
+        </div>
+
+        <p class="text-slate-300 mb-4">
+            Tu vas désactiver l'alerte pour <strong class="text-white">{{ alert.email }}</strong> avec les filtres suivants :
         </p>
-        <ul class="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 mb-6">
-            {% if alert.filter_keyword %}<li>Mot-clé : <b>{{ alert.filter_keyword }}</b></li>{% endif %}
-            {% if alert.filter_city %}<li>Ville : <b>{{ alert.filter_city }}</b></li>{% endif %}
-            {% if alert.filter_tech %}<li>Techno : <b>{{ alert.filter_tech }}</b></li>{% endif %}
-            {% if alert.filter_contract %}<li>Contrat : <b>{{ alert.filter_contract }}</b></li>{% endif %}
-            {% if alert.filter_salary_min %}<li>Salaire ≥ <b>{{ alert.filter_salary_min }} €</b></li>{% endif %}
-        </ul>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-6">
+
+        <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5 mb-5">
+            <ul class="space-y-2">
+                {% if alert.filter_keyword %}
+                <li class="flex items-center gap-2 text-sm">
+                    <span class="mono text-[10px] text-slate-500 uppercase tracking-wider min-w-[80px]">Mot-clé</span>
+                    <span class="text-slate-200">{{ alert.filter_keyword }}</span>
+                </li>
+                {% endif %}
+                {% if alert.filter_city %}
+                <li class="flex items-center gap-2 text-sm">
+                    <span class="mono text-[10px] text-slate-500 uppercase tracking-wider min-w-[80px]">Ville</span>
+                    <span class="text-slate-200">{{ alert.filter_city }}</span>
+                </li>
+                {% endif %}
+                {% if alert.filter_tech %}
+                <li class="flex items-center gap-2 text-sm">
+                    <span class="mono text-[10px] text-slate-500 uppercase tracking-wider min-w-[80px]">Techno</span>
+                    <span class="text-slate-200">{{ alert.filter_tech }}</span>
+                </li>
+                {% endif %}
+                {% if alert.filter_contract %}
+                <li class="flex items-center gap-2 text-sm">
+                    <span class="mono text-[10px] text-slate-500 uppercase tracking-wider min-w-[80px]">Contrat</span>
+                    <span class="text-slate-200">{{ alert.filter_contract }}</span>
+                </li>
+                {% endif %}
+                {% if alert.filter_salary_min %}
+                <li class="flex items-center gap-2 text-sm">
+                    <span class="mono text-[10px] text-slate-500 uppercase tracking-wider min-w-[80px]">Salaire ≥</span>
+                    <span class="text-emerald-400 font-semibold">{{ alert.filter_salary_min }} €</span>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <p class="mono text-[11px] text-slate-500 mb-6">
             Créée le {{ alert.created_at|slice(0, 10) }} · {{ alert.notification_count }} notification(s) envoyée(s)
         </p>
-        <form method="get" action="/unsubscribe.php">
+
+        <form method="get" action="/unsubscribe.php" class="flex flex-wrap items-center gap-3">
             <input type="hidden" name="token" value="{{ token }}">
             <input type="hidden" name="confirm" value="1">
-            <button type="submit"
-                    class="px-5 py-2.5 rounded-md bg-red-600 hover:bg-red-700 text-white font-medium">
+            <button type="submit" class="cta-red inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 Confirmer le désabonnement
             </button>
-            <a href="/" class="ml-3 px-5 py-2.5 rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 inline-block">
+            <a href="/" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full pill text-sm text-white">
                 Annuler
             </a>
         </form>
+    </div>
     {% endif %}
+
 </section>
+
 {% endblock %}

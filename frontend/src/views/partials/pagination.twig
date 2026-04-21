@@ -1,26 +1,24 @@
+{# Pagination V4 — glass pills #}
 {% if pages > 1 %}
-<nav class="flex items-center justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-800">
-    <p class="text-sm text-gray-600 dark:text-gray-400">
-        Page <span class="font-medium text-gray-900 dark:text-white">{{ page }}</span> sur {{ pages }}
-        <span class="mx-2">·</span>
-        <span class="font-medium text-gray-900 dark:text-white">{{ total }}</span> offres au total
+<nav class="flex items-center justify-between mt-8 pt-6 border-t border-white/5">
+    <p class="text-sm text-slate-400">
+        Page <span class="font-semibold text-white">{{ page }}</span> sur {{ pages }}
+        <span class="mx-2 text-slate-600">·</span>
+        <span class="font-semibold text-white">{{ total }}</span> offres au total
     </p>
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-1">
         {% if page > 1 %}
             <a href="?{{ query|merge({page: page - 1})|url_encode }}"
-               class="px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
-                ← Précédent
-            </a>
+               class="pill px-3 py-2 rounded-lg text-sm text-white">← Précédent</a>
         {% else %}
-            <span class="px-3 py-1.5 text-sm rounded-md border border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed">← Précédent</span>
+            <span class="px-3 py-2 text-sm text-slate-600 cursor-not-allowed">← Précédent</span>
         {% endif %}
+        <span class="px-3 text-sm mono text-slate-500">{{ page }}/{{ pages }}</span>
         {% if page < pages %}
             <a href="?{{ query|merge({page: page + 1})|url_encode }}"
-               class="px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
-                Suivant →
-            </a>
+               class="pill px-3 py-2 rounded-lg text-sm text-white">Suivant →</a>
         {% else %}
-            <span class="px-3 py-1.5 text-sm rounded-md border border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed">Suivant →</span>
+            <span class="px-3 py-2 text-sm text-slate-600 cursor-not-allowed">Suivant →</span>
         {% endif %}
     </div>
 </nav>

@@ -17,13 +17,49 @@ Documentation Swagger UI :
 
 from __future__ import annotations
 
-from flask import Flask, redirect, url_for
+import hashlib
+
+from flask import Flask, Response, make_response, redirect, request, url_for
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_smorest import Api
 
 
 def create_app() -> Flask:
     app = Flask(__name__)
+
+    # ─── Rate limiter (anti-abus) ───────────────────
+    # 120 req/min par IP par défaut ; endpoints lourds peuvent override.
+    limiter = Limiter(
+        key_func=get_remote_address,
+        app=app,
+        default_limits=["120 per minute", "2000 per hour"],
+        storage_uri="memory://",
+        headers_enabled=True,
+    )
+    app.extensions["techpulse_limiter"] = limiter
+
+    # ─── Cache ETag + Cache-Control sur GET ─────────
+    @app.after_request
+    def add_cache_headers(response: Response) -> Response:
+        if request.method != "GET" or response.status_code != 200:
+            return response
+        path = request.path
+        # Routes lourdes (analytics) → cache 60s
+        if path.startswith("/stats/") or path == "/offers":
+            response.headers.setdefault("Cache-Control", "public, max-age=60")
+        # Endpoints quasi-statiques
+        elif path in ("/health", "/version"):
+            response.headers.setdefault("Cache-Control", "public, max-age=10")
+        # ETag pour JSON responses
+        ctype = response.headers.get("Content-Type", "")
+        if "application/json" in ctype and response.data:
+            etag = hashlib.md5(response.data).hexdigest()
+            response.headers["ETag"] = f'W/"{etag}"'
+            if request.headers.get("If-None-Match") == f'W/"{etag}"':
+                return make_response("", 304)
+        return response
 
     # ─── Config flask-smorest / OpenAPI ─────────────
     app.config["API_TITLE"] = "TechPulse API"
@@ -66,12 +102,13 @@ def create_app() -> Flask:
     init_scheduler()
 
     # ─── Blueprints ────────────────────────────────
-    from techpulse_api.routes import alerts, meta, offers, stats
+    from techpulse_api.routes import alerts, meta, offers, simulator, stats
 
     api.register_blueprint(meta.blp)
     api.register_blueprint(offers.blp)
     api.register_blueprint(stats.blp)
     api.register_blueprint(alerts.blp)
+    api.register_blueprint(simulator.blp)
 
     # Root → redirige vers Swagger UI
     @app.route("/")

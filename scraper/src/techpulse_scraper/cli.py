@@ -119,8 +119,8 @@ def geocode(limit: int | None) -> None:
 @cli.command()
 def backfill_remote() -> None:
     """Recalcule remote_policy sur toutes les offres via le parser regex."""
-    from techpulse_scraper.parsers import detect_remote_policy
     from techpulse_scraper.models import Offer
+    from techpulse_scraper.parsers import detect_remote_policy
 
     updated = 0
     total = 0

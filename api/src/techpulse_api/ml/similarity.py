@@ -22,7 +22,6 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sqlalchemy import select
-
 from techpulse_scraper.db import get_session
 from techpulse_scraper.models import Offer
 
@@ -119,7 +118,6 @@ def get_similar(offer_id: int) -> list[dict]:
         return []
 
     similar_ids = [s[0] for s in similar]
-    scores = dict(similar)
 
     from sqlalchemy.orm import selectinload
 

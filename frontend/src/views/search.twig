@@ -1,49 +1,64 @@
 {% extends 'layout.twig' %}
+{% set active_page = 'search' %}
 
-{% block title %}Recherche avancée{% endblock %}
+{% block title %}Recherche{% endblock %}
 
 {% block content %}
-<section class="mb-8">
-    <h1 class="text-2xl font-bold mb-1">Recherche avancée</h1>
-    <p class="text-sm text-gray-600 dark:text-gray-400">Combine plusieurs filtres pour trouver l'offre qui te correspond.</p>
+
+<!-- Hero -->
+<section class="reveal mb-8" style="animation-delay:100ms">
+    <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-2">Recherche avancée</p>
+    <h1 class="text-4xl md:text-5xl font-bold tracking-[-0.03em]">
+        Trouve ton prochain job <span class="gradient-accent italic">en précisant ce que tu veux</span>
+    </h1>
+    <p class="text-slate-400 mt-2">6 filtres combinables · autocomplete NLP sur les technos · export CSV/JSON</p>
 </section>
 
-<form action="/search.php" method="get" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 mb-6">
+<!-- Form -->
+<form action="/search.php" method="get" class="reveal glass-strong p-6 mb-6 relative overflow-hidden" style="animation-delay:180ms">
+    <div class="orb w-40 h-40 bg-red-500/15 -top-10 -right-6"></div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
         <div class="lg:col-span-2">
-            <label class="block text-sm font-medium mb-1.5" for="keyword">Mot-clé</label>
-            <input type="text" name="keyword" id="keyword" value="{{ filters.keyword|default('') }}"
-                   placeholder="ex. data, senior, remote…"
-                   class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-brand-500 focus:ring-brand-500">
+            <label class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 block" for="keyword">Mot-clé</label>
+            <div class="relative">
+                <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" name="keyword" id="keyword" value="{{ filters.keyword|default('') }}"
+                       placeholder="ex. data, senior, remote…"
+                       class="input-field pl-11 text-sm">
+            </div>
         </div>
 
-        <div x-data="techAutocomplete('{{ filters.tech|default('')|e('js') }}')" class="relative">
-            <label class="block text-sm font-medium mb-1.5" for="tech">Technologie</label>
-            <input type="text" name="tech" id="tech" x-model="query"
-                   @input.debounce.250ms="fetchSuggestions"
-                   @focus="fetchSuggestions"
-                   @click.outside="open = false"
-                   placeholder="ex. Python, React…" autocomplete="off"
-                   class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-brand-500 focus:ring-brand-500">
-
-            <div x-show="open && suggestions.length" x-transition
-                 class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md shadow-lg max-h-60 overflow-auto">
-                <template x-for="s in suggestions" :key="s.canonical_name">
-                    <button type="button"
-                            @click="query = s.canonical_name; open = false; $el.closest('form').submit()"
-                            class="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-between">
-                        <span x-text="s.display_name"></span>
-                        <span class="text-xs text-gray-500 dark:text-gray-400" x-text="s.count + ' offres'"></span>
-                    </button>
-                </template>
+        <div x-data="techAutocomplete('{{ filters.tech|default('')|e('js') }}')" class="relative lg:col-span-2">
+            <label class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 block flex items-center gap-2" for="tech">
+                Technologie <span class="text-pink-400 mono text-[9px]">autocomplete live</span>
+            </label>
+            <div class="relative">
+                <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                <input type="text" name="tech" id="tech" x-model="query"
+                       @input.debounce.250ms="fetchSuggestions"
+                       @focus="fetchSuggestions"
+                       @click.outside="open = false"
+                       placeholder="ex. Python, React…" autocomplete="off"
+                       class="input-field pl-11 text-sm">
+                <div x-show="open && suggestions.length" x-transition
+                     class="absolute z-30 mt-2 w-full glass-strong rounded-xl p-1 shadow-2xl max-h-60 overflow-auto">
+                    <template x-for="s in suggestions" :key="s.canonical_name">
+                        <button type="button"
+                                @click="query = s.canonical_name; open = false; $el.closest('form').submit()"
+                                class="w-full text-left px-4 py-2.5 rounded-lg hover:bg-white/5 flex items-center justify-between">
+                            <span class="font-medium text-white" x-text="s.display_name"></span>
+                            <span class="mono text-xs text-slate-500" x-text="s.count + ' offres'"></span>
+                        </button>
+                    </template>
+                </div>
             </div>
         </div>
 
         <div>
-            <label class="block text-sm font-medium mb-1.5" for="city">Ville</label>
-            <select name="city" id="city"
-                    class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-brand-500 focus:ring-brand-500">
+            <label class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 block" for="city">Ville</label>
+            <select name="city" id="city" class="input-field text-sm">
                 <option value="">Toutes les villes</option>
                 {% for c in cities %}
                 <option value="{{ c }}"{% if filters.city == c %} selected{% endif %}>{{ c }}</option>
@@ -52,9 +67,8 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium mb-1.5" for="contract">Type de contrat</label>
-            <select name="contract" id="contract"
-                    class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-brand-500 focus:ring-brand-500">
+            <label class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 block" for="contract">Contrat</label>
+            <select name="contract" id="contract" class="input-field text-sm">
                 <option value="">Tous types</option>
                 {% for c in contracts %}
                 <option value="{{ c }}"{% if filters.contract == c %} selected{% endif %}>{{ c }}</option>
@@ -63,9 +77,8 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium mb-1.5" for="seniority">Séniorité</label>
-            <select name="seniority" id="seniority"
-                    class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-brand-500 focus:ring-brand-500">
+            <label class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 block" for="seniority">Séniorité</label>
+            <select name="seniority" id="seniority" class="input-field text-sm">
                 <option value="">Tous niveaux</option>
                 <option value="junior" {% if filters.seniority == 'junior' %}selected{% endif %}>Junior (0-2 ans)</option>
                 <option value="mid" {% if filters.seniority == 'mid' %}selected{% endif %}>Confirmé (3-5 ans)</option>
@@ -75,100 +88,97 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium mb-1.5" for="remote">Télétravail</label>
-            <select name="remote" id="remote"
-                    class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm focus:border-brand-500 focus:ring-brand-500">
+            <label class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 block" for="remote">Télétravail</label>
+            <select name="remote" id="remote" class="input-field text-sm">
                 <option value="">Tous</option>
-                <option value="full_remote" {% if filters.remote == 'full_remote' %}selected{% endif %}>🏠 Full remote</option>
-                <option value="hybrid" {% if filters.remote == 'hybrid' %}selected{% endif %}>↔ Hybride</option>
-                <option value="on_site" {% if filters.remote == 'on_site' %}selected{% endif %}>🏢 Sur site</option>
+                <option value="full_remote" {% if filters.remote == 'full_remote' %}selected{% endif %}>Full remote</option>
+                <option value="hybrid" {% if filters.remote == 'hybrid' %}selected{% endif %}>Hybride</option>
+                <option value="on_site" {% if filters.remote == 'on_site' %}selected{% endif %}>Sur site</option>
             </select>
         </div>
+    </div>
 
-        <div class="md:col-span-2 lg:col-span-3 flex gap-2 items-end">
-            <button type="submit"
-                    class="px-5 py-2.5 rounded-md bg-brand-600 hover:bg-brand-700 text-white font-medium">
-                Rechercher
-            </button>
-            <a href="/search.php" class="px-5 py-2.5 rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
-                Réinitialiser
-            </a>
-        </div>
+    <div class="flex items-center justify-end gap-3 mt-5 pt-5 border-t border-white/5">
+        <a href="/search.php" class="text-sm text-slate-400 hover:text-white">Réinitialiser</a>
+        <button type="submit" class="cta-red px-6 py-2.5 rounded-full font-semibold flex items-center gap-2">
+            Rechercher
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </button>
     </div>
 </form>
 
-<section>
-    <div class="flex items-center justify-between mb-4 gap-4 flex-wrap">
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-            <span class="font-semibold text-gray-900 dark:text-white">{{ offers.total }}</span> offre(s) trouvée(s)
-        </p>
-        {% if offers.total > 0 %}
-        <div class="flex gap-2 text-sm">
-            <a href="/export.php?format=csv&{{ filters|url_encode }}"
-               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
-                Export CSV
-            </a>
-            <a href="/export.php?format=json&{{ filters|url_encode }}"
-               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
-                Export JSON
-            </a>
-            {% if filters|length > 0 %}
-            <button type="button" x-data="alertModal()" @click="open = true"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-brand-600 hover:bg-brand-700 text-white font-medium">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                M'alerter
-            </button>
-            {% endif %}
-        </div>
+<!-- Results header -->
+<section class="reveal flex items-center justify-between mb-5 flex-wrap gap-3" style="animation-delay:260ms">
+    <div>
+        <p class="text-2xl font-bold"><span class="gradient-accent">{{ offers.total }} offre{{ offers.total > 1 ? 's' : '' }}</span> trouvée{{ offers.total > 1 ? 's' : '' }}</p>
+        <p class="text-sm text-slate-400">Triées par date de publication</p>
+    </div>
+    {% if offers.total > 0 %}
+    <div class="flex items-center gap-2 flex-wrap">
+        {% if filters|length > 0 %}
+        <button type="button" x-data="alertModal()" @click="open = true"
+                class="cta-red px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            M'alerter
+        </button>
         {% endif %}
+        <a href="/export.php?format=csv&{{ filters|url_encode }}"
+           class="glass px-3 py-2 text-xs text-white hover:bg-white/10 flex items-center gap-1.5" style="border-radius:9999px;">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+            CSV
+        </a>
+        <a href="/export.php?format=json&{{ filters|url_encode }}"
+           class="glass px-3 py-2 text-xs text-white hover:bg-white/10 flex items-center gap-1.5" style="border-radius:9999px;">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+            JSON
+        </a>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {% for offer in offers.items %}
-            {% include 'partials/offer_card.twig' with { offer: offer } %}
-        {% else %}
-            <p class="col-span-2 text-center py-12 text-gray-500 dark:text-gray-400">Aucune offre ne correspond à vos critères.</p>
-        {% endfor %}
-    </div>
-
-    {% include 'partials/pagination.twig' with { page: page, pages: offers.pages, total: offers.total, query: filters } %}
+    {% endif %}
 </section>
+
+<!-- Results -->
+<section class="reveal grid grid-cols-1 md:grid-cols-2 gap-4" style="animation-delay:340ms">
+    {% for offer in offers.items %}
+        {% include 'partials/offer_card.twig' with { offer: offer } %}
+    {% else %}
+        <div class="col-span-2 glass-strong p-12 text-center">
+            <p class="text-slate-400">Aucune offre ne correspond à tes critères.</p>
+            <a href="/search.php" class="inline-block mt-4 text-sm text-red-400 hover:underline">Réinitialiser les filtres</a>
+        </div>
+    {% endfor %}
+</section>
+
+{% include 'partials/pagination.twig' with { page: page, pages: offers.pages, total: offers.total, query: filters } %}
 
 {# ─── Modal alerte email ─── #}
 {% if filters|length > 0 %}
 <div x-data="alertModal()" x-show="open" x-cloak
      @keydown.escape.window="open = false"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-    <div @click.outside="open = false" class="bg-white dark:bg-gray-900 rounded-xl max-w-md w-full p-6 shadow-2xl">
-        <h2 class="text-xl font-bold mb-2">Créer une alerte email</h2>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            Reçois un email chaque fois qu'une nouvelle offre matche :
-        </p>
-        <ul class="text-xs text-gray-600 dark:text-gray-400 mb-4 space-y-0.5">
-            {% if filters.keyword %}<li>· Mot-clé : <b>{{ filters.keyword }}</b></li>{% endif %}
-            {% if filters.city %}<li>· Ville : <b>{{ filters.city }}</b></li>{% endif %}
-            {% if filters.tech %}<li>· Techno : <b>{{ filters.tech }}</b></li>{% endif %}
-            {% if filters.contract %}<li>· Contrat : <b>{{ filters.contract }}</b></li>{% endif %}
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <div @click.outside="open = false" class="glass-strong max-w-md w-full p-6 relative overflow-hidden iridescent">
+        <div class="orb w-32 h-32 bg-pink-500/25 -top-4 -right-4"></div>
+        <h2 class="text-2xl font-bold mb-2">Créer une alerte email</h2>
+        <p class="text-sm text-slate-400 mb-4">Reçois un email chaque fois qu'une nouvelle offre matche :</p>
+        <ul class="text-xs text-slate-400 mb-4 space-y-1 pl-2">
+            {% if filters.keyword %}<li>· Mot-clé : <b class="text-white">{{ filters.keyword }}</b></li>{% endif %}
+            {% if filters.city %}<li>· Ville : <b class="text-white">{{ filters.city }}</b></li>{% endif %}
+            {% if filters.tech %}<li>· Techno : <b class="text-white">{{ filters.tech }}</b></li>{% endif %}
+            {% if filters.contract %}<li>· Contrat : <b class="text-white">{{ filters.contract }}</b></li>{% endif %}
         </ul>
         <form @submit.prevent="submit">
-            <label class="block text-sm font-medium mb-1.5">Ton email</label>
+            <label class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 block">Ton email</label>
             <input type="email" x-model="email" required placeholder="toi@exemple.com"
-                   class="w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 mb-4">
+                   class="input-field mb-4 text-sm">
             <template x-if="status === 'success'">
-                <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-300 text-sm rounded p-3 mb-3">
-                    ✓ Alerte créée ! Tu recevras un email à la prochaine offre matchante.
-                </div>
+                <div class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm rounded-lg p-3 mb-3">✓ Alerte créée ! Tu recevras un email à la prochaine offre matchante.</div>
             </template>
             <template x-if="status === 'error'">
-                <div class="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-sm rounded p-3 mb-3">
-                    ❌ <span x-text="errorMessage"></span>
-                </div>
+                <div class="bg-red-500/10 border border-red-500/30 text-red-300 text-sm rounded-lg p-3 mb-3">❌ <span x-text="errorMessage"></span></div>
             </template>
             <div class="flex gap-2 justify-end">
-                <button type="button" @click="open = false" class="px-4 py-2 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">Annuler</button>
+                <button type="button" @click="open = false" class="pill px-4 py-2 rounded-full text-sm text-white">Annuler</button>
                 <button type="submit" :disabled="loading || status === 'success'"
-                        class="px-4 py-2 rounded bg-brand-600 hover:bg-brand-700 text-white disabled:opacity-50">
+                        class="cta-red px-4 py-2 rounded-full text-sm font-medium disabled:opacity-50">
                     <span x-show="!loading">Créer l'alerte</span>
                     <span x-show="loading">Envoi…</span>
                 </button>
@@ -176,65 +186,42 @@
         </form>
     </div>
 </div>
-<script>
-function alertModal() {
-    return {
-        open: false,
-        email: '',
-        loading: false,
-        status: null,
-        errorMessage: '',
-        filters: {{ filters|json_encode|raw }},
-        async submit() {
-            this.loading = true;
-            this.status = null;
-            try {
-                const response = await fetch('http://localhost:5001/alerts', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email: this.email, ...this.filters}),
-                });
-                if (response.ok) {
-                    this.status = 'success';
-                } else {
-                    const err = await response.json();
-                    this.status = 'error';
-                    this.errorMessage = err.message || err.errors ? JSON.stringify(err.errors) : 'Erreur inconnue';
-                }
-            } catch (e) {
-                this.status = 'error';
-                this.errorMessage = 'API TechPulse inaccessible (vérifie qu\'elle tourne sur :5001)';
-            } finally {
-                this.loading = false;
-            }
-        },
-    };
-}
-</script>
 {% endif %}
 
+{% endblock %}
+
+{% block scripts_extra %}
 <script>
 function techAutocomplete(initial) {
     return {
-        query: initial,
-        suggestions: [],
-        open: false,
+        query: initial, suggestions: [], open: false,
         async fetchSuggestions() {
             const q = this.query.trim();
-            if (q.length < 1) {
-                this.suggestions = [];
-                this.open = false;
-                return;
-            }
+            if (q.length < 1) { this.suggestions = []; this.open = false; return; }
             try {
                 const res = await fetch('/api/autocomplete.php?q=' + encodeURIComponent(q));
                 this.suggestions = await res.json();
                 this.open = this.suggestions.length > 0;
+            } catch (e) { this.suggestions = []; this.open = false; }
+        },
+    };
+}
+function alertModal() {
+    return {
+        open: false, email: '', loading: false, status: null, errorMessage: '',
+        filters: {{ filters|json_encode|raw }},
+        async submit() {
+            this.loading = true; this.status = null;
+            try {
+                const response = await fetch('http://localhost:5001/alerts', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email: this.email, ...this.filters}),
+                });
+                if (response.ok) { this.status = 'success'; }
+                else { const err = await response.json(); this.status = 'error'; this.errorMessage = err.message || JSON.stringify(err.errors) || 'Erreur inconnue'; }
             } catch (e) {
-                console.error(e);
-                this.suggestions = [];
-                this.open = false;
-            }
+                this.status = 'error'; this.errorMessage = 'API inaccessible (port 5001)';
+            } finally { this.loading = false; }
         },
     };
 }

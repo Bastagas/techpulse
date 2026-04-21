@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TechPulse · Observatoire #47</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Bodoni:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,700&family=Public+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:      #09090B;
+  --paper:    #FAFAFA;
+  --rule:     #E4E4E7;
+  --mute:     #71717A;
+  --surface:  #FFFFFF;
+  --highlight:#FEF3C7;
+  --pink:     #EC4899;
+  --pink-ink: #9D174D;
+  --grid:     rgba(9,9,11,0.04);
+}
+* { font-family: 'Public Sans', system-ui, sans-serif; }
+.serif { font-family: 'Libre Bodoni', serif; font-feature-settings: "liga" 1, "calt" 1; }
+.mono { font-family: 'JetBrains Mono', monospace; font-feature-settings: "tnum" 1, "zero" 1; }
+body { background: var(--paper); color: var(--ink); }
+
+.highlighter {
+  background-image: linear-gradient(180deg, transparent 55%, var(--pink) 55%, var(--pink) 95%, transparent 95%);
+  padding: 0 0.12em;
+}
+.underline-ink {
+  background-image: linear-gradient(var(--ink),var(--ink));
+  background-position: 0 100%;
+  background-size: 100% 1px;
+  background-repeat: no-repeat;
+}
+.rule-h::before {
+  content: ""; display: inline-block; vertical-align: middle;
+  width: 48px; height: 1px; background: var(--ink); margin-right: 12px;
+}
+.drop-cap::first-letter {
+  font-family: 'Libre Bodoni', serif;
+  font-weight: 800;
+  float: left;
+  font-size: 5.2em;
+  line-height: 0.88;
+  padding: 6px 10px 0 0;
+  color: var(--ink);
+}
+.number-huge {
+  font-family: 'Libre Bodoni', serif;
+  font-feature-settings: "tnum" 1, "ss01" 1;
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+}
+.pink-dot::before {
+  content: "●"; color: var(--pink); margin-right: 0.4em; font-size: 0.7em; vertical-align: middle;
+}
+.news-col { column-rule: 1px solid var(--rule); }
+.bar {
+  position: relative; height: 4px; background: var(--ink);
+  animation: barGrow 1.8s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  transform-origin: left center;
+}
+@keyframes barGrow { from { transform: scaleX(0); } }
+.hover-link:hover { background-image: linear-gradient(var(--pink),var(--pink)); background-position:0 100%; background-size:100% 2px; background-repeat:no-repeat; }
+.card-hover { transition: transform 0.2s ease; }
+.card-hover:hover { transform: translateY(-2px); }
+.paper-grid { background-image:
+  linear-gradient(var(--grid) 1px, transparent 1px),
+  linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+.marginalia {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-feature-settings: "smcp" 1;
+}
+</style>
+</head>
+<body class="antialiased">
+
+<!-- ━━━ MASTHEAD ━━━ -->
+<header class="border-b-2 border-black">
+  <div class="max-w-[1280px] mx-auto px-8 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="mono text-[10px] uppercase tracking-[0.2em]">Vendredi · 19.04.2026</span>
+      <span class="text-pink-500">●</span>
+      <span class="mono text-[10px] uppercase tracking-[0.2em]">Édition matinale</span>
+    </div>
+    <div class="flex items-center gap-6 text-xs">
+      <button class="hover-link">Se connecter</button>
+      <span class="text-zinc-400">/</span>
+      <button class="hover-link">S'abonner</button>
+    </div>
+  </div>
+  <div class="border-t border-black bg-black text-white">
+    <div class="max-w-[1280px] mx-auto px-8 py-8 text-center relative">
+      <p class="mono text-[10px] uppercase tracking-[0.4em] text-zinc-400 mb-4">Observatoire indépendant № 47</p>
+      <h1 class="serif font-extrabold text-[88px] leading-[0.85] tracking-[-0.03em]">
+        TechPulse
+        <em class="serif italic font-light text-pink-400 text-[46px] align-middle ml-4">depuis 2026</em>
+      </h1>
+      <p class="mono text-[10px] uppercase tracking-[0.25em] text-zinc-400 mt-5">Emploi Tech · France · Hebdomadaire</p>
+    </div>
+  </div>
+  <!-- Nav rail -->
+  <nav class="bg-zinc-50 border-y border-black">
+    <div class="max-w-[1280px] mx-auto px-8">
+      <ul class="flex items-center justify-between text-[13px] uppercase tracking-wider">
+        <li><a href="#" class="block px-1 py-3.5 font-semibold border-t-2 border-pink-500 -mt-[1px]">À la une</a></li>
+        <li><a href="#" class="block px-1 py-3.5 hover-link">Offres</a></li>
+        <li><a href="#" class="block px-1 py-3.5 hover-link">Tendances</a></li>
+        <li><a href="#" class="block px-1 py-3.5 hover-link">Enquêtes</a></li>
+        <li><a href="#" class="block px-1 py-3.5 hover-link">Salaires</a></li>
+        <li><a href="#" class="block px-1 py-3.5 hover-link">Villes</a></li>
+        <li><a href="#" class="block px-1 py-3.5 hover-link">Technologies</a></li>
+        <li><a href="#" class="block px-1 py-3.5 hover-link">API</a></li>
+        <li><a href="#" class="block px-1 py-3.5 hover-link">À propos</a></li>
+        <li class="ml-4"><span class="mono text-[10px] text-zinc-500">№ 47 / 2026</span></li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<main class="max-w-[1280px] mx-auto px-8 py-16">
+
+  <!-- ━━━ HERO FEATURE ━━━ -->
+  <section class="grid grid-cols-12 gap-8 mb-20">
+    <div class="col-span-8">
+      <p class="mono text-xs uppercase tracking-[0.3em] text-zinc-500 mb-6">ÉDITORIAL · TRIBUNE</p>
+      <h2 class="serif font-extrabold text-[84px] leading-[0.92] tracking-[-0.035em] mb-8">
+        L'emploi tech français&nbsp;:<br>
+        678 preuves <em class="italic font-light text-pink-500">qu'on ne pivote pas</em>
+        sur des slides.
+      </h2>
+      <p class="text-xl text-zinc-700 leading-[1.55] max-w-2xl drop-cap mb-8">
+        Chaque semaine, nos robots parcourent France Travail, HelloWork et APEC pour
+        extraire les signaux réels du marché. Pas d'agrégateur commercial, pas de
+        sponsorisation&nbsp;: de la donnée publique, classée, géolocalisée, et
+        annotée par NLP.
+      </p>
+      <div class="flex items-center gap-4 mt-10">
+        <button class="serif italic text-lg px-7 py-3.5 bg-black text-white hover:bg-pink-500 transition-colors">Commencer la lecture →</button>
+        <button class="text-sm uppercase tracking-widest hover-link">Accéder à l'API</button>
+      </div>
+    </div>
+    <aside class="col-span-4 border-l-2 border-black pl-6 relative">
+      <span class="absolute -left-3 top-0 bg-paper px-1 mono text-[10px] uppercase tracking-widest text-zinc-500" style="background:var(--paper)">En bref</span>
+      <p class="serif italic text-2xl leading-snug mb-6">
+        «&nbsp;Python grimpe de 12%, les offres en full-remote se tassent à 12% du marché, et Nantes détrône Toulouse.&nbsp;»
+      </p>
+      <p class="mono text-[10px] uppercase tracking-widest text-zinc-500 mb-8">Résumé de la semaine 16</p>
+
+      <dl class="space-y-4 text-sm">
+        <div class="flex items-baseline justify-between border-b border-zinc-200 pb-3">
+          <dt class="text-zinc-600">Nouvelles offres</dt>
+          <dd class="serif font-semibold text-xl">678</dd>
+        </div>
+        <div class="flex items-baseline justify-between border-b border-zinc-200 pb-3">
+          <dt class="text-zinc-600">Entreprises</dt>
+          <dd class="serif font-semibold text-xl">316</dd>
+        </div>
+        <div class="flex items-baseline justify-between border-b border-zinc-200 pb-3">
+          <dt class="text-zinc-600">Technos détectées</dt>
+          <dd class="serif font-semibold text-xl text-pink-500">137<span class="text-sm text-zinc-400">/202</span></dd>
+        </div>
+        <div class="flex items-baseline justify-between">
+          <dt class="text-zinc-600">Salaire médian</dt>
+          <dd class="serif font-semibold text-xl">43<span class="text-sm text-zinc-500"> 000 €</span></dd>
+        </div>
+      </dl>
+    </aside>
+  </section>
+
+  <!-- Horizontal rule -->
+  <div class="border-t-2 border-black my-12"></div>
+
+  <!-- ━━━ SECTION : Les chiffres du jour ━━━ -->
+  <section class="mb-20">
+    <div class="flex items-baseline justify-between mb-8">
+      <h3 class="serif font-extrabold text-4xl tracking-tight rule-h">Les chiffres du jour</h3>
+      <span class="mono text-[11px] uppercase tracking-widest text-zinc-500">§ I</span>
+    </div>
+
+    <div class="grid grid-cols-4 gap-8">
+      <div class="border-t-4 border-black pt-4">
+        <p class="mono text-[10px] uppercase tracking-widest text-zinc-500">Offres actives</p>
+        <p class="number-huge text-[88px] mt-1">678</p>
+        <p class="text-sm text-zinc-600 mt-2 serif italic">+12 en 24h</p>
+      </div>
+      <div class="border-t-4 border-black pt-4">
+        <p class="mono text-[10px] uppercase tracking-widest text-zinc-500">Entreprises</p>
+        <p class="number-huge text-[88px] mt-1">316</p>
+        <p class="text-sm text-zinc-600 mt-2 serif italic">Dont 42 nouvelles</p>
+      </div>
+      <div class="border-t-4 border-pink-500 pt-4">
+        <p class="mono text-[10px] uppercase tracking-widest text-pink-500">Technos détectées</p>
+        <p class="number-huge text-[88px] mt-1 text-pink-500">137</p>
+        <p class="text-sm text-zinc-600 mt-2 serif italic">Sur un référentiel de 202</p>
+      </div>
+      <div class="border-t-4 border-black pt-4">
+        <p class="mono text-[10px] uppercase tracking-widest text-zinc-500">Villes</p>
+        <p class="number-huge text-[88px] mt-1">257</p>
+        <p class="text-sm text-zinc-600 mt-2 serif italic">Géolocalisées</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ━━━ SECTION : La palme revient à… (ranking) ━━━ -->
+  <section class="grid grid-cols-12 gap-10 mb-20">
+    <div class="col-span-5">
+      <p class="mono text-[10px] uppercase tracking-widest text-zinc-500 mb-4">Classement · Semaine 16</p>
+      <h3 class="serif font-extrabold text-5xl leading-[0.95] mb-4">
+        La palme<br>
+        revient à<br>
+        <span class="highlighter">C</span>.
+      </h3>
+      <p class="serif italic text-xl text-zinc-600 leading-snug mb-6">
+        Sans surprise. Le langage historique continue de dominer,
+        porté par les offres embarqué, aérospatial et contrôle industriel.
+      </p>
+      <p class="text-sm text-zinc-600">Méthodologie&nbsp;: extraction regex + spaCy sur 202 technologies canoniques. Dédoublonnage cross-source via fingerprint SHA-256.</p>
+    </div>
+
+    <div class="col-span-7">
+      <ol class="divide-y divide-zinc-200">
+        <li class="grid grid-cols-12 items-baseline gap-4 py-4">
+          <span class="col-span-1 mono text-[11px] text-zinc-500">01</span>
+          <span class="col-span-4 serif text-3xl font-semibold">C</span>
+          <div class="col-span-5"><div class="bar" style="width: 100%;"></div></div>
+          <span class="col-span-2 text-right mono font-semibold">216</span>
+        </li>
+        <li class="grid grid-cols-12 items-baseline gap-4 py-4">
+          <span class="col-span-1 mono text-[11px] text-zinc-500">02</span>
+          <span class="col-span-4 serif text-3xl font-semibold">Java</span>
+          <div class="col-span-5"><div class="bar" style="width: 72%; animation-delay:80ms"></div></div>
+          <span class="col-span-2 text-right mono">156</span>
+        </li>
+        <li class="grid grid-cols-12 items-baseline gap-4 py-4">
+          <span class="col-span-1 mono text-[11px] text-zinc-500">03</span>
+          <span class="col-span-4 serif text-3xl font-semibold">SQL</span>
+          <div class="col-span-5"><div class="bar" style="width: 63%; animation-delay:160ms"></div></div>
+          <span class="col-span-2 text-right mono">136</span>
+        </li>
+        <li class="grid grid-cols-12 items-baseline gap-4 py-4">
+          <span class="col-span-1 mono text-[11px] text-zinc-500">04</span>
+          <span class="col-span-4 serif text-3xl font-semibold italic text-zinc-500">Agile</span>
+          <div class="col-span-5"><div class="bar" style="width: 57%; animation-delay:240ms; background:#EC4899"></div></div>
+          <span class="col-span-2 text-right mono">124</span>
+        </li>
+        <li class="grid grid-cols-12 items-baseline gap-4 py-4">
+          <span class="col-span-1 mono text-[11px] text-zinc-500">05</span>
+          <span class="col-span-4 serif text-3xl font-semibold">Angular</span>
+          <div class="col-span-5"><div class="bar" style="width: 47%; animation-delay:320ms"></div></div>
+          <span class="col-span-2 text-right mono">102</span>
+        </li>
+        <li class="grid grid-cols-12 items-baseline gap-4 py-4">
+          <span class="col-span-1 mono text-[11px] text-zinc-500">06</span>
+          <span class="col-span-4 serif text-3xl font-semibold">Python</span>
+          <div class="col-span-5"><div class="bar" style="width: 42%; animation-delay:400ms"></div></div>
+          <span class="col-span-2 text-right mono flex items-center justify-end gap-2">
+            91
+            <span class="text-pink-500 text-sm serif italic">↑ +12%</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Horizontal rule -->
+  <div class="border-t-2 border-black my-12"></div>
+
+  <!-- ━━━ SECTION : Nouvelles offres (feed) ━━━ -->
+  <section class="mb-20">
+    <div class="flex items-baseline justify-between mb-8">
+      <h3 class="serif font-extrabold text-4xl tracking-tight rule-h">Sélection de la rédaction</h3>
+      <span class="mono text-[11px] uppercase tracking-widest text-zinc-500">§ II · 7 parmi 678</span>
+    </div>
+
+    <div class="grid grid-cols-3 gap-8 news-col">
+      <!-- Article 1 (featured) -->
+      <article class="row-span-2 border-t border-black pt-4 card-hover">
+        <p class="mono text-[10px] uppercase tracking-widest text-pink-500 mb-3"><span class="pink-dot"></span>Coup de projecteur</p>
+        <h4 class="serif font-bold text-3xl leading-[1.1] tracking-tight mb-4">
+          <a href="#" class="hover:text-pink-500">Lead Developer Python — Holenek Ingénierie</a>
+        </h4>
+        <p class="serif italic text-lg text-zinc-700 leading-snug mb-4">
+          «&nbsp;Lead technique d'une équipe produit dans l'écosystème ServiceNow, avec
+          une stack Python/FastAPI et un terrain de jeu cloud natif.&nbsp;»
+        </p>
+        <p class="text-sm text-zinc-600 mb-4 leading-relaxed">
+          Nantes · CDI · 5 ans d'expérience souhaités. Télétravail partiel.
+          Dix ans de recul sur le marché montrent que ce type de poste se rémunère
+          entre 55 k€ et 70 k€, prime incluse.
+        </p>
+        <dl class="flex items-center gap-3 text-xs mb-4">
+          <span class="px-2 py-0.5 bg-pink-100 text-pink-900">Python</span>
+          <span class="px-2 py-0.5 bg-zinc-100">FastAPI</span>
+          <span class="px-2 py-0.5 bg-zinc-100">Docker</span>
+          <span class="px-2 py-0.5 bg-zinc-100">CI/CD</span>
+        </dl>
+        <p class="mono text-[10px] uppercase tracking-widest text-zinc-500">Publiée il y a 3 heures · source FT</p>
+      </article>
+
+      <!-- Articles 2-4 (compact) -->
+      <article class="border-t border-black pt-4 card-hover">
+        <p class="mono text-[10px] uppercase tracking-widest text-zinc-500 mb-2">Développement · Embarqué</p>
+        <h4 class="serif font-semibold text-xl leading-snug tracking-tight mb-3">
+          <a href="#" class="hover:text-pink-500">Développeur C# / .NET confirmé — SERA</a>
+        </h4>
+        <p class="text-sm text-zinc-700 mb-3">Clermont-Ferrand · CDD 8 mois · 3 ans</p>
+        <dl class="flex flex-wrap gap-2 text-[11px] mb-3">
+          <span class="px-2 py-0.5 bg-zinc-100">C#</span>
+          <span class="px-2 py-0.5 bg-zinc-100">.NET</span>
+          <span class="px-2 py-0.5 bg-zinc-100">Azure</span>
+        </dl>
+        <p class="mono text-[10px] text-zinc-500">il y a 5 heures</p>
+      </article>
+
+      <article class="border-t border-black pt-4 card-hover">
+        <p class="mono text-[10px] uppercase tracking-widest text-zinc-500 mb-2">Data</p>
+        <h4 class="serif font-semibold text-xl leading-snug tracking-tight mb-3">
+          <a href="#" class="hover:text-pink-500">Data Engineer Senior <em class="italic font-normal">(remote)</em></a>
+        </h4>
+        <p class="text-sm text-zinc-700 mb-3">Paris · CDI · 60-80 k€</p>
+        <dl class="flex flex-wrap gap-2 text-[11px] mb-3">
+          <span class="px-2 py-0.5 bg-zinc-100">Python</span>
+          <span class="px-2 py-0.5 bg-zinc-100">Spark</span>
+          <span class="px-2 py-0.5 bg-zinc-100">AWS</span>
+          <span class="px-2 py-0.5 bg-zinc-100">dbt</span>
+        </dl>
+        <p class="mono text-[10px] text-zinc-500">il y a 8 heures</p>
+      </article>
+
+      <article class="border-t border-black pt-4 card-hover">
+        <p class="mono text-[10px] uppercase tracking-widest text-zinc-500 mb-2">Fullstack · DOM-TOM</p>
+        <h4 class="serif font-semibold text-xl leading-snug tracking-tight mb-3">
+          <a href="#" class="hover:text-pink-500">Fullstack JS H/F — skaelia Martinique</a>
+        </h4>
+        <p class="text-sm text-zinc-700 mb-3">Lamentin · CDI · 45 k€</p>
+        <dl class="flex flex-wrap gap-2 text-[11px] mb-3">
+          <span class="px-2 py-0.5 bg-zinc-100">React</span>
+          <span class="px-2 py-0.5 bg-zinc-100">NestJS</span>
+          <span class="px-2 py-0.5 bg-zinc-100">TypeScript</span>
+        </dl>
+        <p class="mono text-[10px] text-zinc-500">il y a 12 heures</p>
+      </article>
+
+      <article class="border-t border-black pt-4 card-hover">
+        <p class="mono text-[10px] uppercase tracking-widest text-zinc-500 mb-2">Ops</p>
+        <h4 class="serif font-semibold text-xl leading-snug tracking-tight mb-3">
+          <a href="#" class="hover:text-pink-500">DevOps Engineer Kubernetes</a>
+        </h4>
+        <p class="text-sm text-zinc-700 mb-3">Toulouse · CDI · 55 k€</p>
+        <dl class="flex flex-wrap gap-2 text-[11px] mb-3">
+          <span class="px-2 py-0.5 bg-zinc-100">K8s</span>
+          <span class="px-2 py-0.5 bg-zinc-100">Terraform</span>
+          <span class="px-2 py-0.5 bg-zinc-100">Prometheus</span>
+        </dl>
+        <p class="mono text-[10px] text-zinc-500">il y a 1 jour</p>
+      </article>
+    </div>
+
+    <div class="mt-12 text-center">
+      <a href="#" class="serif italic text-lg underline-ink hover:text-pink-500">
+        → Consulter les 671 autres offres
+      </a>
+    </div>
+  </section>
+
+  <!-- Horizontal rule -->
+  <div class="border-t-2 border-black my-12"></div>
+
+  <!-- ━━━ SECTION : Géographie ━━━ -->
+  <section class="grid grid-cols-12 gap-10">
+    <div class="col-span-7">
+      <p class="mono text-[10px] uppercase tracking-widest text-zinc-500 mb-4">§ III · Géographie</p>
+      <h3 class="serif font-extrabold text-5xl tracking-tight mb-10">
+        Nantes, nouvelle<br>
+        <em class="italic font-light">capitale</em> du code français&nbsp;?
+      </h3>
+      <div class="space-y-5">
+        <div class="grid grid-cols-12 items-baseline gap-4 border-b border-zinc-200 pb-4">
+          <span class="col-span-1 mono text-xs text-zinc-500">①</span>
+          <span class="col-span-5 serif font-semibold text-2xl">Nantes <span class="text-zinc-500 text-base">(44)</span></span>
+          <div class="col-span-4"><div class="bar" style="width: 100%;"></div></div>
+          <span class="col-span-2 text-right serif font-bold text-xl">33</span>
+        </div>
+        <div class="grid grid-cols-12 items-baseline gap-4 border-b border-zinc-200 pb-4">
+          <span class="col-span-1 mono text-xs text-zinc-500">②</span>
+          <span class="col-span-5 serif font-semibold text-2xl">Toulouse <span class="text-zinc-500 text-base">(31)</span></span>
+          <div class="col-span-4"><div class="bar" style="width: 67%; animation-delay:80ms"></div></div>
+          <span class="col-span-2 text-right serif font-bold text-xl">22</span>
+        </div>
+        <div class="grid grid-cols-12 items-baseline gap-4 border-b border-zinc-200 pb-4">
+          <span class="col-span-1 mono text-xs text-zinc-500">③</span>
+          <span class="col-span-5 serif font-semibold text-2xl">Strasbourg <span class="text-zinc-500 text-base">(67)</span></span>
+          <div class="col-span-4"><div class="bar" style="width: 64%; animation-delay:160ms"></div></div>
+          <span class="col-span-2 text-right serif font-bold text-xl">21</span>
+        </div>
+        <div class="grid grid-cols-12 items-baseline gap-4 border-b border-zinc-200 pb-4">
+          <span class="col-span-1 mono text-xs text-zinc-500">④</span>
+          <span class="col-span-5 serif font-semibold text-2xl">Bordeaux <span class="text-zinc-500 text-base">(33)</span></span>
+          <div class="col-span-4"><div class="bar" style="width: 64%; animation-delay:240ms"></div></div>
+          <span class="col-span-2 text-right serif font-bold text-xl">21</span>
+        </div>
+        <div class="grid grid-cols-12 items-baseline gap-4 pb-4">
+          <span class="col-span-1 mono text-xs text-zinc-500">⑤</span>
+          <span class="col-span-5 serif font-semibold text-2xl italic text-pink-500">Montpellier <span class="text-zinc-500 text-base not-italic">(34)</span></span>
+          <div class="col-span-4"><div class="bar" style="width: 61%; animation-delay:320ms; background:#EC4899"></div></div>
+          <span class="col-span-2 text-right serif font-bold text-xl text-pink-500">20</span>
+        </div>
+      </div>
+    </div>
+    <aside class="col-span-5 border-l-2 border-black pl-8">
+      <p class="mono text-[10px] uppercase tracking-widest text-zinc-500 mb-4">Télétravail · cette semaine</p>
+      <h4 class="serif italic text-3xl leading-tight mb-8">
+        Le <em class="font-semibold not-italic">full-remote</em> reste minoritaire à 12%.
+      </h4>
+      <div class="space-y-6">
+        <div>
+          <div class="flex items-baseline justify-between mb-2">
+            <span class="serif text-xl font-semibold">Sur site</span>
+            <span class="mono text-sm">439 · 65%</span>
+          </div>
+          <div class="h-1 bg-black" style="width: 100%;"></div>
+        </div>
+        <div>
+          <div class="flex items-baseline justify-between mb-2">
+            <span class="serif text-xl font-semibold">Hybride</span>
+            <span class="mono text-sm">150 · 22%</span>
+          </div>
+          <div class="h-1 bg-black" style="width: 34%;"></div>
+        </div>
+        <div>
+          <div class="flex items-baseline justify-between mb-2">
+            <span class="serif text-xl font-semibold text-pink-500">Full-remote</span>
+            <span class="mono text-sm text-pink-500">79 · 12%</span>
+          </div>
+          <div class="h-1 bg-pink-500" style="width: 19%;"></div>
+        </div>
+      </div>
+      <p class="serif italic text-sm text-zinc-600 mt-8 pt-6 border-t border-zinc-200">
+        Méthodologie&nbsp;: détecteur regex sur titre + description, classifié sur 668 offres ayant assez de contexte.
+      </p>
+    </aside>
+  </section>
+
+</main>
+
+<!-- ━━━ FOOTER ━━━ -->
+<footer class="border-t-2 border-black bg-black text-white mt-20">
+  <div class="max-w-[1280px] mx-auto px-8 py-16">
+    <div class="grid grid-cols-12 gap-8 mb-16">
+      <div class="col-span-6">
+        <p class="serif text-6xl font-extrabold leading-[0.95] mb-6">
+          TechPulse<em class="serif italic text-pink-400 text-3xl align-middle ml-3">№ 47</em>
+        </p>
+        <p class="serif italic text-xl text-zinc-400 max-w-lg leading-relaxed">
+          Publication indépendante sur l'emploi tech français.
+          Observatoire ouvert, données publiques, méthodologie documentée.
+        </p>
+      </div>
+      <div class="col-span-2">
+        <p class="mono text-[10px] uppercase tracking-widest text-zinc-500 mb-4">Rubriques</p>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover-link">À la une</a></li>
+          <li><a href="#" class="hover-link">Offres</a></li>
+          <li><a href="#" class="hover-link">Tendances</a></li>
+          <li><a href="#" class="hover-link">Enquêtes</a></li>
+        </ul>
+      </div>
+      <div class="col-span-2">
+        <p class="mono text-[10px] uppercase tracking-widest text-zinc-500 mb-4">Données</p>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover-link">API</a></li>
+          <li><a href="#" class="hover-link">Exports CSV</a></li>
+          <li><a href="#" class="hover-link">Documentation</a></li>
+          <li><a href="#" class="hover-link">GitHub</a></li>
+        </ul>
+      </div>
+      <div class="col-span-2">
+        <p class="mono text-[10px] uppercase tracking-widest text-zinc-500 mb-4">Maison</p>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover-link">À propos</a></li>
+          <li><a href="#" class="hover-link">Méthode</a></li>
+          <li><a href="#" class="hover-link">Contact</a></li>
+          <li><a href="#" class="hover-link">Éthique</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-zinc-800 pt-6 flex items-center justify-between mono text-[11px] uppercase tracking-widest text-zinc-500">
+      <span>© 2026 · Bastien Ruedas · Observatoire indépendant</span>
+      <span>M2 Web Scraping · Université de Montpellier</span>
+      <span>Vol. I · № 47</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

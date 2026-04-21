@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recherche · TechPulse</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+/* Custom input styling */
+.input-field {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #F1F5F9;
+  transition: all 0.2s ease;
+}
+.input-field:focus {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(220,38,38,0.5);
+  box-shadow: 0 0 0 3px rgba(220,38,38,0.15);
+  outline: none;
+}
+select.input-field option { background: #0F172A; color: white; }
+.chip-remove:hover { color: #EF4444; }
+.active-tab { background: linear-gradient(135deg, #DC2626, #B91C1C); color: white; }
+</style>
+</head>
+<body class="noise body-font min-h-screen antialiased">
+<div class="mesh"><div></div></div>
+
+<!-- Ticker -->
+<div class="relative z-20 ticker-wrap">
+  <div class="ticker">
+    <span class="t-item"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span class="t-lbl">TECHPULSE.MARKET</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">LIVE</span> <span class="t-val">19.04.2026 · 17:32 UTC</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">OFFERS</span> <span class="t-val">678</span> <span class="t-up">▲ +12</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">▲ python +12% · rust +7% · typescript +5%</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span class="t-lbl">TECHPULSE.MARKET</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">LIVE</span> <span class="t-val">19.04.2026 · 17:32 UTC</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">OFFERS</span> <span class="t-val">678</span> <span class="t-up">▲ +12</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">▲ python +12% · rust +7% · typescript +5%</span></span>
+    <span class="t-sep">│</span>
+  </div>
+</div>
+
+<!-- Nav -->
+<header class="relative z-20 pt-5 px-6">
+  <div class="max-w-[1320px] mx-auto glass px-5 h-14 flex items-center justify-between" style="border-radius: 9999px;">
+    <div class="flex items-center gap-8">
+      <a href="#" class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 via-pink-500 to-indigo-500 flex items-center justify-center">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <span class="font-bold tracking-tight text-lg">techpulse</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-1 text-sm">
+        <a href="#" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">Découvrir</a>
+        <a href="#" class="px-3 py-1.5 rounded-full bg-white/5 text-white">Offres</a>
+        <a href="#" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">Dashboard</a>
+        <a href="#" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">API</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-2 text-sm">
+      <button class="px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/5">Se connecter</button>
+      <button class="cta-red px-4 py-1.5 rounded-full text-white font-medium text-sm">Démarrer</button>
+    </div>
+  </div>
+</header>
+
+<main class="relative z-10 max-w-[1320px] mx-auto px-6 py-10">
+
+  <!-- Search hero -->
+  <section class="reveal mb-8" style="animation-delay:100ms">
+    <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-2">Recherche avancée</p>
+    <h1 class="text-4xl font-bold tracking-[-0.03em]">
+      Trouve ton prochain job <span class="gradient-accent italic">en précisant ce que tu veux</span>
+    </h1>
+    <p class="text-slate-400 mt-2">6 filtres combinables · autocomplete NLP sur les technos · export CSV/JSON</p>
+  </section>
+
+  <!-- Form -->
+  <section class="reveal glass-strong p-6 mb-6 relative overflow-hidden" style="animation-delay:180ms">
+    <div class="orb w-40 h-40 bg-red-500/15 -top-10 -right-6"></div>
+    <div class="grid grid-cols-12 gap-3">
+      <!-- Keyword -->
+      <div class="col-span-6 relative">
+        <label class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 block">Mot-clé</label>
+        <div class="relative">
+          <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" placeholder="ex: lead, senior, data engineer..." value="lead python"
+                 class="input-field w-full pl-11 pr-4 py-3 rounded-xl text-sm">
+        </div>
+      </div>
+
+      <!-- Tech with autocomplete -->
+      <div class="col-span-6 relative">
+        <label class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 block flex items-center gap-2">
+          Technologie
+          <span class="text-pink-400 mono text-[9px]">autocomplete live</span>
+        </label>
+        <div class="relative">
+          <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          <input type="text" placeholder="Commence à taper..." value="py"
+                 class="input-field w-full pl-11 pr-4 py-3 rounded-xl text-sm">
+          <!-- Dropdown -->
+          <div class="absolute z-30 left-0 right-0 top-full mt-2 glass-strong rounded-xl p-1 shadow-2xl">
+            <button class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg hover:bg-white/5 group">
+              <span class="flex items-center gap-3">
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 mono">lang</span>
+                <span class="font-medium">Python</span>
+              </span>
+              <span class="mono text-xs text-slate-500">91 offres</span>
+            </button>
+            <button class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg hover:bg-white/5 group">
+              <span class="flex items-center gap-3">
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 mono">lang</span>
+                <span class="font-medium">PyTorch</span>
+              </span>
+              <span class="mono text-xs text-slate-500">18 offres</span>
+            </button>
+            <button class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg hover:bg-white/5 group">
+              <span class="flex items-center gap-3">
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400 mono">fw</span>
+                <span class="font-medium">PyScript</span>
+              </span>
+              <span class="mono text-xs text-slate-500">2 offres</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- City -->
+      <div class="col-span-3">
+        <label class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 block">Ville</label>
+        <select class="input-field w-full px-4 py-3 rounded-xl text-sm">
+          <option>Toutes les villes</option>
+          <option selected>Nantes</option>
+          <option>Toulouse</option>
+          <option>Bordeaux</option>
+          <option>Strasbourg</option>
+          <option>Montpellier</option>
+          <option>Paris</option>
+        </select>
+      </div>
+
+      <!-- Contract -->
+      <div class="col-span-3">
+        <label class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 block">Contrat</label>
+        <select class="input-field w-full px-4 py-3 rounded-xl text-sm">
+          <option>Tous types</option>
+          <option selected>CDI</option>
+          <option>CDD</option>
+          <option>Freelance</option>
+          <option>Stage</option>
+          <option>Alternance</option>
+        </select>
+      </div>
+
+      <!-- Seniority -->
+      <div class="col-span-3">
+        <label class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 block">Séniorité</label>
+        <select class="input-field w-full px-4 py-3 rounded-xl text-sm">
+          <option>Tous niveaux</option>
+          <option>Junior (0-2 ans)</option>
+          <option>Confirmé (3-5 ans)</option>
+          <option selected>Senior (5+ ans)</option>
+          <option>Lead / Principal</option>
+        </select>
+      </div>
+
+      <!-- Remote -->
+      <div class="col-span-3">
+        <label class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-1.5 block">Télétravail</label>
+        <select class="input-field w-full px-4 py-3 rounded-xl text-sm">
+          <option>Tous</option>
+          <option selected>Full remote</option>
+          <option>Hybride</option>
+          <option>Sur site</option>
+        </select>
+      </div>
+
+      <!-- Salary min slider -->
+      <div class="col-span-12 pt-3">
+        <div class="flex items-baseline justify-between mb-2">
+          <label class="mono text-[10px] text-slate-500 uppercase tracking-widest">Salaire minimum</label>
+          <span class="text-lg font-semibold"><span class="gradient-accent">50</span> k€</span>
+        </div>
+        <div class="relative h-2 bg-white/5 rounded-full">
+          <div class="absolute inset-y-0 left-0 w-[38%] bg-gradient-to-r from-red-500 via-pink-500 to-indigo-500 rounded-full"></div>
+          <div class="absolute top-1/2 -translate-y-1/2 left-[38%] -translate-x-1/2 w-5 h-5 bg-white rounded-full shadow-xl ring-2 ring-red-500"></div>
+        </div>
+        <div class="flex justify-between mt-2 mono text-[10px] text-slate-500">
+          <span>20k</span><span>50k</span><span>80k</span><span>110k</span><span>150k+</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active filter chips -->
+    <div class="flex items-center flex-wrap gap-2 mt-6 pt-4 border-t border-white/5">
+      <span class="mono text-[10px] text-slate-500 uppercase tracking-widest mr-1">Filtres actifs (5)</span>
+      <span class="pill inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs">
+        mot-clé: <strong>lead python</strong>
+        <button class="chip-remove text-slate-500 hover:text-red-400 text-sm leading-none">×</button>
+      </span>
+      <span class="pill inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs">
+        tech: <strong>Python</strong>
+        <button class="chip-remove text-slate-500 hover:text-red-400 text-sm leading-none">×</button>
+      </span>
+      <span class="pill inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs">
+        ville: <strong>Nantes</strong>
+        <button class="chip-remove text-slate-500 hover:text-red-400 text-sm leading-none">×</button>
+      </span>
+      <span class="pill inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs">
+        contrat: <strong>CDI</strong>
+        <button class="chip-remove text-slate-500 hover:text-red-400 text-sm leading-none">×</button>
+      </span>
+      <span class="pill inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs">
+        télétravail: <strong>Full remote</strong>
+        <button class="chip-remove text-slate-500 hover:text-red-400 text-sm leading-none">×</button>
+      </span>
+      <button class="text-xs text-slate-500 hover:text-white ml-2 underline">Réinitialiser</button>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center justify-end gap-3 mt-5">
+      <button class="glass px-5 py-2.5 text-sm text-white hover:bg-white/10" style="border-radius:9999px;">Sauvegarder la recherche</button>
+      <button class="cta-red px-6 py-2.5 rounded-full text-white font-semibold flex items-center gap-2">
+        Rechercher
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- Results header with actions -->
+  <section class="reveal flex items-center justify-between mb-5 flex-wrap gap-3" style="animation-delay:260ms">
+    <div>
+      <p class="text-2xl font-bold"><span class="gradient-accent">42 offres</span> trouvées</p>
+      <p class="text-sm text-slate-400">Triées par pertinence · page 1 sur 3</p>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <!-- Sort -->
+      <select class="input-field px-4 py-2 rounded-full text-sm">
+        <option>Plus récentes</option>
+        <option>Pertinence</option>
+        <option>Salaire ↓</option>
+        <option>Salaire ↑</option>
+      </select>
+      <!-- Alert -->
+      <button class="cta-red px-4 py-2 rounded-full text-sm text-white font-medium flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        M'alerter
+      </button>
+      <!-- Export -->
+      <div class="flex gap-1">
+        <button class="glass px-3 py-2 text-xs text-white hover:bg-white/10 flex items-center gap-1.5" style="border-radius:9999px;">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+          CSV
+        </button>
+        <button class="glass px-3 py-2 text-xs text-white hover:bg-white/10 flex items-center gap-1.5" style="border-radius:9999px;">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+          JSON
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results grid -->
+  <section class="reveal grid grid-cols-1 gap-3 mb-10" style="animation-delay:340ms">
+    <!-- Result card with checkbox (for compare) -->
+    <div class="relative group">
+      <label class="absolute top-4 left-4 z-10 cursor-pointer">
+        <input type="checkbox" checked class="w-4 h-4 rounded border-white/20 bg-white/5 text-red-500 focus:ring-red-500 focus:ring-offset-0">
+      </label>
+      <a href="#" class="block glass-strong p-5 pl-12 hover:bg-white/[0.06] transition-all relative overflow-hidden">
+        <div class="orb w-40 h-40 bg-red-500/10 -top-8 -right-4 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="flex items-start justify-between gap-4 mb-3">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono uppercase tracking-wider">Featured</span>
+              <span class="px-2 py-0.5 rounded-full bg-white/5 text-slate-300 text-[10px] mono">CDI</span>
+              <span class="px-2 py-0.5 rounded-full bg-white/5 text-slate-300 text-[10px] mono">Senior</span>
+              <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] mono">Remote</span>
+              <span class="mono text-[10px] text-slate-500 ml-auto">il y a 3h</span>
+            </div>
+            <h3 class="text-xl font-bold mb-1 group-hover:text-red-400 transition-colors">Lead Developer Python</h3>
+            <p class="text-sm text-slate-400 mb-3">Holenek Ingénierie · Nantes (44)</p>
+            <p class="text-sm text-slate-300 mb-3 line-clamp-1">Architecte les services backend Python/FastAPI de nos produits phares, encadre une équipe de 4 développeurs…</p>
+            <div class="flex gap-1.5 flex-wrap">
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Python</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">FastAPI</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Docker</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Kubernetes</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">AWS</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">+ 7</span>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <p class="text-lg font-semibold text-emerald-400">55 – 70 k€</p>
+            <p class="mono text-[10px] text-slate-500 mt-1">Hybride · 2j/sem</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="relative group">
+      <label class="absolute top-4 left-4 z-10 cursor-pointer">
+        <input type="checkbox" checked class="w-4 h-4 rounded border-white/20 bg-white/5 text-red-500 focus:ring-red-500 focus:ring-offset-0">
+      </label>
+      <a href="#" class="block glass-strong p-5 pl-12 hover:bg-white/[0.06] transition-all relative overflow-hidden">
+        <div class="flex items-start justify-between gap-4 mb-3">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono uppercase">CDI</span>
+              <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Senior</span>
+              <span class="mono text-[10px] text-slate-500 ml-auto">il y a 8h</span>
+            </div>
+            <h3 class="text-xl font-bold mb-1 group-hover:text-red-400 transition-colors">Senior Python Engineer · Plateforme data</h3>
+            <p class="text-sm text-slate-400 mb-3">Datadog France · Paris (75)</p>
+            <p class="text-sm text-slate-300 mb-3 line-clamp-1">Conception et évolution de la plateforme data/observabilité, scale challenges sur pipelines…</p>
+            <div class="flex gap-1.5 flex-wrap">
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Python</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Go</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Kafka</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Kubernetes</span>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <p class="text-lg font-semibold text-emerald-400">65 – 85 k€</p>
+            <p class="mono text-[10px] text-slate-500 mt-1">Hybride · 3j/sem</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="relative group">
+      <label class="absolute top-4 left-4 z-10 cursor-pointer">
+        <input type="checkbox" class="w-4 h-4 rounded border-white/20 bg-white/5 text-red-500 focus:ring-red-500 focus:ring-offset-0">
+      </label>
+      <a href="#" class="block glass-strong p-5 pl-12 hover:bg-white/[0.06] transition-all relative overflow-hidden">
+        <div class="flex items-start justify-between gap-4 mb-3">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono">CDI</span>
+              <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Senior</span>
+              <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] mono">Full remote</span>
+              <span class="mono text-[10px] text-slate-500 ml-auto">il y a 1j</span>
+            </div>
+            <h3 class="text-xl font-bold mb-1 group-hover:text-red-400 transition-colors">Tech Lead Backend Python</h3>
+            <p class="text-sm text-slate-400 mb-3">OVHcloud · Roubaix / remote</p>
+            <p class="text-sm text-slate-300 mb-3 line-clamp-1">Tech lead technique sur les services Python de notre plateforme hébergement et cloud sovereign…</p>
+            <div class="flex gap-1.5 flex-wrap">
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Python</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Django</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">PostgreSQL</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Docker</span>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <p class="text-lg font-semibold text-emerald-400">60 – 78 k€</p>
+            <p class="mono text-[10px] text-slate-500 mt-1">🏠 Full remote</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="relative group">
+      <label class="absolute top-4 left-4 z-10 cursor-pointer">
+        <input type="checkbox" class="w-4 h-4 rounded border-white/20 bg-white/5 text-red-500 focus:ring-red-500 focus:ring-offset-0">
+      </label>
+      <a href="#" class="block glass-strong p-5 pl-12 hover:bg-white/[0.06] transition-all">
+        <div class="flex items-start justify-between gap-4 mb-3">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono">CDI</span>
+              <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Senior</span>
+              <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] mono">Full remote</span>
+              <span class="mono text-[10px] text-slate-500 ml-auto">il y a 2j</span>
+            </div>
+            <h3 class="text-xl font-bold mb-1 group-hover:text-red-400 transition-colors">Lead Backend Engineer · Python/Go</h3>
+            <p class="text-sm text-slate-400 mb-3">Qonto · Paris</p>
+            <p class="text-sm text-slate-300 mb-3 line-clamp-1">Lead technique sur nos microservices fintech, stack Python/Go, focus ownership et mentorat…</p>
+            <div class="flex gap-1.5 flex-wrap">
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Python</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Go</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">FastAPI</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Kafka</span>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <p class="text-lg font-semibold text-emerald-400">70 – 95 k€</p>
+            <p class="mono text-[10px] text-slate-500 mt-1">🏠 Full remote EU</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="relative group opacity-90">
+      <label class="absolute top-4 left-4 z-10 cursor-pointer">
+        <input type="checkbox" class="w-4 h-4 rounded border-white/20 bg-white/5 text-red-500 focus:ring-red-500 focus:ring-offset-0">
+      </label>
+      <a href="#" class="block glass-strong p-5 pl-12 hover:bg-white/[0.06] transition-all">
+        <div class="flex items-start justify-between gap-4 mb-3">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono">CDI</span>
+              <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Senior</span>
+              <span class="mono text-[10px] text-slate-500 ml-auto">il y a 3j</span>
+            </div>
+            <h3 class="text-xl font-bold mb-1 group-hover:text-red-400 transition-colors">Staff Engineer Python · Platform</h3>
+            <p class="text-sm text-slate-400 mb-3">Alan · Paris</p>
+            <div class="flex gap-1.5 flex-wrap">
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Python</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Django</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">GraphQL</span>
+              <span class="pill px-2 py-0.5 text-[11px] rounded-full">Kubernetes</span>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <p class="text-lg font-semibold text-emerald-400">75 – 100 k€</p>
+            <p class="mono text-[10px] text-slate-500 mt-1">Hybride</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Pagination -->
+  <section class="reveal flex items-center justify-between mb-8" style="animation-delay:420ms">
+    <p class="text-sm text-slate-400">Affichage <strong class="text-white">1 – 5</strong> sur <strong class="text-white">42</strong></p>
+    <div class="flex items-center gap-1">
+      <button class="pill px-3 py-2 rounded-lg text-slate-400">← Précédent</button>
+      <button class="w-9 h-9 rounded-lg bg-red-500 text-white font-semibold text-sm">1</button>
+      <button class="w-9 h-9 rounded-lg text-slate-400 hover:bg-white/5 text-sm">2</button>
+      <button class="w-9 h-9 rounded-lg text-slate-400 hover:bg-white/5 text-sm">3</button>
+      <button class="pill px-3 py-2 rounded-lg text-white">Suivant →</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- Compare floating bar (since 2 items checked) -->
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 glass-strong px-5 py-3 flex items-center gap-4 shadow-2xl" style="border-radius: 9999px;">
+  <div class="flex items-center gap-2">
+    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center text-xs font-bold">2</div>
+    <span class="text-sm">offres sélectionnées</span>
+  </div>
+  <div class="w-px h-6 bg-white/10"></div>
+  <button class="cta-red px-4 py-2 rounded-full text-white font-semibold text-sm flex items-center gap-2">
+    Comparer →
+  </button>
+  <button class="text-slate-400 hover:text-white text-lg leading-none">×</button>
+</div>
+
+<!-- Footer -->
+<footer class="relative z-10 border-t border-white/5 mt-8 py-10 px-6 pb-32">
+  <div class="max-w-[1320px] mx-auto flex items-center justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-6">
+      <a href="#" class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 via-pink-500 to-indigo-500"></div>
+        <span class="font-bold tracking-tight">techpulse</span>
+      </a>
+      <span class="text-slate-600 text-sm">© 2026 · Bastien Ruedas</span>
+    </div>
+    <div class="flex items-center gap-6 text-sm text-slate-400">
+      <a href="#" class="hover:text-white">GitHub</a>
+      <a href="#" class="hover:text-white">API</a>
+      <a href="#" class="hover:text-white">Mentions</a>
+    </div>
+    <div class="mono text-[10px] text-slate-600 tracking-widest uppercase">M2 · Montpellier</div>
+  </div>
+</footer>
+</body>
+</html>

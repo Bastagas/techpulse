@@ -1,87 +1,173 @@
 {% extends 'layout.twig' %}
+{% set active_page = 'compare' %}
 {% block title %}Comparateur{% endblock %}
 
 {% block content %}
-<section class="mb-6">
-    <h1 class="text-2xl font-bold mb-1">Comparateur d'offres</h1>
-    <p class="text-sm text-gray-600 dark:text-gray-400">
-        Compare jusqu'à 4 offres côté à côté. Coche les offres depuis la recherche puis clique "Comparer".
+
+<!-- ─── HEADER ─── -->
+<section class="reveal mb-8" style="animation-delay:120ms">
+    <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-2">Side-by-side · analyse comparée</p>
+    <h1 class="text-4xl sm:text-5xl font-bold tracking-[-0.03em] leading-[1.05] mb-3">
+        Comparateur <span class="gradient-accent">d'offres</span>
+    </h1>
+    <p class="text-slate-400 max-w-2xl">
+        Compare jusqu'à 4 offres côte à côte. Coche les offres depuis la recherche puis clique "Comparer".
     </p>
 </section>
 
 {% if offers|length == 0 %}
-<div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-8 text-center">
-    <p class="text-gray-500 dark:text-gray-400 mb-4">Aucune offre sélectionnée.</p>
-    <a href="/search.php" class="inline-block px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md">
-        ← Retour à la recherche
+<!-- ─── EMPTY STATE ─── -->
+<div class="reveal glass-strong p-12 text-center relative overflow-hidden iridescent" style="animation-delay:200ms">
+    <div class="orb w-72 h-72 bg-indigo-500/20 -top-10 left-1/2 -translate-x-1/2"></div>
+    <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-5">
+        <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+    </div>
+    <h2 class="text-2xl font-bold mb-2">Aucune offre sélectionnée</h2>
+    <p class="text-slate-400 mb-6 max-w-md mx-auto">
+        Rends-toi sur la page recherche, coche les cases à gauche des offres qui t'intéressent, puis reviens ici.
+    </p>
+    <a href="/search.php" class="cta-red inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Retour à la recherche
     </a>
 </div>
 {% else %}
 
-<div class="overflow-x-auto">
-<table class="min-w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
-    <thead>
-        <tr>
-            <th class="sticky left-0 bg-gray-50 dark:bg-gray-800 p-3 text-left font-semibold text-sm border-b border-gray-200 dark:border-gray-800" style="width:180px;">Critère</th>
-            {% for offer in offers %}
-            <th class="p-3 text-left border-b border-gray-200 dark:border-gray-800 align-top" style="min-width: 280px;">
-                <a href="/offer.php?id={{ offer.id }}" class="font-semibold text-brand-600 dark:text-brand-400 hover:underline line-clamp-2">{{ offer.title }}</a>
-                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ offer.company_name }}</p>
-            </th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody class="text-sm">
-        <tr>
-            <td class="sticky left-0 bg-gray-50 dark:bg-gray-800 p-3 font-medium border-b border-gray-100 dark:border-gray-800">Ville</td>
-            {% for o in offers %}<td class="p-3 border-b border-gray-100 dark:border-gray-800">{{ o.city ?: '—' }}{% if o.department_code %} ({{ o.department_code }}){% endif %}</td>{% endfor %}
-        </tr>
-        <tr>
-            <td class="sticky left-0 bg-gray-50 dark:bg-gray-800 p-3 font-medium border-b border-gray-100 dark:border-gray-800">Contrat</td>
-            {% for o in offers %}<td class="p-3 border-b border-gray-100 dark:border-gray-800">{{ o.contract_type ?: '—' }}</td>{% endfor %}
-        </tr>
-        <tr>
-            <td class="sticky left-0 bg-gray-50 dark:bg-gray-800 p-3 font-medium border-b border-gray-100 dark:border-gray-800">Expérience</td>
-            {% for o in offers %}<td class="p-3 border-b border-gray-100 dark:border-gray-800">{{ o.experience_level ?: '—' }}</td>{% endfor %}
-        </tr>
-        <tr>
-            <td class="sticky left-0 bg-gray-50 dark:bg-gray-800 p-3 font-medium border-b border-gray-100 dark:border-gray-800">Séniorité (ML)</td>
-            {% for o in offers %}<td class="p-3 border-b border-gray-100 dark:border-gray-800">
-                {% set senLabels = {junior: 'Junior', mid: 'Confirmé', senior: 'Senior', lead: 'Lead'} %}
-                {{ senLabels[o.seniority]|default('—') }}
-            </td>{% endfor %}
-        </tr>
-        <tr>
-            <td class="sticky left-0 bg-gray-50 dark:bg-gray-800 p-3 font-medium border-b border-gray-100 dark:border-gray-800">Télétravail</td>
-            {% for o in offers %}<td class="p-3 border-b border-gray-100 dark:border-gray-800">
-                {% set remLabels = {full_remote: '🏠 Full remote', hybrid: '↔ Hybride', on_site: '🏢 Sur site'} %}
-                {{ remLabels[o.remote_policy]|default('—') }}
-            </td>{% endfor %}
-        </tr>
-        <tr>
-            <td class="sticky left-0 bg-gray-50 dark:bg-gray-800 p-3 font-medium border-b border-gray-100 dark:border-gray-800">Salaire</td>
-            {% for o in offers %}<td class="p-3 border-b border-gray-100 dark:border-gray-800 font-semibold text-emerald-600 dark:text-emerald-400">
-                {% if o.salary_min %}{{ o.salary_min|salary }}{% if o.salary_max and o.salary_max > o.salary_min %} – {{ o.salary_max|salary }}{% endif %}{% else %}—{% endif %}
-            </td>{% endfor %}
-        </tr>
-        <tr>
-            <td class="sticky left-0 bg-gray-50 dark:bg-gray-800 p-3 font-medium border-b border-gray-100 dark:border-gray-800 align-top">Technologies</td>
-            {% for o in offers %}<td class="p-3 border-b border-gray-100 dark:border-gray-800 align-top">
-                <div class="flex flex-wrap gap-1">
-                    {% for tech in o.technologies %}
-                        {% include 'partials/tech_badge.twig' with { tech: tech } %}
-                    {% else %}<span class="text-gray-400">—</span>{% endfor %}
-                </div>
-            </td>{% endfor %}
-        </tr>
-        <tr>
-            <td class="sticky left-0 bg-gray-50 dark:bg-gray-800 p-3 font-medium align-top">Extrait</td>
-            {% for o in offers %}<td class="p-3 align-top text-xs text-gray-600 dark:text-gray-400">
-                {{ o.description|excerpt(250) }}
-            </td>{% endfor %}
-        </tr>
-    </tbody>
-</table>
+<!-- ─── COMPARATIVE TABLE ─── -->
+<section class="reveal glass-strong p-0 mb-8 overflow-hidden" style="animation-delay:200ms">
+    <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+            <thead>
+                <tr class="border-b border-white/5">
+                    <th class="sticky left-0 z-10 bg-[#0F0F12] p-4 text-left mono text-[10px] uppercase tracking-widest text-slate-500" style="width:200px;">
+                        Critère
+                    </th>
+                    {% for offer in offers %}
+                    <th class="p-4 text-left align-top border-l border-white/5" style="min-width: 300px;">
+                        <a href="/offer.php?id={{ offer.id }}" class="block group">
+                            <h3 class="font-semibold text-white group-hover:text-red-400 transition-colors line-clamp-2 leading-snug mb-1">
+                                {{ offer.title }}
+                            </h3>
+                            <p class="text-xs text-slate-400">{{ offer.company_name }}</p>
+                        </a>
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+
+                <!-- Ville -->
+                <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                    <td class="sticky left-0 z-10 bg-[#0F0F12] p-4 mono text-[11px] uppercase tracking-wider text-slate-400">Ville</td>
+                    {% for o in offers %}
+                    <td class="p-4 border-l border-white/5">
+                        {% if o.city %}<span class="text-slate-200">{{ o.city }}{% if o.department_code %} <span class="text-slate-500 mono text-xs">({{ o.department_code }})</span>{% endif %}</span>{% else %}<span class="text-slate-600">—</span>{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <!-- Contrat -->
+                <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                    <td class="sticky left-0 z-10 bg-[#0F0F12] p-4 mono text-[11px] uppercase tracking-wider text-slate-400">Contrat</td>
+                    {% for o in offers %}
+                    <td class="p-4 border-l border-white/5">
+                        {% if o.contract_type %}
+                        <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono uppercase tracking-wider">{{ o.contract_type }}</span>
+                        {% else %}<span class="text-slate-600">—</span>{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <!-- Expérience -->
+                <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                    <td class="sticky left-0 z-10 bg-[#0F0F12] p-4 mono text-[11px] uppercase tracking-wider text-slate-400">Expérience</td>
+                    {% for o in offers %}
+                    <td class="p-4 border-l border-white/5">
+                        {% if o.experience_level %}<span class="text-slate-200">{{ o.experience_level }}</span>{% else %}<span class="text-slate-600">—</span>{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <!-- Séniorité -->
+                <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                    <td class="sticky left-0 z-10 bg-[#0F0F12] p-4 mono text-[11px] uppercase tracking-wider text-slate-400">Séniorité · ML</td>
+                    {% for o in offers %}
+                    <td class="p-4 border-l border-white/5">
+                        {% set senLabels = {junior: 'Junior', mid: 'Confirmé', senior: 'Senior', lead: 'Lead'} %}
+                        {% if o.seniority %}
+                        <span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 text-[10px] mono uppercase tracking-wider">{{ senLabels[o.seniority] }}</span>
+                        {% else %}<span class="text-slate-600">—</span>{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <!-- Télétravail -->
+                <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                    <td class="sticky left-0 z-10 bg-[#0F0F12] p-4 mono text-[11px] uppercase tracking-wider text-slate-400">Télétravail</td>
+                    {% for o in offers %}
+                    <td class="p-4 border-l border-white/5">
+                        {% if o.remote_policy == 'full_remote' %}
+                        <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] mono uppercase tracking-wider">Full remote</span>
+                        {% elseif o.remote_policy == 'hybrid' %}
+                        <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] mono uppercase tracking-wider">Hybride</span>
+                        {% elseif o.remote_policy == 'on_site' %}
+                        <span class="px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-400 text-[10px] mono uppercase tracking-wider">Sur site</span>
+                        {% else %}<span class="text-slate-600">—</span>{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <!-- Salaire -->
+                <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                    <td class="sticky left-0 z-10 bg-[#0F0F12] p-4 mono text-[11px] uppercase tracking-wider text-slate-400">Salaire</td>
+                    {% for o in offers %}
+                    <td class="p-4 border-l border-white/5">
+                        {% if o.salary_min %}
+                        <span class="font-bold text-emerald-400 text-base">
+                            {{ o.salary_min|salary }}{% if o.salary_max and o.salary_max > o.salary_min %} – {{ o.salary_max|salary }}{% endif %}
+                        </span>
+                        {% else %}<span class="text-slate-600">—</span>{% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <!-- Technologies -->
+                <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                    <td class="sticky left-0 z-10 bg-[#0F0F12] p-4 mono text-[11px] uppercase tracking-wider text-slate-400 align-top">Stack</td>
+                    {% for o in offers %}
+                    <td class="p-4 border-l border-white/5 align-top">
+                        <div class="flex flex-wrap gap-1">
+                            {% for tech in o.technologies %}
+                                {% include 'partials/tech_badge.twig' with { tech: tech } %}
+                            {% else %}<span class="text-slate-600">—</span>{% endfor %}
+                        </div>
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <!-- Extrait -->
+                <tr class="hover:bg-white/[0.02] transition-colors">
+                    <td class="sticky left-0 z-10 bg-[#0F0F12] p-4 mono text-[11px] uppercase tracking-wider text-slate-400 align-top">Extrait</td>
+                    {% for o in offers %}
+                    <td class="p-4 border-l border-white/5 align-top text-xs text-slate-400 leading-relaxed">
+                        {{ o.description|excerpt(260) }}
+                    </td>
+                    {% endfor %}
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ─── BACK BUTTON ─── -->
+<div class="reveal flex justify-center" style="animation-delay:300ms">
+    <a href="/search.php" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full pill text-sm text-white">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Ajouter d'autres offres
+    </a>
 </div>
+
 {% endif %}
+
 {% endblock %}

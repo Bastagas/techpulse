@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TechPulse · Premium</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:         #050810;
+  --ink:        #0F172A;
+  --text:       #F1F5F9;
+  --text-mute:  #94A3B8;
+  --red:        #DC2626;
+  --red-light:  #EF4444;
+  --accent-1:   #6366F1;
+  --accent-2:   #EC4899;
+  --accent-3:   #22D3EE;
+  --glass:      rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
+}
+* { font-family: 'Space Grotesk', system-ui, sans-serif; }
+.body-font { font-family: 'DM Sans', sans-serif; }
+.mono { font-family: 'JetBrains Mono', monospace; font-feature-settings: "tnum" 1, "zero" 1; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ── Animated mesh gradient background ── */
+.mesh {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.mesh::before {
+  content: '';
+  position: absolute;
+  width: 60vw; height: 60vw;
+  top: -10vw; left: -10vw;
+  background: radial-gradient(circle, rgba(220, 38, 38, 0.35) 0%, transparent 70%);
+  filter: blur(80px);
+  animation: float1 22s ease-in-out infinite;
+}
+.mesh::after {
+  content: '';
+  position: absolute;
+  width: 50vw; height: 50vw;
+  top: 40vh; right: -10vw;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, transparent 70%);
+  filter: blur(80px);
+  animation: float2 18s ease-in-out infinite;
+}
+.mesh > div {
+  position: absolute;
+  width: 40vw; height: 40vw;
+  bottom: -10vh; left: 30vw;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.28) 0%, transparent 70%);
+  filter: blur(80px);
+  animation: float3 26s ease-in-out infinite;
+}
+@keyframes float1 {
+  0%,100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(20vw, 10vh) scale(1.1); }
+  66% { transform: translate(-5vw, 30vh) scale(0.9); }
+}
+@keyframes float2 {
+  0%,100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-15vw, -20vh) scale(1.2); }
+}
+@keyframes float3 {
+  0%,100% { transform: translate(0, 0) scale(0.9); }
+  40% { transform: translate(-20vw, -15vh) scale(1.1); }
+  80% { transform: translate(10vw, 5vh) scale(1); }
+}
+
+/* Noise overlay */
+.noise::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Glass surfaces */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 20px 40px -20px rgba(0,0,0,0.6);
+  border-radius: 24px;
+}
+.glass-strong {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 28px;
+}
+
+.cta-red {
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  box-shadow:
+    0 8px 24px -4px rgba(220, 38, 38, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cta-red:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 32px -4px rgba(220, 38, 38, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Iridescent border animation */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+.iridescent {
+  position: relative;
+}
+.iridescent::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(from var(--angle), #DC2626, #EC4899, #6366F1, #22D3EE, #EC4899, #DC2626);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: rotateBorder 6s linear infinite;
+  opacity: 0.6;
+}
+@keyframes rotateBorder { to { --angle: 360deg; } }
+
+/* Grain scroll reveal */
+.reveal {
+  animation: reveal 1s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Tech pill */
+.pill {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+.pill:hover {
+  background: rgba(220, 38, 38, 0.12);
+  border-color: rgba(220, 38, 38, 0.4);
+}
+
+/* Floating badge */
+.badge-pulse {
+  position: relative;
+}
+.badge-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: inherit;
+  animation: pulseRing 2s ease-out infinite;
+  z-index: -1;
+}
+@keyframes pulseRing {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* Bar spark */
+.spark-bar {
+  background: linear-gradient(90deg, rgba(220, 38, 38, 1) 0%, rgba(236, 72, 153, 0.7) 100%);
+  animation: sparkGrow 1.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  transform-origin: left;
+}
+@keyframes sparkGrow { from { transform: scaleX(0); } }
+
+/* Floating orbs for bento hero */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  animation: orbFloat 8s ease-in-out infinite;
+}
+@keyframes orbFloat {
+  0%,100% { transform: translate(0,0); }
+  50% { transform: translate(20px, -20px); }
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #F1F5F9 0%, #94A3B8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.gradient-accent {
+  background: linear-gradient(135deg, #EF4444 0%, #EC4899 60%, #6366F1 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+</style>
+</head>
+<body class="noise body-font min-h-screen antialiased">
+
+<!-- ━━━ Animated mesh background ━━━ -->
+<div class="mesh"><div></div></div>
+
+<!-- ━━━ NAV ━━━ -->
+<header class="relative z-20 pt-5 px-6">
+  <div class="max-w-[1320px] mx-auto glass px-5 h-14 flex items-center justify-between" style="border-radius: 9999px;">
+    <div class="flex items-center gap-8">
+      <a href="#" class="flex items-center gap-2.5">
+        <div class="relative">
+          <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 via-pink-500 to-indigo-500 flex items-center justify-center">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 badge-pulse"></span>
+        </div>
+        <span class="font-bold tracking-tight text-lg">techpulse</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-1 text-sm">
+        <a href="#" class="px-3 py-1.5 rounded-full bg-white/5 text-white">Découvrir</a>
+        <a href="#" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">Offres</a>
+        <a href="#" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">Dashboard</a>
+        <a href="#" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">API</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-2 text-sm">
+      <button class="px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/5">Se connecter</button>
+      <button class="cta-red px-4 py-1.5 rounded-full text-white font-medium text-sm">
+        Démarrer
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="relative z-10 max-w-[1320px] mx-auto px-6 py-10">
+
+  <!-- ━━━ HERO ━━━ -->
+  <section class="reveal relative mt-8 mb-16 text-center" style="animation-delay: 100ms">
+    <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full opacity-30 pointer-events-none"
+         style="background: radial-gradient(circle, rgba(236, 72, 153, 0.8), transparent 70%); filter: blur(60px);"></div>
+
+    <div class="inline-flex items-center gap-2 glass px-3 py-1.5 text-xs mb-8" style="border-radius: 9999px;">
+      <span class="relative flex w-1.5 h-1.5">
+        <span class="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75"></span>
+        <span class="relative rounded-full bg-emerald-400 w-1.5 h-1.5"></span>
+      </span>
+      <span class="text-slate-300 mono">LIVE · 678 offres indexées · dernière MAJ 17h32</span>
+    </div>
+
+    <h1 class="text-[88px] leading-[0.92] font-bold tracking-[-0.04em] mb-6">
+      Le marché de l'emploi tech,<br>
+      <span class="gradient-accent italic">lu autrement.</span>
+    </h1>
+
+    <p class="text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed body-font">
+      Agrégation temps réel, extraction NLP des technologies, prédiction de salaire par ML.
+      Un observatoire ouvert qui vous rend le signal sans le bruit.
+    </p>
+
+    <div class="flex items-center justify-center gap-3 mb-14">
+      <button class="cta-red px-6 py-3 rounded-full text-white font-semibold flex items-center gap-2">
+        Explorer les offres
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+      </button>
+      <button class="glass px-6 py-3 text-white hover:bg-white/10" style="border-radius: 9999px;">
+        <span class="text-slate-300 mono text-xs mr-2">$</span>
+        Accéder à l'API
+      </button>
+    </div>
+
+    <!-- Mini ticker under hero -->
+    <div class="flex items-center justify-center gap-6 mono text-[11px] text-slate-500 flex-wrap">
+      <span>▲ python <span class="text-emerald-400">+12%</span></span>
+      <span class="text-slate-700">·</span>
+      <span>▲ rust <span class="text-emerald-400">+7%</span></span>
+      <span class="text-slate-700">·</span>
+      <span>▼ jquery <span class="text-red-400">−4%</span></span>
+      <span class="text-slate-700">·</span>
+      <span>▲ typescript <span class="text-emerald-400">+5%</span></span>
+      <span class="text-slate-700">·</span>
+      <span>Nantes domine <span class="text-amber-400">+3%</span></span>
+    </div>
+  </section>
+
+  <!-- ━━━ BENTO GRID ━━━ -->
+  <section class="reveal grid grid-cols-12 gap-4 mb-16" style="animation-delay: 280ms">
+
+    <!-- Big stat card -->
+    <div class="col-span-5 row-span-2 glass-strong p-8 relative overflow-hidden iridescent">
+      <div class="orb w-48 h-48 bg-red-500/30 -top-10 -right-10"></div>
+      <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-4">Offres actives</p>
+      <div class="flex items-baseline gap-3 mb-6">
+        <p class="text-[120px] font-bold tracking-[-0.05em] leading-none gradient-text">678</p>
+        <span class="text-lg text-emerald-400 font-medium">+12 (24h)</span>
+      </div>
+      <svg class="w-full h-28 mb-6" viewBox="0 0 400 90" fill="none" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#EF4444" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#EF4444" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,70 C50,60 100,50 130,45 C160,40 200,55 230,50 C260,45 280,30 320,35 C350,38 380,20 400,15"
+              stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M0,70 C50,60 100,50 130,45 C160,40 200,55 230,50 C260,45 280,30 320,35 C350,38 380,20 400,15 L400,90 L0,90 Z"
+              fill="url(#g2)"/>
+      </svg>
+      <div class="grid grid-cols-4 gap-3 pt-6 border-t border-white/5">
+        <div>
+          <p class="mono text-[10px] text-slate-500 uppercase">CDI</p>
+          <p class="text-lg font-semibold">412</p>
+        </div>
+        <div>
+          <p class="mono text-[10px] text-slate-500 uppercase">Stage</p>
+          <p class="text-lg font-semibold">87</p>
+        </div>
+        <div>
+          <p class="mono text-[10px] text-slate-500 uppercase">Freelance</p>
+          <p class="text-lg font-semibold">96</p>
+        </div>
+        <div>
+          <p class="mono text-[10px] text-slate-500 uppercase">Alternance</p>
+          <p class="text-lg font-semibold">83</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Salary median -->
+    <div class="col-span-4 glass-strong p-6 relative overflow-hidden">
+      <div class="orb w-40 h-40 bg-pink-500/20 -top-6 right-0"></div>
+      <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-2">Salaire médian</p>
+      <div class="flex items-baseline gap-2">
+        <p class="text-5xl font-bold tracking-tight">43<span class="text-2xl text-slate-400 font-normal"> k€</span></p>
+        <span class="text-xs text-emerald-400 ml-auto">+3.2%</span>
+      </div>
+      <div class="mt-5 h-1.5 rounded-full bg-white/5 relative overflow-hidden">
+        <div class="absolute inset-y-0 left-[21%] right-[35%] bg-gradient-to-r from-red-500 via-pink-500 to-indigo-500 rounded-full"></div>
+        <div class="absolute top-1/2 -translate-y-1/2 left-[38%] w-3 h-3 bg-white rounded-full shadow-xl"></div>
+      </div>
+      <div class="flex justify-between mt-2 mono text-[10px] text-slate-500">
+        <span>p25 = 33k</span>
+        <span class="text-pink-400">median 43k</span>
+        <span>p75 = 55k</span>
+      </div>
+    </div>
+
+    <!-- Companies -->
+    <div class="col-span-3 glass-strong p-6">
+      <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-2">Entreprises</p>
+      <p class="text-5xl font-bold tracking-tight mb-1">316</p>
+      <p class="text-xs text-emerald-400">+4 cette semaine</p>
+    </div>
+
+    <!-- Technos -->
+    <div class="col-span-3 glass-strong p-6 relative overflow-hidden">
+      <div class="orb w-24 h-24 bg-indigo-500/30 -top-2 -right-2"></div>
+      <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-2">Technos détectées</p>
+      <p class="text-5xl font-bold tracking-tight mb-1">
+        <span class="gradient-accent">137</span><span class="text-xl text-slate-500">/202</span>
+      </p>
+      <p class="text-xs text-slate-400">par NLP spaCy</p>
+    </div>
+
+    <!-- Top tech featured -->
+    <div class="col-span-4 glass-strong p-6 relative overflow-hidden">
+      <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-4">Techno #1</p>
+      <div class="flex items-center justify-between">
+        <p class="text-5xl font-bold tracking-tight">C</p>
+        <div class="text-right">
+          <p class="text-2xl font-semibold">216</p>
+          <p class="text-[10px] mono text-slate-500">offres</p>
+        </div>
+      </div>
+      <div class="mt-4 h-1 rounded-full bg-white/5">
+        <div class="spark-bar h-1 rounded-full" style="width: 100%"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ━━━ TECH RANKINGS ━━━ -->
+  <section class="reveal grid grid-cols-12 gap-4 mb-16" style="animation-delay: 420ms">
+    <div class="col-span-7 glass-strong p-8">
+      <div class="flex items-start justify-between mb-6">
+        <div>
+          <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-2">Classement · Top 10</p>
+          <h2 class="text-3xl font-bold tracking-tight">Technologies les plus demandées</h2>
+        </div>
+        <button class="pill px-3 py-1.5 text-xs text-white" style="border-radius: 9999px;">Voir tout →</button>
+      </div>
+
+      <div class="space-y-3">
+        <div class="group">
+          <div class="flex items-baseline justify-between mb-1.5">
+            <div class="flex items-baseline gap-3">
+              <span class="mono text-xs text-slate-500">01</span>
+              <span class="font-semibold">C</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 mono">language</span>
+            </div>
+            <span class="mono font-semibold">216</span>
+          </div>
+          <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div class="spark-bar h-1" style="width: 100%; animation-delay: 0ms"></div></div>
+        </div>
+        <div class="group">
+          <div class="flex items-baseline justify-between mb-1.5">
+            <div class="flex items-baseline gap-3">
+              <span class="mono text-xs text-slate-500">02</span>
+              <span class="font-semibold">Java</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 mono">language</span>
+            </div>
+            <span class="mono font-semibold">156</span>
+          </div>
+          <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div class="spark-bar h-1" style="width: 72%; animation-delay: 60ms"></div></div>
+        </div>
+        <div class="group">
+          <div class="flex items-baseline justify-between mb-1.5">
+            <div class="flex items-baseline gap-3">
+              <span class="mono text-xs text-slate-500">03</span>
+              <span class="font-semibold">SQL</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 mono">language</span>
+            </div>
+            <span class="mono font-semibold">136</span>
+          </div>
+          <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div class="spark-bar h-1" style="width: 63%; animation-delay: 120ms"></div></div>
+        </div>
+        <div class="group">
+          <div class="flex items-baseline justify-between mb-1.5">
+            <div class="flex items-baseline gap-3">
+              <span class="mono text-xs text-slate-500">04</span>
+              <span class="font-semibold">Agile</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-500/20 text-slate-400 mono">method</span>
+            </div>
+            <span class="mono font-semibold">124</span>
+          </div>
+          <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div class="spark-bar h-1" style="width: 57%; animation-delay: 180ms"></div></div>
+        </div>
+        <div class="group">
+          <div class="flex items-baseline justify-between mb-1.5">
+            <div class="flex items-baseline gap-3">
+              <span class="mono text-xs text-slate-500">05</span>
+              <span class="font-semibold">Angular</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400 mono">framework</span>
+            </div>
+            <span class="mono font-semibold">102</span>
+          </div>
+          <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div class="spark-bar h-1" style="width: 47%; animation-delay: 240ms"></div></div>
+        </div>
+        <div class="group">
+          <div class="flex items-baseline justify-between mb-1.5">
+            <div class="flex items-baseline gap-3">
+              <span class="mono text-xs text-slate-500">06</span>
+              <span class="font-semibold">JavaScript</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 mono">language</span>
+            </div>
+            <span class="mono font-semibold">99</span>
+          </div>
+          <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div class="spark-bar h-1" style="width: 46%; animation-delay: 300ms"></div></div>
+        </div>
+        <div class="group">
+          <div class="flex items-baseline justify-between mb-1.5">
+            <div class="flex items-baseline gap-3">
+              <span class="mono text-xs text-slate-500">07</span>
+              <span class="font-semibold">CI/CD</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-500/20 text-slate-400 mono">method</span>
+            </div>
+            <span class="mono font-semibold">98</span>
+          </div>
+          <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div class="spark-bar h-1" style="width: 45%; animation-delay: 360ms"></div></div>
+        </div>
+        <div class="group">
+          <div class="flex items-baseline justify-between mb-1.5">
+            <div class="flex items-baseline gap-3">
+              <span class="mono text-xs text-slate-500">08</span>
+              <span class="font-semibold">Python</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 mono">language</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 mono">↑ +12%</span>
+            </div>
+            <span class="mono font-semibold">91</span>
+          </div>
+          <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div class="spark-bar h-1" style="width: 42%; animation-delay: 420ms"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cities floating card -->
+    <div class="col-span-5 space-y-4">
+      <div class="glass-strong p-6 relative overflow-hidden">
+        <div class="orb w-32 h-32 bg-cyan-500/20 -bottom-2 -left-2"></div>
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-1">Top villes</p>
+            <h3 class="text-2xl font-bold">Où ça recrute</h3>
+          </div>
+          <div class="text-3xl">🇫🇷</div>
+        </div>
+        <ol class="space-y-2.5">
+          <li class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="mono text-xs text-slate-500 w-6">#01</span>
+              <span class="font-medium">Nantes</span>
+              <span class="mono text-[10px] text-slate-500">(44)</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-24 h-1 bg-white/5 rounded-full overflow-hidden"><div class="h-1 bg-red-500 rounded-full" style="width:100%"></div></div>
+              <span class="mono font-semibold w-8 text-right">33</span>
+            </div>
+          </li>
+          <li class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="mono text-xs text-slate-500 w-6">#02</span>
+              <span class="font-medium">Toulouse</span>
+              <span class="mono text-[10px] text-slate-500">(31)</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-24 h-1 bg-white/5 rounded-full overflow-hidden"><div class="h-1 bg-red-500/80 rounded-full" style="width:67%"></div></div>
+              <span class="mono font-semibold w-8 text-right">22</span>
+            </div>
+          </li>
+          <li class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="mono text-xs text-slate-500 w-6">#03</span>
+              <span class="font-medium">Strasbourg</span>
+              <span class="mono text-[10px] text-slate-500">(67)</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-24 h-1 bg-white/5 rounded-full overflow-hidden"><div class="h-1 bg-red-500/70 rounded-full" style="width:64%"></div></div>
+              <span class="mono font-semibold w-8 text-right">21</span>
+            </div>
+          </li>
+          <li class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="mono text-xs text-slate-500 w-6">#04</span>
+              <span class="font-medium">Bordeaux</span>
+              <span class="mono text-[10px] text-slate-500">(33)</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-24 h-1 bg-white/5 rounded-full overflow-hidden"><div class="h-1 bg-red-500/70 rounded-full" style="width:64%"></div></div>
+              <span class="mono font-semibold w-8 text-right">21</span>
+            </div>
+          </li>
+          <li class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="mono text-xs text-slate-500 w-6">#05</span>
+              <span class="font-medium text-pink-400">Montpellier</span>
+              <span class="mono text-[10px] text-slate-500">(34)</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-24 h-1 bg-white/5 rounded-full overflow-hidden"><div class="h-1 bg-pink-500 rounded-full" style="width:61%"></div></div>
+              <span class="mono font-semibold w-8 text-right text-pink-400">20</span>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <!-- Remote donut -->
+      <div class="glass-strong p-6 flex items-center gap-6 relative overflow-hidden">
+        <div class="orb w-24 h-24 bg-red-500/20 -bottom-4 -right-4"></div>
+        <div class="relative w-28 h-28 shrink-0">
+          <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+            <circle cx="18" cy="18" r="15.915" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3"/>
+            <circle cx="18" cy="18" r="15.915" fill="none" stroke="#EF4444" stroke-width="3" stroke-dasharray="65 35" stroke-dashoffset="0"/>
+            <circle cx="18" cy="18" r="15.915" fill="none" stroke="#F59E0B" stroke-width="3" stroke-dasharray="22 78" stroke-dashoffset="-65"/>
+            <circle cx="18" cy="18" r="15.915" fill="none" stroke="#22D3EE" stroke-width="3" stroke-dasharray="12 88" stroke-dashoffset="-87"/>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <p class="text-2xl font-bold rotate-0">12%</p>
+            <p class="text-[10px] mono text-slate-500 rotate-0">remote</p>
+          </div>
+        </div>
+        <div class="flex-1 space-y-2">
+          <p class="mono text-xs text-slate-400 tracking-widest uppercase">Télétravail</p>
+          <div class="flex items-center justify-between text-sm">
+            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500"></span>Sur site</span>
+            <span class="mono text-slate-300">65%</span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Hybride</span>
+            <span class="mono text-slate-300">22%</span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-400"></span>Full remote</span>
+            <span class="mono text-cyan-300">12%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ━━━ OFFERS ━━━ -->
+  <section class="reveal mb-16" style="animation-delay: 560ms">
+    <div class="flex items-end justify-between mb-6">
+      <div>
+        <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-2">Dernières publications</p>
+        <h2 class="text-3xl font-bold tracking-tight">Sélection du moment</h2>
+      </div>
+      <a href="#" class="text-sm text-slate-300 hover:text-white flex items-center gap-1">
+        Voir les 678 offres
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-12 gap-4">
+      <!-- Featured offer (larger) -->
+      <a href="#" class="col-span-6 glass-strong p-6 hover:bg-white/[0.06] transition-colors relative overflow-hidden group">
+        <div class="orb w-40 h-40 bg-red-500/20 -top-6 -right-4 group-hover:bg-red-500/30 transition-all"></div>
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono uppercase tracking-wider">Featured</span>
+            <span class="px-2 py-0.5 rounded-full bg-white/5 text-slate-300 text-[10px] mono">CDI</span>
+            <span class="px-2 py-0.5 rounded-full bg-white/5 text-slate-300 text-[10px] mono">Senior</span>
+          </div>
+          <span class="mono text-[10px] text-slate-500">il y a 3h</span>
+        </div>
+        <h3 class="text-2xl font-bold tracking-tight mb-2 group-hover:text-red-400 transition-colors">Lead Developer Python</h3>
+        <p class="text-sm text-slate-400 mb-4">Holenek Ingénierie · Nantes (44)</p>
+        <div class="flex items-center gap-2 mb-4 flex-wrap">
+          <span class="pill px-2.5 py-1 text-xs rounded-full">Python</span>
+          <span class="pill px-2.5 py-1 text-xs rounded-full">FastAPI</span>
+          <span class="pill px-2.5 py-1 text-xs rounded-full">Docker</span>
+          <span class="pill px-2.5 py-1 text-xs rounded-full">CI/CD</span>
+          <span class="pill px-2.5 py-1 text-xs rounded-full">AWS</span>
+        </div>
+        <div class="flex items-baseline justify-between pt-4 border-t border-white/5">
+          <div>
+            <p class="mono text-[10px] text-slate-500 uppercase">Salaire estimé (ML)</p>
+            <p class="text-lg font-semibold text-emerald-400">55 – 70 k€</p>
+          </div>
+          <div class="text-right">
+            <p class="mono text-[10px] text-slate-500 uppercase">Télétravail</p>
+            <p class="text-sm">🏠 Hybride · 2j/sem</p>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="col-span-3 glass-strong p-5 hover:bg-white/[0.06] transition-colors group">
+        <div class="flex items-center gap-1.5 mb-3">
+          <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">CDD</span>
+          <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Mid</span>
+        </div>
+        <h3 class="font-semibold mb-2 leading-tight group-hover:text-red-400 transition-colors">Dev C# .NET confirmé</h3>
+        <p class="text-xs text-slate-400 mb-3">SERA · Clermont-Ferrand</p>
+        <div class="flex gap-1.5 flex-wrap mb-3">
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">C#</span>
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">.NET</span>
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">Azure</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <p class="text-xs text-slate-500">8 mois · 3 ans exp</p>
+          <p class="mono text-[10px] text-slate-600">5h</p>
+        </div>
+      </a>
+
+      <a href="#" class="col-span-3 glass-strong p-5 hover:bg-white/[0.06] transition-colors group relative overflow-hidden">
+        <span class="absolute top-4 right-4 text-lg">🏠</span>
+        <div class="flex items-center gap-1.5 mb-3">
+          <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono">CDI</span>
+          <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Senior</span>
+        </div>
+        <h3 class="font-semibold mb-2 leading-tight group-hover:text-red-400 transition-colors">Data Engineer · Remote</h3>
+        <p class="text-xs text-slate-400 mb-3">Entreprise anonyme · Paris</p>
+        <div class="flex gap-1.5 flex-wrap mb-3">
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">Python</span>
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">Spark</span>
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">AWS</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-semibold text-emerald-400">60-80 k€</p>
+          <p class="mono text-[10px] text-slate-600">8h</p>
+        </div>
+      </a>
+
+      <a href="#" class="col-span-4 glass-strong p-5 hover:bg-white/[0.06] transition-colors group">
+        <div class="flex items-center gap-1.5 mb-3">
+          <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono">CDI</span>
+          <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Mid</span>
+        </div>
+        <h3 class="font-semibold mb-2 leading-tight group-hover:text-red-400 transition-colors">Fullstack JS — Martinique</h3>
+        <p class="text-xs text-slate-400 mb-3">skaelia · Lamentin (972)</p>
+        <div class="flex gap-1.5 flex-wrap mb-3">
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">React</span>
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">NestJS</span>
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">TypeScript</span>
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">Next.js</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-semibold text-emerald-400">45 k€</p>
+          <p class="mono text-[10px] text-slate-600">12h · ☀</p>
+        </div>
+      </a>
+
+      <a href="#" class="col-span-4 glass-strong p-5 hover:bg-white/[0.06] transition-colors group">
+        <div class="flex items-center gap-1.5 mb-3">
+          <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono">CDI</span>
+          <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Senior</span>
+        </div>
+        <h3 class="font-semibold mb-2 leading-tight group-hover:text-red-400 transition-colors">DevOps Kubernetes</h3>
+        <p class="text-xs text-slate-400 mb-3">Entreprise anonyme · Toulouse</p>
+        <div class="flex gap-1.5 flex-wrap mb-3">
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">K8s</span>
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">Terraform</span>
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">Prometheus</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-semibold text-emerald-400">55 k€</p>
+          <p class="mono text-[10px] text-slate-600">1j</p>
+        </div>
+      </a>
+
+      <a href="#" class="col-span-4 glass-strong p-5 hover:bg-white/[0.06] transition-colors group">
+        <div class="flex items-center gap-1.5 mb-3">
+          <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono">CDI</span>
+          <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Junior</span>
+        </div>
+        <h3 class="font-semibold mb-2 leading-tight group-hover:text-red-400 transition-colors">Dev React Native H/F</h3>
+        <p class="text-xs text-slate-400 mb-3">Entreprise anonyme · Strasbourg</p>
+        <div class="flex gap-1.5 flex-wrap mb-3">
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">React Native</span>
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">TypeScript</span>
+          <span class="pill px-2 py-0.5 text-[10px] rounded-full">GraphQL</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <p class="text-xs text-slate-500">Débutant accepté</p>
+          <p class="mono text-[10px] text-slate-600">1j</p>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ━━━ CTA BANNER ━━━ -->
+  <section class="reveal glass-strong p-12 relative overflow-hidden iridescent mb-16" style="animation-delay: 700ms">
+    <div class="orb w-96 h-96 bg-red-500/20 -top-20 -left-20"></div>
+    <div class="orb w-96 h-96 bg-indigo-500/20 -bottom-20 -right-20"></div>
+    <div class="relative z-10 grid grid-cols-12 gap-8 items-center">
+      <div class="col-span-7">
+        <p class="mono text-xs text-pink-400 tracking-widest uppercase mb-4">API publique · gratuite</p>
+        <h2 class="text-5xl font-bold tracking-tight mb-4 leading-[1.05]">
+          Branche TechPulse<br>
+          à <span class="gradient-accent italic">ton application</span>.
+        </h2>
+        <p class="text-slate-300 body-font leading-relaxed max-w-xl">
+          API REST documentée via Swagger. Filtres sur technos, villes, contrats, salaires.
+          Prédiction de salaire par ML, recherche de similarité TF-IDF, agrégations temps réel.
+        </p>
+      </div>
+      <div class="col-span-5">
+        <div class="bg-black/50 border border-white/10 rounded-2xl p-5 mono text-sm">
+          <div class="flex items-center gap-2 mb-3 pb-3 border-b border-white/5">
+            <div class="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+            <div class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
+            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
+            <span class="text-[10px] text-slate-500 ml-auto">curl-example.sh</span>
+          </div>
+          <p><span class="text-cyan-400">curl</span> <span class="text-pink-400">-s</span> \</p>
+          <p class="pl-4 text-slate-300">https://api.techpulse.fr/offers \</p>
+          <p class="pl-4"><span class="text-pink-400">?tech=</span><span class="text-amber-400">python</span></p>
+          <p class="pl-4"><span class="text-pink-400">&amp;city=</span><span class="text-amber-400">Nantes</span></p>
+          <p class="pl-4"><span class="text-pink-400">&amp;remote=</span><span class="text-amber-400">full_remote</span></p>
+          <p class="mt-3 pt-3 border-t border-white/5 text-emerald-400 text-xs"># 200 OK · 17 résultats</p>
+        </div>
+        <button class="cta-red w-full mt-4 px-6 py-3 rounded-2xl font-semibold text-white">
+          Voir la documentation Swagger →
+        </button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ━━━ FOOTER ━━━ -->
+<footer class="relative z-10 border-t border-white/5 mt-8 py-10 px-6">
+  <div class="max-w-[1320px] mx-auto flex items-center justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-6">
+      <a href="#" class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 via-pink-500 to-indigo-500"></div>
+        <span class="font-bold tracking-tight">techpulse</span>
+      </a>
+      <span class="text-slate-600 text-sm">© 2026 · Bastien Ruedas</span>
+    </div>
+    <div class="flex items-center gap-6 text-sm text-slate-400">
+      <a href="#" class="hover:text-white">GitHub</a>
+      <a href="#" class="hover:text-white">API Swagger</a>
+      <a href="#" class="hover:text-white">Statut</a>
+      <a href="#" class="hover:text-white">Changelog</a>
+      <a href="#" class="hover:text-white">Mentions</a>
+    </div>
+    <div class="mono text-[10px] text-slate-600 tracking-widest uppercase">M2 Web Scraping · Université de Montpellier</div>
+  </div>
+</footer>
+
+</body>
+</html>

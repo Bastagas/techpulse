@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comparateur · TechPulse</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+/* Table row hover highlight */
+.cmp-row:hover { background: rgba(255,255,255,0.02); }
+.cmp-label { background: rgba(15,23,42,0.8); backdrop-filter: blur(8px); }
+.col-header { transition: transform 0.2s ease; }
+.col-header:hover { transform: translateY(-2px); }
+.best { position: relative; }
+.best::before {
+  content: '★';
+  position: absolute;
+  top: -8px; right: -2px;
+  color: #FBBF24;
+  font-size: 12px;
+  text-shadow: 0 0 8px rgba(251,191,36,0.6);
+}
+</style>
+</head>
+<body class="noise body-font min-h-screen antialiased">
+<div class="mesh"><div></div></div>
+
+<!-- Ticker -->
+<div class="relative z-20 ticker-wrap">
+  <div class="ticker">
+    <span class="t-item"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span class="t-lbl">TECHPULSE.MARKET</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">LIVE</span> <span class="t-val">19.04.2026 · 17:32 UTC</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">OFFERS</span> <span class="t-val">678</span> <span class="t-up">▲ +12</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">▲ python +12% · rust +7% · typescript +5%</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span class="t-lbl">TECHPULSE.MARKET</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">LIVE</span> <span class="t-val">19.04.2026 · 17:32 UTC</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">OFFERS</span> <span class="t-val">678</span> <span class="t-up">▲ +12</span></span>
+    <span class="t-sep">│</span>
+    <span class="t-item"><span class="t-lbl">▲ python +12% · rust +7% · typescript +5%</span></span>
+    <span class="t-sep">│</span>
+  </div>
+</div>
+
+<!-- Nav -->
+<header class="relative z-20 pt-5 px-6">
+  <div class="max-w-[1440px] mx-auto glass px-5 h-14 flex items-center justify-between" style="border-radius: 9999px;">
+    <div class="flex items-center gap-8">
+      <a href="#" class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 via-pink-500 to-indigo-500 flex items-center justify-center">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <span class="font-bold tracking-tight text-lg">techpulse</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-1 text-sm">
+        <a href="#" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">Découvrir</a>
+        <a href="#" class="px-3 py-1.5 rounded-full bg-white/5 text-white">Offres</a>
+        <a href="#" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">Dashboard</a>
+        <a href="#" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">API</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-2 text-sm">
+      <button class="px-3 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/5">Se connecter</button>
+      <button class="cta-red px-4 py-1.5 rounded-full text-white font-medium text-sm">Démarrer</button>
+    </div>
+  </div>
+</header>
+
+<main class="relative z-10 max-w-[1440px] mx-auto px-6 py-10">
+
+  <!-- Back + header -->
+  <a href="#" class="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white mb-6 reveal">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Retour aux résultats
+  </a>
+
+  <section class="reveal flex items-end justify-between mb-8 flex-wrap gap-3" style="animation-delay:100ms">
+    <div>
+      <p class="mono text-xs text-slate-400 tracking-widest uppercase mb-2">Comparateur d'offres</p>
+      <h1 class="text-4xl font-bold tracking-[-0.03em]">
+        <span class="gradient-accent italic">4 offres</span> côte à côte
+      </h1>
+      <p class="text-slate-400 mt-2">Les meilleurs critères sont marqués d'une étoile <span class="text-amber-400">★</span>. Coche/décoche les lignes que tu veux cacher.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="glass px-4 py-2 text-sm text-white hover:bg-white/10" style="border-radius:9999px;">
+        + Ajouter une offre
+      </button>
+      <button class="cta-red px-4 py-2 rounded-full text-sm text-white font-medium">Exporter PDF</button>
+    </div>
+  </section>
+
+  <!-- Criteria toggles -->
+  <section class="reveal flex items-center gap-2 flex-wrap mb-5" style="animation-delay:180ms">
+    <span class="mono text-[10px] text-slate-500 uppercase tracking-widest mr-2">Critères visibles (8)</span>
+    <span class="pill px-3 py-1 rounded-full text-xs flex items-center gap-1.5"><svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Rémunération</span>
+    <span class="pill px-3 py-1 rounded-full text-xs flex items-center gap-1.5"><svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Télétravail</span>
+    <span class="pill px-3 py-1 rounded-full text-xs flex items-center gap-1.5"><svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Séniorité</span>
+    <span class="pill px-3 py-1 rounded-full text-xs flex items-center gap-1.5"><svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Technologies</span>
+    <span class="pill px-3 py-1 rounded-full text-xs flex items-center gap-1.5"><svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Ville</span>
+    <span class="pill px-3 py-1 rounded-full text-xs flex items-center gap-1.5"><svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Contrat</span>
+    <span class="pill px-3 py-1 rounded-full text-xs flex items-center gap-1.5"><svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>ML Salary</span>
+    <span class="pill px-3 py-1 rounded-full text-xs flex items-center gap-1.5 opacity-60"><svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>Description</span>
+  </section>
+
+  <!-- Comparison table -->
+  <section class="reveal glass-strong overflow-hidden" style="animation-delay:260ms; border-radius: 28px;">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr>
+            <th class="cmp-label sticky left-0 p-4 text-left font-semibold w-48 z-10 border-r border-white/5">
+              <span class="mono text-[10px] text-slate-500 uppercase tracking-widest">Critère</span>
+            </th>
+            <!-- Offer 1 header -->
+            <th class="col-header p-5 border-r border-white/5 align-top relative" style="min-width:280px;">
+              <div class="absolute top-2 right-2">
+                <button class="text-slate-500 hover:text-red-400 text-lg leading-none">×</button>
+              </div>
+              <div class="flex items-center gap-2 mb-3">
+                <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono">CDI</span>
+                <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Senior</span>
+              </div>
+              <a href="#" class="block text-lg font-bold tracking-tight hover:text-red-400 mb-1 leading-tight">Lead Developer Python</a>
+              <p class="text-xs text-slate-400">Holenek Ingénierie · Nantes</p>
+            </th>
+            <!-- Offer 2 header -->
+            <th class="col-header p-5 border-r border-white/5 align-top relative" style="min-width:280px;">
+              <div class="absolute top-2 right-2">
+                <button class="text-slate-500 hover:text-red-400 text-lg leading-none">×</button>
+              </div>
+              <div class="flex items-center gap-2 mb-3">
+                <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono">CDI</span>
+                <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Senior</span>
+              </div>
+              <a href="#" class="block text-lg font-bold tracking-tight hover:text-red-400 mb-1 leading-tight">Senior Python Engineer</a>
+              <p class="text-xs text-slate-400">Datadog · Paris</p>
+            </th>
+            <!-- Offer 3 header -->
+            <th class="col-header p-5 border-r border-white/5 align-top relative" style="min-width:280px;">
+              <div class="absolute top-2 right-2">
+                <button class="text-slate-500 hover:text-red-400 text-lg leading-none">×</button>
+              </div>
+              <div class="flex items-center gap-2 mb-3">
+                <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono">CDI</span>
+                <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Senior</span>
+                <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] mono">Remote</span>
+              </div>
+              <a href="#" class="block text-lg font-bold tracking-tight hover:text-red-400 mb-1 leading-tight">Tech Lead Backend Python</a>
+              <p class="text-xs text-slate-400">OVHcloud · Roubaix (remote)</p>
+            </th>
+            <!-- Offer 4 header -->
+            <th class="col-header p-5 align-top relative" style="min-width:280px;">
+              <div class="absolute top-2 right-2">
+                <button class="text-slate-500 hover:text-red-400 text-lg leading-none">×</button>
+              </div>
+              <div class="flex items-center gap-2 mb-3">
+                <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] mono">CDI</span>
+                <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px] mono">Senior</span>
+                <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] mono">Remote EU</span>
+              </div>
+              <a href="#" class="block text-lg font-bold tracking-tight hover:text-red-400 mb-1 leading-tight">Lead Backend Python/Go</a>
+              <p class="text-xs text-slate-400">Qonto · Paris (remote-friendly)</p>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="text-sm">
+          <!-- Salary -->
+          <tr class="cmp-row border-t border-white/5">
+            <td class="cmp-label sticky left-0 p-4 font-semibold z-10 border-r border-white/5">
+              <span class="mono text-[10px] text-slate-500 uppercase tracking-widest block mb-0.5">Rémunération</span>
+              <span class="text-sm text-slate-400">Brut annuel</span>
+            </td>
+            <td class="p-4 border-r border-white/5"><span class="text-lg font-bold text-emerald-400">55 – 70 k€</span></td>
+            <td class="p-4 border-r border-white/5"><span class="text-lg font-bold text-emerald-400">65 – 85 k€</span></td>
+            <td class="p-4 border-r border-white/5"><span class="text-lg font-bold text-emerald-400">60 – 78 k€</span></td>
+            <td class="p-4"><span class="text-lg font-bold text-emerald-400 best">70 – 95 k€</span></td>
+          </tr>
+          <!-- ML Salary estimation -->
+          <tr class="cmp-row border-t border-white/5">
+            <td class="cmp-label sticky left-0 p-4 font-semibold z-10 border-r border-white/5">
+              <span class="mono text-[10px] text-pink-400 uppercase tracking-widest block mb-0.5">Prédiction ML</span>
+              <span class="text-sm text-slate-400">scikit-learn</span>
+            </td>
+            <td class="p-4 border-r border-white/5"><p class="font-semibold">52 – 68 k€</p><p class="mono text-[10px] text-slate-500 mt-0.5">conf 73% · point 60k</p></td>
+            <td class="p-4 border-r border-white/5"><p class="font-semibold">63 – 82 k€</p><p class="mono text-[10px] text-slate-500 mt-0.5">conf 81% · point 74k</p></td>
+            <td class="p-4 border-r border-white/5"><p class="font-semibold">58 – 75 k€</p><p class="mono text-[10px] text-slate-500 mt-0.5">conf 69% · point 65k</p></td>
+            <td class="p-4"><p class="font-semibold">68 – 92 k€</p><p class="mono text-[10px] text-slate-500 mt-0.5">conf 78% · point 82k</p></td>
+          </tr>
+          <!-- Remote -->
+          <tr class="cmp-row border-t border-white/5">
+            <td class="cmp-label sticky left-0 p-4 font-semibold z-10 border-r border-white/5">
+              <span class="mono text-[10px] text-slate-500 uppercase tracking-widest block mb-0.5">Télétravail</span>
+            </td>
+            <td class="p-4 border-r border-white/5">
+              <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Hybride</span>
+              <p class="mono text-[10px] text-slate-500 mt-0.5">2 jours / semaine</p>
+            </td>
+            <td class="p-4 border-r border-white/5">
+              <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Hybride</span>
+              <p class="mono text-[10px] text-slate-500 mt-0.5">3 jours / semaine</p>
+            </td>
+            <td class="p-4 border-r border-white/5">
+              <span class="flex items-center gap-2 best"><span class="w-2 h-2 rounded-full bg-cyan-400"></span>Full remote</span>
+              <p class="mono text-[10px] text-slate-500 mt-0.5">France uniquement</p>
+            </td>
+            <td class="p-4">
+              <span class="flex items-center gap-2 best"><span class="w-2 h-2 rounded-full bg-cyan-400"></span>Full remote</span>
+              <p class="mono text-[10px] text-slate-500 mt-0.5">EU · nomadisme ok</p>
+            </td>
+          </tr>
+          <!-- Experience -->
+          <tr class="cmp-row border-t border-white/5">
+            <td class="cmp-label sticky left-0 p-4 font-semibold z-10 border-r border-white/5">
+              <span class="mono text-[10px] text-slate-500 uppercase tracking-widest block mb-0.5">Expérience</span>
+            </td>
+            <td class="p-4 border-r border-white/5">5+ ans</td>
+            <td class="p-4 border-r border-white/5">4-7 ans</td>
+            <td class="p-4 border-r border-white/5">5+ ans</td>
+            <td class="p-4">5-8 ans</td>
+          </tr>
+          <!-- Seniority -->
+          <tr class="cmp-row border-t border-white/5">
+            <td class="cmp-label sticky left-0 p-4 font-semibold z-10 border-r border-white/5">
+              <span class="mono text-[10px] text-slate-500 uppercase tracking-widest block mb-0.5">Séniorité ML</span>
+              <span class="text-sm text-slate-400">Détection auto</span>
+            </td>
+            <td class="p-4 border-r border-white/5"><span class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 mono">Senior</span></td>
+            <td class="p-4 border-r border-white/5"><span class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 mono">Senior</span></td>
+            <td class="p-4 border-r border-white/5"><span class="text-[11px] px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 mono">Lead</span></td>
+            <td class="p-4"><span class="text-[11px] px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 mono">Lead</span></td>
+          </tr>
+          <!-- Technos -->
+          <tr class="cmp-row border-t border-white/5">
+            <td class="cmp-label sticky left-0 p-4 font-semibold z-10 border-r border-white/5 align-top">
+              <span class="mono text-[10px] text-slate-500 uppercase tracking-widest block mb-0.5">Technologies</span>
+              <span class="text-sm text-slate-400">Extraction NLP</span>
+            </td>
+            <td class="p-4 border-r border-white/5 align-top">
+              <div class="flex flex-wrap gap-1">
+                <span class="text-[11px] px-2 py-0.5 rounded bg-red-500/15 text-red-300">Python</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-red-500/15 text-red-300">FastAPI</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-red-500/15 text-red-300">Django</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300">Docker</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300">K8s</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300">PostgreSQL</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-pink-500/15 text-pink-300">AWS</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-300">+5</span>
+              </div>
+              <p class="mono text-[10px] text-slate-500 mt-3">12 technos détectées</p>
+            </td>
+            <td class="p-4 border-r border-white/5 align-top">
+              <div class="flex flex-wrap gap-1">
+                <span class="text-[11px] px-2 py-0.5 rounded bg-red-500/15 text-red-300">Python</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-red-500/15 text-red-300">Go</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300">Kafka</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300">K8s</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-300">+3</span>
+              </div>
+              <p class="mono text-[10px] text-slate-500 mt-3">7 technos détectées</p>
+            </td>
+            <td class="p-4 border-r border-white/5 align-top">
+              <div class="flex flex-wrap gap-1">
+                <span class="text-[11px] px-2 py-0.5 rounded bg-red-500/15 text-red-300">Python</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-red-500/15 text-red-300">Django</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300">PostgreSQL</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300">Docker</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-300">+2</span>
+              </div>
+              <p class="mono text-[10px] text-slate-500 mt-3">6 technos détectées</p>
+            </td>
+            <td class="p-4 align-top">
+              <div class="flex flex-wrap gap-1 best">
+                <span class="text-[11px] px-2 py-0.5 rounded bg-red-500/15 text-red-300">Python</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-red-500/15 text-red-300">Go</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-red-500/15 text-red-300">FastAPI</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300">Kafka</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300">gRPC</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300">PostgreSQL</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-pink-500/15 text-pink-300">AWS</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-pink-500/15 text-pink-300">GCP</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-300">+6</span>
+              </div>
+              <p class="mono text-[10px] text-slate-500 mt-3">14 technos détectées</p>
+            </td>
+          </tr>
+          <!-- Company size -->
+          <tr class="cmp-row border-t border-white/5">
+            <td class="cmp-label sticky left-0 p-4 font-semibold z-10 border-r border-white/5">
+              <span class="mono text-[10px] text-slate-500 uppercase tracking-widest block mb-0.5">Taille entreprise</span>
+            </td>
+            <td class="p-4 border-r border-white/5">120 collaborateurs</td>
+            <td class="p-4 border-r border-white/5">4 800 mondial</td>
+            <td class="p-4 border-r border-white/5">2 700 collaborateurs</td>
+            <td class="p-4">1 400 collaborateurs</td>
+          </tr>
+          <!-- Posted date -->
+          <tr class="cmp-row border-t border-white/5">
+            <td class="cmp-label sticky left-0 p-4 font-semibold z-10 border-r border-white/5">
+              <span class="mono text-[10px] text-slate-500 uppercase tracking-widest block mb-0.5">Publication</span>
+            </td>
+            <td class="p-4 border-r border-white/5 mono text-xs"><span class="best">il y a 3h</span><br><span class="text-slate-500 text-[10px]">19.04.2026 · 14:45</span></td>
+            <td class="p-4 border-r border-white/5 mono text-xs">il y a 8h<br><span class="text-slate-500 text-[10px]">19.04.2026 · 09:10</span></td>
+            <td class="p-4 border-r border-white/5 mono text-xs">il y a 1j<br><span class="text-slate-500 text-[10px]">18.04.2026</span></td>
+            <td class="p-4 mono text-xs">il y a 2j<br><span class="text-slate-500 text-[10px]">17.04.2026</span></td>
+          </tr>
+          <!-- Source -->
+          <tr class="cmp-row border-t border-white/5">
+            <td class="cmp-label sticky left-0 p-4 font-semibold z-10 border-r border-white/5">
+              <span class="mono text-[10px] text-slate-500 uppercase tracking-widest block mb-0.5">Source scrapée</span>
+            </td>
+            <td class="p-4 border-r border-white/5"><span class="mono text-[11px] text-slate-400">France Travail</span></td>
+            <td class="p-4 border-r border-white/5"><span class="mono text-[11px] text-slate-400">WTTJ</span></td>
+            <td class="p-4 border-r border-white/5"><span class="mono text-[11px] text-slate-400">HelloWork</span></td>
+            <td class="p-4"><span class="mono text-[11px] text-slate-400">APEC</span></td>
+          </tr>
+          <!-- Description excerpt -->
+          <tr class="cmp-row border-t border-white/5">
+            <td class="cmp-label sticky left-0 p-4 font-semibold z-10 border-r border-white/5 align-top">
+              <span class="mono text-[10px] text-slate-500 uppercase tracking-widest block mb-0.5">Extrait</span>
+            </td>
+            <td class="p-4 border-r border-white/5 text-xs text-slate-400 align-top leading-relaxed">Architecte les services backend Python/FastAPI, encadre une équipe de 4 devs, contribue à la roadmap produit avec le CTO…</td>
+            <td class="p-4 border-r border-white/5 text-xs text-slate-400 align-top leading-relaxed">Conception et évolution de la plateforme data/observabilité, scale challenges sur pipelines Python + Go, 2 000 clients entreprises…</td>
+            <td class="p-4 border-r border-white/5 text-xs text-slate-400 align-top leading-relaxed">Tech lead technique sur les services Python de notre plateforme hébergement et cloud souverain, OVHcloud Paris + fully remote possible…</td>
+            <td class="p-4 text-xs text-slate-400 align-top leading-relaxed">Lead technique sur nos microservices fintech, stack Python/Go, focus ownership et mentorat, série C récemment…</td>
+          </tr>
+          <!-- Actions row -->
+          <tr class="border-t border-white/10 bg-gradient-to-r from-red-500/5 via-pink-500/5 to-indigo-500/5">
+            <td class="cmp-label sticky left-0 p-4 z-10 border-r border-white/5"></td>
+            <td class="p-4 border-r border-white/5">
+              <a href="#" class="cta-red inline-flex px-4 py-2 rounded-full text-white font-medium text-sm">Postuler →</a>
+            </td>
+            <td class="p-4 border-r border-white/5">
+              <a href="#" class="cta-red inline-flex px-4 py-2 rounded-full text-white font-medium text-sm">Postuler →</a>
+            </td>
+            <td class="p-4 border-r border-white/5">
+              <a href="#" class="cta-red inline-flex px-4 py-2 rounded-full text-white font-medium text-sm">Postuler →</a>
+            </td>
+            <td class="p-4">
+              <a href="#" class="cta-red inline-flex px-4 py-2 rounded-full text-white font-medium text-sm">Postuler →</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Summary card -->
+  <section class="reveal glass-strong p-8 mt-8 relative overflow-hidden iridescent" style="animation-delay:500ms">
+    <div class="orb w-64 h-64 bg-indigo-500/15 -top-10 -right-10"></div>
+    <p class="mono text-xs text-pink-400 uppercase tracking-widest mb-4">★ Recommandation TechPulse</p>
+    <h2 class="text-3xl font-bold mb-4 leading-tight">
+      Pour toi : <span class="gradient-accent">Lead Backend Python/Go chez Qonto</span>
+    </h2>
+    <p class="text-slate-300 mb-6 body-font leading-relaxed max-w-3xl">
+      Meilleure rémunération (70-95k), full remote EU, stack la plus large et intéressante (14 technos dont Go, Kafka, gRPC, multi-cloud),
+      plus grande flexibilité géographique. La séniorité attendue (5-8 ans) est aussi la plus ouverte parmi les 4 finalistes.
+    </p>
+    <div class="grid grid-cols-4 gap-4">
+      <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+        <p class="mono text-[10px] text-slate-500 uppercase">Salaire brut</p>
+        <p class="text-xl font-bold text-emerald-400">+25%</p>
+        <p class="text-xs text-slate-500">vs médiane 4 offres</p>
+      </div>
+      <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+        <p class="mono text-[10px] text-slate-500 uppercase">Tech breadth</p>
+        <p class="text-xl font-bold text-pink-400">14</p>
+        <p class="text-xs text-slate-500">technos distinctes</p>
+      </div>
+      <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+        <p class="mono text-[10px] text-slate-500 uppercase">Flexibilité</p>
+        <p class="text-xl font-bold text-cyan-400">Max</p>
+        <p class="text-xs text-slate-500">full remote EU</p>
+      </div>
+      <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+        <p class="mono text-[10px] text-slate-500 uppercase">Score global</p>
+        <p class="text-xl font-bold gradient-accent">8.9/10</p>
+        <p class="text-xs text-slate-500">selon tes filtres</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="relative z-10 border-t border-white/5 mt-12 py-10 px-6">
+  <div class="max-w-[1440px] mx-auto flex items-center justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-6">
+      <a href="#" class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 via-pink-500 to-indigo-500"></div>
+        <span class="font-bold tracking-tight">techpulse</span>
+      </a>
+      <span class="text-slate-600 text-sm">© 2026 · Bastien Ruedas</span>
+    </div>
+    <div class="flex items-center gap-6 text-sm text-slate-400">
+      <a href="#" class="hover:text-white">GitHub</a>
+      <a href="#" class="hover:text-white">API</a>
+      <a href="#" class="hover:text-white">Mentions</a>
+    </div>
+    <div class="mono text-[10px] text-slate-600 tracking-widest uppercase">M2 · Montpellier</div>
+  </div>
+</footer>
+</body>
+</html>

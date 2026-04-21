@@ -11,12 +11,12 @@ import os
 import sys
 from datetime import datetime, timedelta
 
-from sqlalchemy import and_, select
+from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-
-from techpulse_api.email_sender import send_email
 from techpulse_scraper.db import get_session
 from techpulse_scraper.models import Alert, Offer, OfferTechnology, Technology
+
+from techpulse_api.email_sender import send_email
 
 
 def _build_email_html(alert: Alert, offers: list[Offer]) -> str:
@@ -34,11 +34,16 @@ def _build_email_html(alert: Alert, offers: list[Offer]) -> str:
             f'</td></tr>'
         )
     filter_desc = []
-    if alert.filter_keyword: filter_desc.append(f"mot-clé « {alert.filter_keyword} »")
-    if alert.filter_city:    filter_desc.append(f"ville : {alert.filter_city}")
-    if alert.filter_tech:    filter_desc.append(f"techno : {alert.filter_tech}")
-    if alert.filter_contract: filter_desc.append(f"contrat : {alert.filter_contract}")
-    if alert.filter_salary_min: filter_desc.append(f"salaire ≥ {alert.filter_salary_min} €")
+    if alert.filter_keyword:
+        filter_desc.append(f"mot-clé « {alert.filter_keyword} »")
+    if alert.filter_city:
+        filter_desc.append(f"ville : {alert.filter_city}")
+    if alert.filter_tech:
+        filter_desc.append(f"techno : {alert.filter_tech}")
+    if alert.filter_contract:
+        filter_desc.append(f"contrat : {alert.filter_contract}")
+    if alert.filter_salary_min:
+        filter_desc.append(f"salaire ≥ {alert.filter_salary_min} €")
     filter_str = " · ".join(filter_desc) or "tous les critères"
 
     return f"""<!DOCTYPE html>
@@ -128,7 +133,7 @@ def main() -> int:
     print(f"  {stats['alerts_checked']} alertes vérifiées")
     print(f"  {stats['emails_sent']} emails envoyés")
     print(f"  {stats['errors']} erreurs")
-    print(f"\n  Log : /tmp/techpulse_emails.log")
+    print("\n  Log : /tmp/techpulse_emails.log")
     return 0
 
 

@@ -23,6 +23,10 @@ ROME_CODES = [
     "M1802",  # Expertise et support en systèmes d'information
     "M1810",  # Production et exploitation de systèmes d'information
     "M1811",  # Chef de projet informatique
+    "M1803",  # Direction des systèmes d'information
+    "M1806",  # Conseil et maîtrise d'ouvrage en SI
+    "M1801",  # Administration de systèmes d'information
+    "H1206",  # Management et ingénierie études, R&D industriel (data science / embedded)
 ]
 
 PAGE_SIZE = 150

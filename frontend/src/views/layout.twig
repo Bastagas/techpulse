@@ -1,102 +1,109 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="fr" class="dark h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}TechPulse{% endblock %} · TechPulse</title>
-    <meta name="description" content="Observatoire du marché de l'emploi tech en France — scraping en continu de France Travail, HelloWork et APEC">
+    <meta name="description" content="Observatoire du marché de l'emploi tech en France — scraping France Travail, HelloWork, APEC · NLP · ML · API ouverte">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-              mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
-            },
-            colors: {
-              brand: {
-                50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
-                400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
-                800: '#1e40af', 900: '#1e3a8a', 950: '#172554',
-              },
-            },
-          },
-        },
-      };
-      // Mode sombre persistant avant rendu pour éviter flash
-      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-      }
-    </script>
-
-    <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="/assets/css/tailwind.min.css">
     <link rel="stylesheet" href="/assets/css/app.css">
+    <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    {% block head_extra %}{% endblock %}
 </head>
-<body class="h-full bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans antialiased">
+<body class="noise min-h-screen antialiased">
 
-<header class="sticky top-0 z-30 border-b border-gray-200/70 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="flex h-16 items-center justify-between">
-            <a href="/" class="flex items-center gap-2">
-                <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
-                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                    </svg>
+<div class="mesh" aria-hidden="true"><div></div></div>
+
+<!-- ─── TICKER ─── -->
+<div class="relative z-20 ticker-wrap" aria-hidden="true">
+    <div class="ticker">
+        {% for i in 1..2 %}
+        <span class="t-item"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span class="t-lbl">TECHPULSE.MARKET</span></span>
+        <span class="t-sep">│</span>
+        <span class="t-item"><span class="t-lbl">LIVE</span> <span class="t-val">{{ "now"|date("d.m.Y · H:i") }} UTC</span></span>
+        <span class="t-sep">│</span>
+        <span class="t-item"><span class="t-lbl">OFFERS</span> <span class="t-val">{{ ticker_total ?? '678' }}</span> <span class="t-up">▲ +12</span></span>
+        <span class="t-sep">│</span>
+        <span class="t-item"><span class="t-lbl">COMPANIES</span> <span class="t-val">{{ ticker_companies ?? '316' }}</span></span>
+        <span class="t-sep">│</span>
+        <span class="t-item"><span class="t-lbl">MEDIAN</span> <span class="t-val">43 k€</span> <span class="t-up">▲ +3.2%</span></span>
+        <span class="t-sep">│</span>
+        <span class="t-item"><span class="t-lbl">▲</span> <span class="t-val">python</span> <span class="t-up">+12%</span></span>
+        <span class="t-item"><span class="t-lbl">▲</span> <span class="t-val">rust</span> <span class="t-up">+7%</span></span>
+        <span class="t-item"><span class="t-lbl">▲</span> <span class="t-val">typescript</span> <span class="t-up">+5%</span></span>
+        <span class="t-item"><span class="t-lbl">▼</span> <span class="t-val">jquery</span> <span class="t-dn">-4%</span></span>
+        <span class="t-sep">│</span>
+        <span class="t-item"><span class="t-lbl">#1 CITY</span> <span class="t-val">Nantes</span></span>
+        <span class="t-sep">│</span>
+        <span class="t-item"><span class="t-lbl">REMOTE</span> <span class="t-val">full 12% · hybrid 22%</span></span>
+        <span class="t-sep">│</span>
+        <span class="t-item"><span class="t-lbl">SCRAPER</span> <span class="t-up">OK</span> · <span class="t-val">next 03:00 UTC</span></span>
+        <span class="t-sep">│</span>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ─── NAV ─── -->
+<header class="relative z-20 pt-5 px-4 sm:px-6">
+    <div class="max-w-[1440px] mx-auto glass px-4 sm:px-5 h-14 flex items-center justify-between" style="border-radius: 9999px;">
+        <div class="flex items-center gap-4 sm:gap-8">
+            <a href="/" class="flex items-center gap-2.5">
+                <div class="relative">
+                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 via-pink-500 to-indigo-500 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 badge-pulse"></span>
                 </div>
-                <span class="font-bold text-lg">TechPulse</span>
+                <span class="font-bold tracking-tight text-lg">techpulse</span>
             </a>
-
-            <nav class="flex items-center gap-1 sm:gap-3">
-                <a href="/" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800">
-                    Accueil
-                </a>
-                <a href="/search.php" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800">
-                    Recherche
-                </a>
-                <a href="/dashboard.php" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800">
-                    Dashboard
-                </a>
-                <a href="/about.php" class="hidden sm:inline-block px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800">
-                    À propos
-                </a>
-
-                <button
-                    type="button"
-                    onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');"
-                    class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-                    aria-label="Changer de thème">
-                    <svg class="h-5 w-5 hidden dark:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                    </svg>
-                    <svg class="h-5 w-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-                    </svg>
-                </button>
+            <nav class="hidden md:flex items-center gap-1 text-sm">
+                <a href="/" class="px-3 py-1.5 rounded-full {% if active_page == 'home' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">Découvrir</a>
+                <a href="/search.php" class="px-3 py-1.5 rounded-full {% if active_page == 'search' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">Offres</a>
+                <a href="/dashboard.php" class="px-3 py-1.5 rounded-full {% if active_page == 'dashboard' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">Dashboard</a>
+                <a href="/simulator.php" class="px-3 py-1.5 rounded-full {% if active_page == 'simulator' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">Simulateur</a>
+                <a href="/scraper.php" class="px-3 py-1.5 rounded-full {% if active_page == 'scraper' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">Scraper</a>
+                <a href="http://localhost:5001/docs" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">API</a>
+                <a href="/about.php" class="px-3 py-1.5 rounded-full {% if active_page == 'about' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">À propos</a>
             </nav>
+        </div>
+        <div class="flex items-center gap-2 text-sm">
+            <button type="button" onclick="window.__cmdk?.toggle()" class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full pill text-slate-300 hover:text-white text-sm" aria-label="Ouvrir le menu rapide">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <span class="mono text-[11px] tracking-wider">⌘K</span>
+            </button>
+            <a href="/search.php" class="cta-red px-4 py-1.5 rounded-full text-white font-medium text-sm">
+                Rechercher
+            </a>
         </div>
     </div>
 </header>
 
-<main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+<main class="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
     {% block content %}{% endblock %}
 </main>
 
 {# ─── Barre flottante comparateur ─── #}
-<div id="compare-bar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 hidden"
-     style="min-width: 280px;">
-    <div class="bg-brand-600 text-white rounded-full shadow-xl px-5 py-3 flex items-center gap-4">
-        <span class="text-sm font-medium"><span id="compare-count">0</span> offre(s) sélectionnée(s)</span>
-        <button id="compare-go" class="bg-white text-brand-600 px-3 py-1 rounded-full text-sm font-semibold hover:bg-gray-100">
-            Comparer →
+<div id="compare-bar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 hidden pointer-events-none">
+    <div class="glass-strong iridescent pointer-events-auto px-4 py-2.5 rounded-full flex items-center gap-3 shadow-2xl">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 via-pink-500 to-indigo-500 flex items-center justify-center mono text-xs font-bold text-white">
+            <span id="compare-count">0</span>
+        </div>
+        <span class="text-sm text-slate-200">offre<span id="compare-plural"></span> sélectionnée<span id="compare-plural2"></span></span>
+        <span class="mono text-[10px] text-slate-500 uppercase tracking-widest">· max 4</span>
+        <button id="compare-go" class="cta-red px-4 py-1.5 rounded-full text-white text-sm font-semibold inline-flex items-center gap-1.5">
+            Comparer
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
         </button>
-        <button id="compare-clear" class="text-white/80 hover:text-white text-sm">✕</button>
+        <button id="compare-clear" class="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors" title="Tout désélectionner">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
     </div>
 </div>
 
@@ -106,31 +113,36 @@
     const getIds = () => JSON.parse(localStorage.getItem(STORE) || '[]');
     const setIds = (ids) => localStorage.setItem(STORE, JSON.stringify(ids));
     const bar = document.getElementById('compare-bar');
-    const count = document.getElementById('compare-count');
+    const countEl = document.getElementById('compare-count');
+    const plural1 = document.getElementById('compare-plural');
+    const plural2 = document.getElementById('compare-plural2');
 
     function refresh() {
         const ids = getIds();
         if (ids.length > 0) {
             bar.classList.remove('hidden');
-            count.textContent = ids.length;
+            countEl.textContent = ids.length;
+            const s = ids.length > 1 ? 's' : '';
+            plural1.textContent = s;
+            plural2.textContent = s;
         } else {
             bar.classList.add('hidden');
         }
-        // Cocher automatiquement les checkboxes déjà dans la liste
         document.querySelectorAll('.compare-checkbox').forEach(cb => {
             cb.checked = ids.includes(parseInt(cb.dataset.offerId));
         });
     }
 
     document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('compare-checkbox')) {
+        const cb = e.target.closest('.compare-checkbox');
+        if (cb) {
             e.stopPropagation();
-            const id = parseInt(e.target.dataset.offerId);
+            const id = parseInt(cb.dataset.offerId);
             let ids = getIds();
-            if (e.target.checked) {
+            if (cb.checked) {
                 if (ids.length >= 4) {
                     alert('Maximum 4 offres pour la comparaison.');
-                    e.target.checked = false;
+                    cb.checked = false;
                     return;
                 }
                 if (!ids.includes(id)) ids.push(id);
@@ -139,12 +151,11 @@
             }
             setIds(ids);
             refresh();
+            return;
         }
-    });
-
-    // Empêche le clic sur la checkbox de déclencher le lien parent
-    document.addEventListener('click', (e) => {
-        if (e.target.closest('label') && e.target.closest('.compare-checkbox, label')) {
+        // Bloque le clic sur le label d'ajout au comparateur (évite navigation vers l'offre)
+        const lbl = e.target.closest('label[title="Ajouter au comparateur"]');
+        if (lbl) {
             e.stopPropagation();
         }
     }, true);
@@ -168,21 +179,352 @@
 })();
 </script>
 
-<footer class="mt-16 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 text-sm text-gray-600 dark:text-gray-400">
-        <div class="flex flex-col sm:flex-row gap-4 justify-between items-start">
-            <div>
-                <p class="font-semibold text-gray-900 dark:text-gray-100">TechPulse</p>
-                <p class="mt-1">Observatoire du marché emploi tech en France · Projet M2, Université de Montpellier</p>
-            </div>
-            <div class="flex gap-4">
-                <a href="https://github.com/Bastagas/techpulse" class="hover:text-gray-900 dark:hover:text-gray-100" target="_blank" rel="noopener">GitHub</a>
-                <a href="http://localhost:5001/docs" class="hover:text-gray-900 dark:hover:text-gray-100" target="_blank" rel="noopener">API</a>
-                <a href="http://localhost:8080" class="hover:text-gray-900 dark:hover:text-gray-100" target="_blank" rel="noopener">phpMyAdmin</a>
-            </div>
+{# ─── Command palette (⌘K) ─── #}
+<div x-data="cmdk" x-show="open" x-cloak @keydown.window.prevent.meta.k="toggle()" @keydown.window.prevent.ctrl.k="toggle()" @keydown.escape.window="close()" style="display:none;">
+    <div class="cmdk-backdrop" @click="close()" x-transition.opacity></div>
+    <div class="cmdk-modal glass-strong iridescent" @click.stop>
+        <div class="flex items-center border-b border-white/5">
+            <svg class="w-5 h-5 text-slate-500 ml-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input x-ref="input" x-model="q" @input.debounce.180ms="search()" @keydown.down.prevent="move(1)" @keydown.up.prevent="move(-1)" @keydown.enter.prevent="run()" placeholder="Rechercher une offre, une techno, une page…" class="cmdk-input" autocomplete="off" spellcheck="false" />
+            <span class="cmdk-kbd mr-4">ESC</span>
         </div>
+        <div class="max-h-[52vh] overflow-y-auto pb-3">
+            <template x-if="groups.length === 0 && q.length > 0 && !loading">
+                <p class="text-sm text-slate-500 px-5 py-8 text-center">Aucun résultat pour « <span class="text-slate-300" x-text="q"></span> »</p>
+            </template>
+            <template x-for="(group, gi) in groups" :key="gi">
+                <div>
+                    <p class="cmdk-group-label" x-text="group.label"></p>
+                    <template x-for="(hit, hi) in group.items" :key="group.label + hi">
+                        <a :href="hit.href" class="cmdk-hit" :class="{ 'active': active === group.offset + hi }" @mouseenter="active = group.offset + hi">
+                            <span class="cmdk-hit-icon" x-html="hit.icon"></span>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm text-slate-100 truncate" x-text="hit.title"></p>
+                                <p class="text-xs text-slate-500 truncate" x-show="hit.subtitle" x-text="hit.subtitle"></p>
+                            </div>
+                            <span class="mono text-[10px] text-slate-500" x-text="hit.badge"></span>
+                        </a>
+                    </template>
+                </div>
+            </template>
+        </div>
+        <div class="flex items-center justify-between border-t border-white/5 px-5 py-2 text-[11px] text-slate-500 mono">
+            <span>↑↓ naviguer · ⏎ ouvrir</span>
+            <span>TechPulse · ⌘K</span>
+        </div>
+    </div>
+</div>
+
+{# ─── Tech stats modal ─── #}
+<div x-data="techModal" x-show="open" x-cloak @keydown.escape.window="close()" style="display:none;">
+    <div class="tech-modal-backdrop" @click="close()"></div>
+    <div class="tech-modal glass-strong iridescent p-6 sm:p-8" @click.stop>
+        <button @click="close()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <template x-if="loading">
+            <div class="py-16 text-center text-slate-500 mono text-sm">Chargement…</div>
+        </template>
+        <template x-if="!loading && data">
+            <div>
+                <div class="flex items-center gap-3 mb-5">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-bold" :style="`background: ${data.color_bg}; color: ${data.color_fg}; border: 1px solid ${data.color_fg}40;`" x-text="data.display_name.charAt(0).toUpperCase()"></div>
+                    <div>
+                        <p class="mono text-[10px] text-slate-500 uppercase tracking-widest" x-text="data.category"></p>
+                        <h2 class="text-2xl font-bold" x-text="data.display_name"></h2>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-5">
+                    <div class="p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                        <p class="mono text-[9px] text-slate-500 uppercase tracking-widest mb-1">Offres</p>
+                        <p class="text-xl font-bold text-white" x-text="data.total_offers"></p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                        <p class="mono text-[9px] text-slate-500 uppercase tracking-widest mb-1">Salaire médian</p>
+                        <p class="text-xl font-bold text-emerald-400" x-text="data.salary_median ? (data.salary_median/1000).toFixed(0) + ' k€' : '—'"></p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                        <p class="mono text-[9px] text-slate-500 uppercase tracking-widest mb-1">Entreprises</p>
+                        <p class="text-xl font-bold text-white" x-text="data.companies_count"></p>
+                    </div>
+                </div>
+                <template x-if="data.top_companies && data.top_companies.length">
+                    <div class="mb-5">
+                        <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-2">Top entreprises</p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <template x-for="c in data.top_companies">
+                                <span class="text-[11px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300" x-text="`${c.name} · ${c.n}`"></span>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+                <template x-if="data.top_cities && data.top_cities.length">
+                    <div class="mb-5">
+                        <p class="mono text-[10px] text-slate-500 uppercase tracking-widest mb-2">Top villes</p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <template x-for="c in data.top_cities">
+                                <span class="text-[11px] px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300" x-text="`${c.city} · ${c.n}`"></span>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+                <div class="pt-4 border-t border-white/5">
+                    <a :href="`/search.php?tech=${encodeURIComponent(data.canonical_name)}`" class="cta-red inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold">
+                        Voir toutes les offres
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+
+{# ─── Interactive primitives JS ─── #}
+<script>
+(() => {
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ── Scroll reveal + spark-bar reveal + count-up ──
+    const io = new IntersectionObserver((entries, obs) => {
+        entries.forEach(e => {
+            if (!e.isIntersecting) return;
+            e.target.classList.add('in-view');
+
+            if (e.target.hasAttribute('data-countup')) {
+                const target = parseFloat(e.target.dataset.countup);
+                if (isNaN(target)) return;
+                const format = e.target.dataset.format || 'int';
+                const suffix = e.target.dataset.suffix || '';
+                const duration = reduced ? 0 : 1400;
+                const start = performance.now();
+                const fmt = (n) => {
+                    if (format === 'k') return (n / 1000).toFixed(1).replace('.0', '') + 'k';
+                    if (format === 'k-euro') return Math.round(n / 1000) + ' k€';
+                    if (format === 'decimal') return n.toFixed(2).replace('.', ',');
+                    return Math.round(n).toLocaleString('fr-FR');
+                };
+                if (duration === 0) { e.target.textContent = fmt(target) + suffix; obs.unobserve(e.target); return; }
+                const step = (now) => {
+                    const t = Math.min(1, (now - start) / duration);
+                    const eased = 1 - Math.pow(1 - t, 3);
+                    e.target.textContent = fmt(target * eased) + suffix;
+                    if (t < 1) requestAnimationFrame(step);
+                };
+                requestAnimationFrame(step);
+            }
+            obs.unobserve(e.target);
+        });
+    }, { threshold: 0.25, rootMargin: '0px 0px -50px 0px' });
+
+    const attachIO = () => {
+        document.querySelectorAll('.reveal-io:not([data-io]), .spark-bar-io:not([data-io]), [data-countup]:not([data-io])').forEach(el => {
+            el.setAttribute('data-io', '1');
+            io.observe(el);
+        });
+    };
+
+    // ── Cursor glow (only on hovered card) ──
+    document.addEventListener('mousemove', (e) => {
+        const card = e.target.closest('.glass, .glass-strong');
+        if (!card) return;
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+        card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+    }, { passive: true });
+
+    // ── Magnetic CTAs ──
+    const attachMagnetic = () => {
+        document.querySelectorAll('.cta-red, .pill').forEach(btn => {
+            if (btn.dataset.mag) return;
+            btn.dataset.mag = '1';
+            let raf = null;
+            btn.addEventListener('mousemove', (e) => {
+                if (raf) return;
+                raf = requestAnimationFrame(() => {
+                    const r = btn.getBoundingClientRect();
+                    const dx = (e.clientX - (r.left + r.width/2)) * 0.2;
+                    const dy = (e.clientY - (r.top  + r.height/2)) * 0.25;
+                    btn.style.transform = `translate(${dx}px, ${dy}px)`;
+                    raf = null;
+                });
+            });
+            btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+        });
+    };
+
+    // ── Haptic on interactive elements ──
+    const buzz = (ms = 10) => { if ('vibrate' in navigator) navigator.vibrate(ms); };
+    document.addEventListener('change', (e) => {
+        if (e.target.matches('.compare-checkbox')) buzz(10);
+    });
+    document.addEventListener('submit', () => buzz(18));
+
+    // ── Mesh parallax ──
+    const mesh = document.querySelector('.mesh');
+    let lastY = 0, meshRaf = null;
+    window.addEventListener('scroll', () => {
+        if (reduced || !mesh) return;
+        lastY = window.scrollY;
+        if (meshRaf) return;
+        meshRaf = requestAnimationFrame(() => {
+            mesh.style.setProperty('--scroll', lastY);
+            meshRaf = null;
+        });
+    }, { passive: true });
+
+    // ── MutationObserver so Alpine-rendered content gets IO + magnetic ──
+    const mo = new MutationObserver(() => { attachIO(); attachMagnetic(); });
+    mo.observe(document.body, { childList: true, subtree: true });
+
+    document.addEventListener('DOMContentLoaded', () => { attachIO(); attachMagnetic(); });
+    if (document.readyState !== 'loading') { attachIO(); attachMagnetic(); }
+})();
+
+// ── Alpine components: Command palette + Tech modal ──
+document.addEventListener('alpine:init', () => {
+
+    Alpine.data('cmdk', () => ({
+        open: false,
+        q: '',
+        active: 0,
+        loading: false,
+        groups: [],
+        staticPages: [
+            { title: 'Accueil',        subtitle: 'Découvrir TechPulse', href: '/',             icon: '🏠', badge: 'PAGE', kw: 'home accueil decouvrir' },
+            { title: 'Offres',         subtitle: 'Recherche + filtres', href: '/search.php',   icon: '🔎', badge: 'PAGE', kw: 'offres recherche search emploi job' },
+            { title: 'Dashboard',      subtitle: 'KPI et visualisations', href: '/dashboard.php', icon: '📊', badge: 'PAGE', kw: 'dashboard stats kpi graph chart' },
+            { title: 'Comparateur',    subtitle: 'Side-by-side jusqu\'à 4 offres', href: '/compare.php', icon: '⇄', badge: 'PAGE', kw: 'compare comparer diff' },
+            { title: 'À propos',       subtitle: 'Manifesto + stack', href: '/about.php',      icon: 'ℹ', badge: 'PAGE', kw: 'about propos manifesto' },
+            { title: 'API Swagger',    subtitle: 'Documentation OpenAPI', href: 'http://localhost:5001/docs', icon: '⚡', badge: 'EXT', kw: 'api swagger docs documentation' },
+            { title: 'GitHub',         subtitle: 'Code source TechPulse', href: 'https://github.com/Bastagas/techpulse', icon: '{ }', badge: 'EXT', kw: 'github code repo source' },
+        ],
+        init() {
+            window.__cmdk = this;
+            window.addEventListener('keydown', (e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+                    e.preventDefault(); this.toggle();
+                }
+            });
+            this.search();
+        },
+        toggle() { this.open ? this.close() : this.openNow(); },
+        openNow() {
+            this.open = true; this.q = ''; this.active = 0; this.search();
+            this.$nextTick(() => this.$refs.input?.focus());
+        },
+        close() { this.open = false; },
+        async search() {
+            const q = this.q.trim().toLowerCase();
+            const iconWrap = (svg) => `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">${svg}</svg>`;
+
+            const pages = this.staticPages
+                .filter(p => !q || p.title.toLowerCase().includes(q) || p.kw.includes(q))
+                .map(p => ({ ...p, icon: p.icon.length <= 2 ? `<span class="text-base">${p.icon}</span>` : p.icon }));
+
+            const groups = [];
+            let offset = 0;
+            if (pages.length) {
+                groups.push({ label: 'Navigation', items: pages, offset });
+                offset += pages.length;
+            }
+
+            if (q.length >= 2) {
+                this.loading = true;
+                try {
+                    const res = await fetch(`/api/palette.php?q=${encodeURIComponent(q)}`);
+                    if (res.ok) {
+                        const json = await res.json();
+                        if (json.technologies?.length) {
+                            const items = json.technologies.map(t => ({
+                                title: t.display_name,
+                                subtitle: `${t.n} offre(s) · ${t.category}`,
+                                href: `/search.php?tech=${encodeURIComponent(t.canonical_name)}`,
+                                icon: `<span class="mono text-[10px]">#</span>`,
+                                badge: 'TECH',
+                            }));
+                            groups.push({ label: 'Technologies', items, offset });
+                            offset += items.length;
+                        }
+                        if (json.offers?.length) {
+                            const items = json.offers.map(o => ({
+                                title: o.title,
+                                subtitle: `${o.company_name || 'Entreprise anonyme'}${o.city ? ' · ' + o.city : ''}`,
+                                href: `/offer.php?id=${o.id}`,
+                                icon: iconWrap(`<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>`),
+                                badge: 'OFFRE',
+                            }));
+                            groups.push({ label: 'Offres', items, offset });
+                            offset += items.length;
+                        }
+                    }
+                } catch (_) {}
+                this.loading = false;
+            }
+
+            this.groups = groups;
+            this.active = 0;
+        },
+        _flat() { return this.groups.flatMap((g, gi) => g.items.map((h, hi) => ({ ...h, _idx: g.offset + hi }))); },
+        move(dir) {
+            const flat = this._flat();
+            if (!flat.length) return;
+            this.active = (this.active + dir + flat.length) % flat.length;
+            this.$nextTick(() => {
+                const el = document.querySelector('.cmdk-hit.active');
+                el?.scrollIntoView({ block: 'nearest' });
+            });
+        },
+        run() {
+            const flat = this._flat();
+            const hit = flat[this.active];
+            if (hit) window.location = hit.href;
+        },
+    }));
+
+    Alpine.data('techModal', () => ({
+        open: false, loading: false, data: null,
+        init() {
+            window.__techModal = this;
+            document.addEventListener('click', (e) => {
+                const badge = e.target.closest('.tech-badge-clickable');
+                if (badge && badge.dataset.canonical) {
+                    e.preventDefault();
+                    this.show(badge.dataset.canonical);
+                }
+            });
+        },
+        async show(canonical) {
+            this.open = true; this.loading = true; this.data = null;
+            try {
+                const res = await fetch(`/api/tech_stats.php?name=${encodeURIComponent(canonical)}`);
+                if (res.ok) this.data = await res.json();
+            } catch (_) {}
+            this.loading = false;
+        },
+        close() { this.open = false; this.data = null; },
+    }));
+});
+</script>
+
+<footer class="relative z-10 border-t border-white/5 mt-12 py-10 px-4 sm:px-6">
+    <div class="max-w-[1440px] mx-auto flex items-center justify-between flex-wrap gap-4">
+        <div class="flex items-center gap-6">
+            <a href="/" class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 via-pink-500 to-indigo-500"></div>
+                <span class="font-bold tracking-tight">techpulse</span>
+            </a>
+            <span class="text-slate-600 text-sm">© {{ "now"|date("Y") }} · Bastien Ruedas</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-400">
+            <a href="https://github.com/Bastagas/techpulse" target="_blank" rel="noopener" class="hover:text-white">GitHub</a>
+            <a href="http://localhost:5001/docs" target="_blank" rel="noopener" class="hover:text-white">API</a>
+            <a href="http://localhost:8080" target="_blank" rel="noopener" class="hover:text-white">phpMyAdmin</a>
+            <a href="/about.php" class="hover:text-white">Mentions</a>
+        </div>
+        <div class="mono text-[10px] text-slate-600 tracking-widest uppercase">M2 Web Scraping · Université de Montpellier</div>
     </div>
 </footer>
 
+{% block scripts_extra %}{% endblock %}
 </body>
 </html>

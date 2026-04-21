@@ -142,8 +142,9 @@ final class OfferRepository
         $joinTech = false;
 
         if (!empty($filters['keyword'])) {
-            $conditions[] = '(o.title LIKE :kw OR o.description LIKE :kw)';
-            $params[':kw'] = '%' . $filters['keyword'] . '%';
+            $conditions[] = '(o.title LIKE :kw_title OR o.description LIKE :kw_desc)';
+            $params[':kw_title'] = '%' . $filters['keyword'] . '%';
+            $params[':kw_desc'] = '%' . $filters['keyword'] . '%';
         }
         if (!empty($filters['city'])) {
             $conditions[] = 'o.city = :city';

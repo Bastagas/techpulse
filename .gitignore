@@ -69,3 +69,12 @@ Thumbs.db
 instance.config.yaml
 api/src/techpulse_api/ml/salary_model.pkl
 api/src/techpulse_api/ml/similarity_model.pkl
+
+# ─── Frontend build ─────────────────────────────
+frontend/node_modules/
+frontend/public/assets/css/tailwind.min.css.map
+
+# ─── PHPUnit / Playwright ───────────────────────
+frontend/.phpunit.cache/
+frontend/test-results/
+frontend/playwright-report/
