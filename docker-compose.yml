@@ -72,14 +72,11 @@ services:
       - path: .env.local
         required: false
     environment:
+      # Override Docker-network-specific (prevail sur .env.local qui a MYSQL_HOST=localhost pour dev local)
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
-      MYSQL_USER: ${MYSQL_USER:-techpulse}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-techpass}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-techpulse}
-      FRANCE_TRAVAIL_CLIENT_ID: ${FRANCE_TRAVAIL_CLIENT_ID:-}
-      FRANCE_TRAVAIL_CLIENT_SECRET: ${FRANCE_TRAVAIL_CLIENT_SECRET:-}
       PORT: 5001
+      # FRANCE_TRAVAIL_CLIENT_ID / _SECRET + MYSQL_USER/PASSWORD/DATABASE sont fournis par env_file
     ports:
       - "${API_PORT:-5001}:5001"
     depends_on:

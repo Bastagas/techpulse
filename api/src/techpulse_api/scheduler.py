@@ -11,10 +11,11 @@ from __future__ import annotations
 
 import os
 import subprocess
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.date import DateTrigger
 
 scheduler: BackgroundScheduler | None = None
 
@@ -97,3 +98,43 @@ def get_next_run() -> datetime | None:
         return None
     job = scheduler.get_job("scrape_all")
     return job.next_run_time if job else None
+
+
+def trigger_scrape_now() -> dict:
+    """Enqueue un scrape immédiat (dans 2 s) via un one-shot job APScheduler.
+
+    Retourne :
+        {"ok": True,  "job_id": "...", "run_at": "..."} si OK
+        {"ok": False, "reason": "..."} si scheduler OFF ou job déjà en cours
+
+    Protège contre les doubles-clics : renvoie reason='already_queued' si un
+    job manuel est déjà dans la file (id commence par 'manual_').
+    """
+    global scheduler
+    if scheduler is None:
+        init_scheduler()
+    if scheduler is None:
+        return {"ok": False, "reason": "scheduler_disabled"}
+
+    # Anti double-clic : un seul job manuel en file à la fois
+    for job in scheduler.get_jobs():
+        if job.id.startswith("manual_"):
+            return {
+                "ok": False,
+                "reason": "already_queued",
+                "next_run": job.next_run_time.isoformat() if job.next_run_time else None,
+            }
+
+    run_at = datetime.utcnow() + timedelta(seconds=2)
+    job_id = f"manual_{int(run_at.timestamp())}"
+    job = scheduler.add_job(
+        _scraping_job,
+        trigger=DateTrigger(run_date=run_at),
+        id=job_id,
+        name="Scrape manuel déclenché par utilisateur",
+    )
+    return {
+        "ok": True,
+        "job_id": job.id,
+        "run_at": run_at.isoformat() + "Z",
+    }

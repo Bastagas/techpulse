@@ -5,7 +5,7 @@
 {% block content %}
 
 <!-- ─── HEADER ─── -->
-<section class="reveal flex items-end justify-between mb-8 flex-wrap gap-4" style="animation-delay:100ms">
+<section class="reveal flex items-end justify-between mb-8 flex-wrap gap-4" style="animation-delay:100ms" x-data="scrapeTrigger()">
     <div>
         <p class="mono text-xs text-slate-400 uppercase tracking-widest mb-2">Pipeline · supervision</p>
         <h1 class="text-4xl md:text-5xl font-bold tracking-[-0.03em] leading-tight">
@@ -30,8 +30,122 @@
             Next run · <span class="text-white">{{ scheduler.next_run }}</span>
         </div>
         {% endif %}
+
+        <!-- Bouton Actualiser les offres -->
+        <button type="button" @click="trigger()" :disabled="loading || running"
+                class="cta-red px-5 py-2 rounded-full text-sm font-semibold inline-flex items-center gap-2 disabled:opacity-60">
+            <template x-if="!loading && !running">
+                <span class="inline-flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Actualiser les offres
+                </span>
+            </template>
+            <template x-if="loading">
+                <span class="inline-flex items-center gap-2">
+                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity="0.25"/><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    Envoi…
+                </span>
+            </template>
+            <template x-if="running">
+                <span class="inline-flex items-center gap-2">
+                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity="0.25"/><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    Scrape en cours<span x-text="dots"></span>
+                </span>
+            </template>
+        </button>
+    </div>
+
+    <!-- Toast feedback -->
+    <div x-show="toast.visible" x-cloak
+         :class="toast.type === 'error' ? 'bg-red-500/10 border-red-500/30 text-red-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'"
+         class="w-full mt-2 rounded-2xl border px-4 py-3 text-sm flex items-start gap-3"
+         x-transition>
+        <svg x-show="toast.type !== 'error'" class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <svg x-show="toast.type === 'error'" class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <span x-text="toast.message"></span>
     </div>
 </section>
+
+<script>
+function scrapeTrigger() {
+    return {
+        loading: false,
+        running: false,
+        dots: '',
+        toast: { visible: false, type: 'ok', message: '' },
+        pollTimer: null,
+        dotsTimer: null,
+
+        init() {
+            // Si un run est déjà en cours à l'ouverture de la page, on poll
+            this.checkStatus();
+        },
+
+        showToast(type, message, autoHide = 4000) {
+            this.toast = { visible: true, type, message };
+            if (autoHide) {
+                setTimeout(() => { this.toast.visible = false; }, autoHide);
+            }
+        },
+
+        async trigger() {
+            this.loading = true;
+            try {
+                const res = await fetch('/api/trigger_scrape.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                const json = await res.json();
+                if (res.ok && json.ok) {
+                    this.showToast('ok', json.message);
+                    this.startPolling();
+                } else {
+                    this.showToast('error', json.message || `Erreur ${res.status}`);
+                }
+            } catch (e) {
+                this.showToast('error', `Erreur réseau : ${e.message}`);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async checkStatus() {
+            try {
+                const res = await fetch('http://localhost:5001/scraping/status');
+                if (!res.ok) return null;
+                const json = await res.json();
+                const latest = json.runs && json.runs[0];
+                if (latest && latest.status === 'running') {
+                    this.running = true;
+                    if (!this.pollTimer) this.startPolling();
+                } else if (this.running) {
+                    // Run vient de terminer → reload la page pour voir les nouvelles offres
+                    this.running = false;
+                    if (this.pollTimer) { clearInterval(this.pollTimer); this.pollTimer = null; }
+                    if (this.dotsTimer) { clearInterval(this.dotsTimer); this.dotsTimer = null; }
+                    this.showToast('ok', `Scrape terminé · +${latest.offers_new} nouvelles offres, ${latest.offers_updated} maj. Rechargement…`, 2500);
+                    setTimeout(() => window.location.reload(), 2500);
+                }
+                return latest;
+            } catch (e) {
+                return null;
+            }
+        },
+
+        startPolling() {
+            this.running = true;
+            // Animation "..."
+            let i = 0;
+            this.dotsTimer = setInterval(() => {
+                i = (i + 1) % 4;
+                this.dots = '.'.repeat(i);
+            }, 400);
+            // Poll status toutes les 5 s
+            this.pollTimer = setInterval(() => this.checkStatus(), 5000);
+        },
+    };
+}
+</script>
 
 <!-- ─── KPI snapshot ─── -->
 <section class="reveal grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6" style="animation-delay:180ms">

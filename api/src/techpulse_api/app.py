@@ -102,13 +102,14 @@ def create_app() -> Flask:
     init_scheduler()
 
     # ─── Blueprints ────────────────────────────────
-    from techpulse_api.routes import alerts, meta, offers, simulator, stats
+    from techpulse_api.routes import alerts, meta, offers, scraping, simulator, stats
 
     api.register_blueprint(meta.blp)
     api.register_blueprint(offers.blp)
     api.register_blueprint(stats.blp)
     api.register_blueprint(alerts.blp)
     api.register_blueprint(simulator.blp)
+    api.register_blueprint(scraping.blp)
 
     # Root → redirige vers Swagger UI
     @app.route("/")
