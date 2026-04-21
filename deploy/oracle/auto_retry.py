@@ -68,16 +68,20 @@ def load_instance_config() -> dict:
 
 
 def build_launch_details(cfg: dict, compute_mgmt) -> oci.core.models.LaunchInstanceDetails:
-    """Construit l'objet LaunchInstanceDetails pour l'appel API."""
-    return oci.core.models.LaunchInstanceDetails(
+    """Construit l'objet LaunchInstanceDetails pour l'appel API.
+
+    Les shapes "fixed" (E2.1.Micro, E2.2.Micro…) ont des specs immuables et
+    REFUSENT shape_config (HTTP 400). On skip l'argument pour ces shapes.
+    Les shapes "Flex" (A1.Flex, E3.Flex, E4.Flex…) acceptent shape_config.
+    """
+    shape = cfg["shape"]
+    is_flex = shape.endswith(".Flex")
+
+    kwargs = dict(
         availability_domain=cfg["availability_domain"],
         compartment_id=cfg["compartment_id"],
         display_name=cfg.get("display_name", "techpulse"),
-        shape=cfg["shape"],
-        shape_config=oci.core.models.LaunchInstanceShapeConfigDetails(
-            ocpus=float(cfg["ocpus"]),
-            memory_in_gbs=float(cfg["memory_gb"]),
-        ),
+        shape=shape,
         create_vnic_details=oci.core.models.CreateVnicDetails(
             subnet_id=cfg["subnet_id"],
             assign_public_ip=cfg.get("assign_public_ip", True),
@@ -88,6 +92,12 @@ def build_launch_details(cfg: dict, compute_mgmt) -> oci.core.models.LaunchInsta
         ),
         metadata={"ssh_authorized_keys": cfg["ssh_public_key"].strip()},
     )
+    if is_flex:
+        kwargs["shape_config"] = oci.core.models.LaunchInstanceShapeConfigDetails(
+            ocpus=float(cfg["ocpus"]),
+            memory_in_gbs=float(cfg["memory_gb"]),
+        )
+    return oci.core.models.LaunchInstanceDetails(**kwargs)
 
 
 def notify(title: str, message: str) -> None:
