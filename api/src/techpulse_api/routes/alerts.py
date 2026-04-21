@@ -9,7 +9,6 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from marshmallow import Schema, fields, validate
 from sqlalchemy import select
-
 from techpulse_scraper.db import get_session
 from techpulse_scraper.models import Alert
 

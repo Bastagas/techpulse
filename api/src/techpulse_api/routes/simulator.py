@@ -12,7 +12,6 @@ Payload JSON : {
 
 from __future__ import annotations
 
-from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint
 from marshmallow import Schema, fields, validate

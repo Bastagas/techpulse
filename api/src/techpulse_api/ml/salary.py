@@ -21,15 +21,13 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.pipeline import Pipeline
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-
 from techpulse_scraper.db import get_session
-from techpulse_scraper.models import Offer, OfferTechnology, Technology
+from techpulse_scraper.models import Offer
 
 MODEL_FILE = Path(__file__).parent / "salary_model.pkl"
 
@@ -181,7 +179,7 @@ def predict_for_offer(session: Session, offer_id: int) -> SalaryPrediction | Non
     # Prédictions individuelles de chaque arbre → dispersion pour fourchette
     rf = pipeline.named_steps["model"]
     vectorizer = pipeline.named_steps["vectorizer"]
-    X = vectorizer.transform([features])
+    X = vectorizer.transform([features])  # noqa: N806 (convention scikit-learn)
     tree_predictions = np.array([tree.predict(X)[0] for tree in rf.estimators_])
 
     point = float(np.mean(tree_predictions))
@@ -237,7 +235,7 @@ def predict_from_features(
 
     rf = pipeline.named_steps["model"]
     vectorizer = pipeline.named_steps["vectorizer"]
-    X = vectorizer.transform([features])
+    X = vectorizer.transform([features])  # noqa: N806 (convention scikit-learn)
     tree_predictions = np.array([tree.predict(X)[0] for tree in rf.estimators_])
 
     point = float(np.mean(tree_predictions))
@@ -268,7 +266,7 @@ def main() -> int:
     print(f"  R² training        : {metadata['r2_train']:.3f}")
     print(f"  Salaire médian     : {metadata['salary_median']:.0f} €")
     print(f"  Salaire moyen      : {metadata['salary_mean']:.0f} €")
-    print(f"\n  Top 10 features les plus importantes :")
+    print("\n  Top 10 features les plus importantes :")
     for f in metadata["top_features"][:10]:
         print(f"    {f['name']:40s} {f['importance']:.4f}")
     print(f"\n  Modèle sauvegardé dans : {MODEL_FILE}")
