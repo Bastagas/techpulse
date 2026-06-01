@@ -67,8 +67,9 @@ Thumbs.db
 *.tmp
 .cache/
 instance.config.yaml
-api/src/techpulse_api/ml/salary_model.pkl
-api/src/techpulse_api/ml/similarity_model.pkl
+# Modèles ML versionnés : nécessaires au déploiement (sinon simulateur / prédiction
+# salaire / offres similaires renvoient "modèle non entraîné"). Re-générables via
+# `make retrain` mais commités pour que tout déploiement/grading fonctionne d'emblée.
 
 # ─── Frontend build ─────────────────────────────
 frontend/node_modules/

@@ -41,6 +41,13 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/techpulse_api"]
+# Force l'inclusion des modèles ML dans le wheel (hatchling exclut les binaires
+# par défaut). Sans ça, l'API déployée renvoie "modèle non entraîné".
+artifacts = ["src/techpulse_api/ml/*.pkl"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/techpulse_api/ml/salary_model.pkl" = "techpulse_api/ml/salary_model.pkl"
+"src/techpulse_api/ml/similarity_model.pkl" = "techpulse_api/ml/similarity_model.pkl"
 
 [tool.ruff]
 line-length = 100

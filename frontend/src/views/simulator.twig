@@ -203,7 +203,7 @@ function simulatorForm() {
             this.result = null;
             this.loading = true;
             try {
-                const res = await fetch('http://localhost:5001/simulator/salary', {
+                const res = await fetch((window.TECHPULSE_API || 'http://localhost:5001') + '/simulator/salary', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(this.form),
