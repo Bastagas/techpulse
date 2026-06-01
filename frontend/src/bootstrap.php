@@ -37,6 +37,11 @@ $twig = new Environment(
     ],
 );
 
+// URL publique de l'API Flask, utilisée par le JS client (simulateur, scraper, alertes,
+// liens Swagger). En dev local : http://localhost:5001. En prod : défini via PUBLIC_API_URL
+// dans .env.local (ex: https://mon-api.duckdns.org).
+$twig->addGlobal('api_base_url', $_ENV['PUBLIC_API_URL'] ?? getenv('PUBLIC_API_URL') ?: 'http://localhost:5001');
+
 // Filtre : formatte un salaire annuel (45000 → "45 000 €")
 $twig->addFilter(new TwigFilter('salary', static function (?int $n): string {
     if ($n === null) {

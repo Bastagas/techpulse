@@ -13,6 +13,8 @@
     {% set asset_v = "now"|date("U") %}
     <link rel="stylesheet" href="/assets/css/tailwind.min.css?v={{ asset_v }}">
     <link rel="stylesheet" href="/assets/css/app.css?v={{ asset_v }}">
+    {# URL publique de l'API Flask, source unique pour tous les fetch JS client #}
+    <script>window.TECHPULSE_API = {{ api_base_url|json_encode|raw }};</script>
     <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
     {% block head_extra %}{% endblock %}
 </head>
@@ -70,7 +72,7 @@
                 <a href="/dashboard.php" class="px-3 py-1.5 rounded-full {% if active_page == 'dashboard' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">Dashboard</a>
                 <a href="/simulator.php" class="px-3 py-1.5 rounded-full {% if active_page == 'simulator' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">Simulateur</a>
                 <a href="/scraper.php" class="px-3 py-1.5 rounded-full {% if active_page == 'scraper' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">Scraper</a>
-                <a href="http://localhost:5001/docs" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">API</a>
+                <a href="{{ api_base_url }}/docs" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-full text-slate-300 hover:bg-white/5">API</a>
                 <a href="/about.php" class="px-3 py-1.5 rounded-full {% if active_page == 'about' %}bg-white/5 text-white{% else %}text-slate-300 hover:bg-white/5{% endif %}">À propos</a>
             </nav>
         </div>
@@ -396,7 +398,7 @@ document.addEventListener('alpine:init', () => {
             { title: 'Dashboard',      subtitle: 'KPI et visualisations', href: '/dashboard.php', icon: '📊', badge: 'PAGE', kw: 'dashboard stats kpi graph chart' },
             { title: 'Comparateur',    subtitle: 'Side-by-side jusqu\'à 4 offres', href: '/compare.php', icon: '⇄', badge: 'PAGE', kw: 'compare comparer diff' },
             { title: 'À propos',       subtitle: 'Manifesto + stack', href: '/about.php',      icon: 'ℹ', badge: 'PAGE', kw: 'about propos manifesto' },
-            { title: 'API Swagger',    subtitle: 'Documentation OpenAPI', href: 'http://localhost:5001/docs', icon: '⚡', badge: 'EXT', kw: 'api swagger docs documentation' },
+            { title: 'API Swagger',    subtitle: 'Documentation OpenAPI', href: (window.TECHPULSE_API || '') + '/docs', icon: '⚡', badge: 'EXT', kw: 'api swagger docs documentation' },
             { title: 'GitHub',         subtitle: 'Code source TechPulse', href: 'https://github.com/Bastagas/techpulse', icon: '{ }', badge: 'EXT', kw: 'github code repo source' },
         ],
         init() {
@@ -518,7 +520,7 @@ document.addEventListener('alpine:init', () => {
         </div>
         <div class="flex items-center gap-6 text-sm text-slate-400">
             <a href="https://github.com/Bastagas/techpulse" target="_blank" rel="noopener" class="hover:text-white">GitHub</a>
-            <a href="http://localhost:5001/docs" target="_blank" rel="noopener" class="hover:text-white">API</a>
+            <a href="{{ api_base_url }}/docs" target="_blank" rel="noopener" class="hover:text-white">API</a>
             <a href="http://localhost:8080" target="_blank" rel="noopener" class="hover:text-white">phpMyAdmin</a>
             <a href="/about.php" class="hover:text-white">Mentions</a>
         </div>

@@ -213,7 +213,7 @@ function alertModal() {
         async submit() {
             this.loading = true; this.status = null;
             try {
-                const response = await fetch('http://localhost:5001/alerts', {
+                const response = await fetch((window.TECHPULSE_API || 'http://localhost:5001') + '/alerts', {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({email: this.email, ...this.filters}),
                 });
