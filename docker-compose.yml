@@ -100,6 +100,9 @@ services:
       MYSQL_USER: ${MYSQL_USER:-techpulse}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-techpass}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-techpulse}
+      # URL publique de l'API exposée au JS client (simulateur, scraper, alertes, Swagger).
+      # En dev local : http://localhost:5001. En prod : https://<api>.duckdns.org via .env.local.
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:5001}
       PORT: 80
     ports:
       - "${FRONTEND_PORT:-8000}:80"
