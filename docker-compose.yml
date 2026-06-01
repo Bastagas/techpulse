@@ -24,7 +24,9 @@ services:
       - --collation-server=utf8mb4_unicode_ci
       - --default-authentication-plugin=mysql_native_password
     ports:
-      - "${MYSQL_PORT:-3306}:3306"
+      # Bind localhost UNIQUEMENT : MySQL ne doit JAMAIS être exposé publiquement.
+      # Accès dev via 127.0.0.1:3306 ; en prod l'API/front passent par le réseau Docker interne.
+      - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./db/migrations/001_init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
@@ -56,7 +58,9 @@ services:
       PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
       UPLOAD_LIMIT: 128M
     ports:
-      - "${PHPMYADMIN_PORT:-8080}:80"
+      # Bind localhost UNIQUEMENT : phpMyAdmin = surface d'attaque, jamais public.
+      # Accès distant via tunnel SSH : ssh -L 8080:127.0.0.1:8080 user@serveur
+      - "127.0.0.1:${PHPMYADMIN_PORT:-8080}:80"
     depends_on:
       mysql:
         condition: service_healthy
