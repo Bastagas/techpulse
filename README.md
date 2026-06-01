@@ -1,6 +1,7 @@
 # TechPulse
 
 [![CI](https://github.com/Bastagas/techpulse/actions/workflows/ci.yml/badge.svg)](https://github.com/Bastagas/techpulse/actions/workflows/ci.yml)
+[![Live](https://img.shields.io/badge/demo-live-success.svg)](https://bastagas-techpulse.duckdns.org)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![PHP](https://img.shields.io/badge/php-8.1%2B-777bb4.svg)](https://www.php.net/)
 [![MySQL](https://img.shields.io/badge/mysql-8.0-4479a1.svg)](https://www.mysql.com/)
@@ -9,11 +10,13 @@
 
 > **Observatoire du marché de l'emploi tech en France.** Scrape en continu France Travail (API officielle) pour cartographier les technologies demandées, les salaires, les localisations et les tendances du moment. Prédit votre salaire via RandomForest. Design Liquid Glass avec command palette ⌘K, cursor-glow, count-up, heatmap calendaire, progress ring percentile.
 
-![TechPulse Dashboard](docs/demo/dashboard.png)
-
 <p align="center">
-  <strong><a href="https://github.com/Bastagas/techpulse">⭐ Étoile le repo sur GitHub</a></strong>
+  🌐 <strong>Démo live</strong> : <a href="https://bastagas-techpulse.duckdns.org">bastagas-techpulse.duckdns.org</a>
+  &nbsp;·&nbsp; ⚡ <strong>API</strong> : <a href="https://bastagas-tehcpulse-api.duckdns.org/docs">Swagger</a>
+  &nbsp;·&nbsp; <a href="https://github.com/Bastagas/techpulse">⭐ GitHub</a>
 </p>
+
+![TechPulse Dashboard](docs/demo/dashboard.png)
 
 ---
 
