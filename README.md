@@ -16,7 +16,11 @@
   &nbsp;·&nbsp; <a href="https://github.com/Bastagas/techpulse">⭐ GitHub</a>
 </p>
 
-![TechPulse Dashboard](docs/demo/dashboard.png)
+![Accueil TechPulse](docs/demo/accueil.png)
+
+| Dashboard analytique | Recherche avancée | Simulateur de salaire |
+| --- | --- | --- |
+| ![Dashboard analytique](docs/demo/dashboard.png) | ![Recherche avancée](docs/demo/recherche.png) | ![Simulateur de salaire ML](docs/demo/simulateur.png) |
 
 ---
 
